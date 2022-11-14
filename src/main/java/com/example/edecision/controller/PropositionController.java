@@ -15,7 +15,12 @@ public class PropositionController {
     @Autowired
     public PropositionService service;
     @GetMapping("/propositions")
-    public List<Proposition> getAll() {
-        return service.getAll();
+    public ResponseEntity<List<Proposition>> getAll() {
+        try{
+            return new ResponseEntity<>(service.getAll(), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 }
