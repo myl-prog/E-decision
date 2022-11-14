@@ -14,7 +14,7 @@ public class UserService {
     @Autowired
     public UserRepository userRepository;
 
-    public List<User> getAll() {
+    public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
@@ -22,13 +22,8 @@ public class UserService {
         return userRepository.findById(id).get();
     }
 
-    public ResponseEntity<User> createUser(User user) {
-        try {
-            userRepository.save(user);
-            return new ResponseEntity<User>(HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public void createUser(User user) {
+        userRepository.save(user);
     }
 
     public ResponseEntity<HttpStatus> deleteUser(int id) {
