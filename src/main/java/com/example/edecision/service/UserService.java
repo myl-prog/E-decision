@@ -1,4 +1,5 @@
 package com.example.edecision.service;
+
 import com.example.edecision.model.User;
 import com.example.edecision.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,22 +12,28 @@ import java.util.List;
 @Service
 public class UserService {
     @Autowired
-    public UserRepository repo;
+    public UserRepository userRepository;
 
-
-    public List<User> getAll(){
-        return repo.findAll();
+    public List<User> getAll() {
+        return userRepository.findAll();
     }
 
-    public User getById(String id){
-        return repo.findById(id).get();
+    public User getById(String id) {
+        return userRepository.findById(id).get();
     }
-    public User addUser(User user){
-        return repo.save(user);
-    }
-    public ResponseEntity<HttpStatus> deleteUser(String id){
+
+    public ResponseEntity<User> createUser(User user) {
         try {
-            repo.deleteById(id);
+            userRepository.save(user);
+            return new ResponseEntity<User>(HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<HttpStatus> deleteUser(int id) {
+        try {
+            userRepository.deleteById(String.valueOf(id));
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

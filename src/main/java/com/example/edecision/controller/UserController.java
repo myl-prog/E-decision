@@ -1,4 +1,5 @@
 package com.example.edecision.controller;
+
 import com.example.edecision.model.User;
 import com.example.edecision.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,27 +12,25 @@ import java.util.List;
 @RestController
 public class UserController {
     @Autowired
-    public UserService service;
+    public UserService userService;
+
     @GetMapping("/users")
-    public List<User> getAll(){
-        return service.getAll();
+    public List<User> getAll() {
+        return userService.getAll();
     }
+
     @GetMapping("/users/{id}")
-    public User getById(@PathVariable("id") String id){
-        return service.getById(id);
+    public User getById(@PathVariable("id") String id) {
+        return userService.getById(id);
     }
-    @PostMapping("/Users/add/{id}")
-    public void addUser(@PathVariable("id") String id){
-        User randomUser = new User();
-        randomUser.setId(id);
-        randomUser.setFirst_name("firstName");
-        randomUser.setLast_name("lastName");
-        service.addUser(randomUser);
+
+    @PostMapping("/users/add/")
+    public void postUser(@RequestBody User user) {
+        userService.createUser(user);
     }
+
     @DeleteMapping("/users/delete/{id}")
-    public ResponseEntity<HttpStatus> deleteById(@PathVariable("id") String id){
-        return service.deleteUser(id);
+    public ResponseEntity<HttpStatus> deleteById(@PathVariable("id") int id) {
+        return userService.deleteUser(id);
     }
-
-
 }
