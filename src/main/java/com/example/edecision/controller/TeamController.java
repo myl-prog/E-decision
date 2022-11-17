@@ -1,7 +1,7 @@
 package com.example.edecision.controller;
 
-import com.example.edecision.model.User;
-import com.example.edecision.service.UserService;
+import com.example.edecision.model.Team;
+import com.example.edecision.service.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,41 +10,43 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-public class UserController {
+public class TeamController {
     @Autowired
-    public UserService userService;
+    public TeamService teamService;
 
-    @GetMapping("/users")
-    public ResponseEntity<List<User>> getAll() {
+    @GetMapping("/Teams")
+    public ResponseEntity<List<Team>> getAll() {
         try {
-            return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
+            return new ResponseEntity<>(teamService.getAllTeams(), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    @GetMapping("/users/{id}")
-    public ResponseEntity<User> getById(@PathVariable("id") int id) {
+    @GetMapping("/Teams/{id}")
+    public ResponseEntity<Team> getById(@PathVariable("id") int id) {
         try {
-            return new ResponseEntity<>(userService.getUser(id), HttpStatus.OK);
+            return new ResponseEntity<>(teamService.getTeam(id), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    @PostMapping("/user")
-    public ResponseEntity<User> postUser(@RequestBody User user) {
+    @PostMapping("/Team/add/{name}/{project_id}/{team_type_id}")
+    public ResponseEntity<Team> postTeam(@PathVariable("name") String name,@PathVariable("project_id") int project_id,@PathVariable("team_type_id") int team_type_id) {
+
+        Team newTeam=new Team(name,project_id,team_type_id);
         try {
-            return new ResponseEntity<>(userService.createUser(user), HttpStatus.CREATED);
+            return new ResponseEntity<>(teamService.createTeam(newTeam), HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    @DeleteMapping("/users/delete/{id}")
+    @DeleteMapping("/Teams/delete/{id}")
     public ResponseEntity<HttpStatus> deleteById(@PathVariable("id") int id) {
         try {
-            userService.deleteUser(id);
+            teamService.deleteTeam(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
