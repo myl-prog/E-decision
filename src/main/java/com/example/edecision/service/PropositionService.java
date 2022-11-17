@@ -24,7 +24,7 @@ public class PropositionService {
     }
 
     public Proposition create(Proposition propositon){
-        return repo.save(propositon);
+        return repo.save(propositon); // TODO : add in user_proposition and in team_proposition (with token auth)
     }
 
 }
