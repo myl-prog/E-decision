@@ -24,7 +24,11 @@ public class PropositionController {
     }
 
     @GetMapping("/propositions/{id}")
-    public Proposition getById(@PathVariable("id") Integer id) {
-        return service.getById(id);
+    public ResponseEntity<Proposition> getById(@PathVariable("id") Integer id) {
+        try{
+            return new ResponseEntity<>(service.getById(id), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
