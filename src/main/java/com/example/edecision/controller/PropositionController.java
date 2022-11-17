@@ -15,7 +15,29 @@ public class PropositionController {
     @Autowired
     public PropositionService service;
     @GetMapping("/propositions")
-    public List<Proposition> getAll() {
-        return service.getAll();
+    public ResponseEntity<List<Proposition>> getAll() {
+        try{
+            return new ResponseEntity<>(service.getAll(), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/propositions/{id}")
+    public ResponseEntity<Proposition> getById(@PathVariable("id") Integer id) {
+        try{
+            return new ResponseEntity<>(service.getById(id), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/propositions")
+    public ResponseEntity<Proposition> create(@RequestBody Proposition proposition) {
+        try{
+            return new ResponseEntity<>(service.create(proposition), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

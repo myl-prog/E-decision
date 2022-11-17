@@ -19,4 +19,12 @@ public class PropositionService {
         return repo.findAll();
     }
 
+    public Proposition getById(Integer id) {
+        return repo.findById(id).get();
+    }
+
+    public Proposition create(Proposition propositon){
+        return repo.save(propositon);
+    }
+
 }
