@@ -16,21 +16,38 @@ public class UserController {
 
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAll() {
-        return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
+        try {
+            return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/users/{id}")
-    public User getById(@PathVariable("id") String id) {
-        return userService.getById(id);
+    public ResponseEntity<User> getById(@PathVariable("id") int id) {
+        try {
+            return new ResponseEntity<>(userService.getUser(id), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
-    @PostMapping("/users/add/")
-    public void postUser(@RequestBody User user) {
-        userService.createUser(user);
+    @PostMapping("/user")
+    public ResponseEntity<User> postUser(@RequestBody User user) {
+        try {
+            return new ResponseEntity<>(userService.createUser(user), HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
-    @DeleteMapping("/users/delete/{id}")
+    @DeleteMapping("/users/{id}")
     public ResponseEntity<HttpStatus> deleteById(@PathVariable("id") int id) {
-        return userService.deleteUser(id);
+        try {
+            userService.deleteUser(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
