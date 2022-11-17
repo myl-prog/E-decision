@@ -31,4 +31,13 @@ public class PropositionController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @PostMapping("/propositions")
+    public ResponseEntity<Proposition> create(@RequestBody Proposition proposition) {
+        try{
+            return new ResponseEntity<>(service.create(proposition), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
