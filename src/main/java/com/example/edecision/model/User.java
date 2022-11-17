@@ -10,6 +10,7 @@ import javax.persistence.*;
 public class User {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
 
@@ -24,4 +25,19 @@ public class User {
 
     @Column(name = "password")
     private String password;
+
+    @Column(name = "user_role_id")
+    private int user_role_id;
+
+    public User(String login, String firstName, String lastName, String password,int userRoleId) {
+        setLogin(login);
+        setFirst_name(firstName);
+        setLast_name(lastName);
+        setPassword(password);
+        setUser_role_id(userRoleId);
+
+    }
+    public User(){
+
+    }
 }

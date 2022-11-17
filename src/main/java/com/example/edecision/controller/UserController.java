@@ -32,10 +32,11 @@ public class UserController {
         }
     }
 
-    @PostMapping("/user")
-    public ResponseEntity<User> postUser(@RequestBody User user) {
+    @PostMapping("/user/add/{login}/{firstName}/{lastName}/{password}/{userRoleId}")
+    public ResponseEntity<User> postUser(@PathVariable("login") String login,@PathVariable("firstName") String firstName,@PathVariable("lastName") String lastName,@PathVariable("password") String password,@PathVariable("userRoleId") int userRoleId) {
+        User newUser = new User(login,firstName,lastName,password,userRoleId);
         try {
-            return new ResponseEntity<>(userService.createUser(user), HttpStatus.CREATED);
+            return new ResponseEntity<>(userService.createUser(newUser), HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }

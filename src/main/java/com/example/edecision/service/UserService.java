@@ -21,7 +21,9 @@ public class UserService {
     }
 
     public User createUser(User user) {
-        return userRepository.save(user);
+        User newUser =  userRepository.save(user);
+        System.out.println(newUser);
+        return newUser;
     }
 
     public void deleteUser(int id) {

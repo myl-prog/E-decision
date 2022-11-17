@@ -7,6 +7,7 @@ import javax.persistence.*;
 @Table(name = "project")
 public class Project {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "project_id")
     private String project_id;
     @Column(name = "title")

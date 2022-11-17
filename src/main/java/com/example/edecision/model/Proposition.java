@@ -8,6 +8,7 @@ import java.util.Date;
 @Table(name = "proposition")
 public class Proposition {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
 

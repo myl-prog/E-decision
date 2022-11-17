@@ -23,8 +23,11 @@ public class PropositionService {
         return repo.findById(id).get();
     }
 
-    public Proposition create(Proposition propositon){
-        return repo.save(propositon);
+    public Proposition create(Proposition proposition){
+        Proposition createdProposition = repo.save(proposition);
+        System.out.println(createdProposition);
+
+        return createdProposition;
     }
 
 }
