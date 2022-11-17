@@ -19,4 +19,8 @@ public class PropositionService {
         return repo.findAll();
     }
 
+    public Proposition getById(Integer id) {
+        return repo.findById(id).get(); // TODO WITH INT
+    }
+
 }
