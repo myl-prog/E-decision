@@ -1,5 +1,6 @@
 package com.example.edecision.controller;
 import com.example.edecision.model.Proposition;
+import com.example.edecision.model.PropositionBody;
 import com.example.edecision.model.User;
 import com.example.edecision.service.PropositionService;
 import com.example.edecision.service.UserService;
@@ -33,7 +34,7 @@ public class PropositionController {
     }
 
     @PostMapping("/propositions")
-    public ResponseEntity<Proposition> create(@RequestBody Proposition proposition) {
+    public ResponseEntity<Proposition> create(@RequestBody PropositionBody proposition) {
         try{
             return new ResponseEntity<>(service.create(proposition), HttpStatus.OK);
         }catch(Exception e){

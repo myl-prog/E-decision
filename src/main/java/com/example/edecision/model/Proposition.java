@@ -8,6 +8,7 @@ import java.util.Date;
 @Table(name = "proposition")
 public class Proposition {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
 
@@ -23,11 +24,11 @@ public class Proposition {
     @Column(name = "content")
     private String content;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "proposition_status_id", referencedColumnName = "id")
-    private PropositionStatus propositionStatus;
+    private PropositionStatus proposition_status;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "amend_proposition_id", referencedColumnName = "id")
-    private Proposition amendProposition;
+    private Proposition amend_proposition;
 }
