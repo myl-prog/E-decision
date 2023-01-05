@@ -24,11 +24,11 @@ public class Proposition {
     @Column(name = "content")
     private String content;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "proposition_status_id", referencedColumnName = "id")
-    private PropositionStatus propositionStatus;
+    private PropositionStatus proposition_status;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "amend_proposition_id", referencedColumnName = "id")
-    private Proposition amendProposition;
+    private Proposition amend_proposition;
 }
