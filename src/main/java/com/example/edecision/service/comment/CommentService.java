@@ -1,10 +1,8 @@
-package com.example.edecision.service;
+package com.example.edecision.service.comment;
 
-import com.example.edecision.model.Comment;
-import com.example.edecision.model.Proposition;
-import com.example.edecision.model.User;
-import com.example.edecision.repository.CommentRepository;
-import com.example.edecision.repository.PropositionRepository;
+import com.example.edecision.model.comment.Comment;
+import com.example.edecision.repository.comment.CommentRepository;
+import com.example.edecision.repository.proposition.PropositionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +23,7 @@ public class CommentService {
         return commentRepository.findById(id).get();
     }
     public Comment createComment(Comment comment, Integer id) {
-        comment.setProposition(id);
+        comment.setId(id);
         return commentRepository.save(comment);
     }
 
@@ -36,7 +34,7 @@ public class CommentService {
         List<Comment> comments = commentRepository.findAll();
         List<Comment> commentsByPropositionID = new ArrayList<>();
         for (Comment comment : comments) {
-            if (comment.getProposition() == id) {
+            if (comment.getProposition().getId() == id) {
                 commentsByPropositionID.add(comment);
             }
         }

@@ -1,5 +1,6 @@
-package com.example.edecision.model;
+package com.example.edecision.model.comment;
 
+import com.example.edecision.model.user.User;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -29,6 +30,7 @@ public class Comment {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
-    @Column(name = "proposition_id")
-    private Integer proposition;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "proposition_id", referencedColumnName = "id")
+    private Proposition proposition;
 }
