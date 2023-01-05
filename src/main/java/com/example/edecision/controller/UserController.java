@@ -36,6 +36,8 @@ public class UserController {
     public ResponseEntity<User> createUser(@RequestBody User user) {
         try {
             return new ResponseEntity<>(userService.createUser(user), HttpStatus.CREATED);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(null, HttpStatus.CONFLICT);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
