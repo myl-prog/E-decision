@@ -32,10 +32,19 @@ public class UserController {
         }
     }
 
-    @PostMapping("/user")
+    @PostMapping("/users")
     public ResponseEntity<User> postUser(@RequestBody User user) {
         try {
             return new ResponseEntity<>(userService.createUser(user), HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PutMapping("/users/{id}")
+    public ResponseEntity<User> updateUser(@RequestBody User user, @PathVariable("id") int id) {
+        try {
+            return new ResponseEntity<>(userService.updateUser(user, id), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
