@@ -21,16 +21,14 @@ public class UserService {
     }
 
     public User createUser(User user) {
-        User newUser =  userRepository.save(user);
-        System.out.println(newUser);
-        return newUser;
+        return userRepository.save(user);
     }
 
     public User updateUser(User user, int id) {
         User userUpdated = userRepository.findById(id).get();
         userUpdated.setLogin(user.getLogin());
-        userUpdated.setFirst_name(user.getFirst_name());
-        userUpdated.setLast_name(user.getLast_name());
+        userUpdated.setFirstName(user.getFirstName());
+        userUpdated.setLastName(user.getLastName());
         userUpdated.setPassword(user.getPassword());
         return userRepository.save(userUpdated);
     }

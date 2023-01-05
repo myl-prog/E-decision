@@ -15,7 +15,7 @@ public class UserController {
     public UserService userService;
 
     @GetMapping("/users")
-    public ResponseEntity<List<User>> getAll() {
+    public ResponseEntity<List<User>> getAllUsers() {
         try {
             return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
         } catch (Exception e) {
@@ -24,7 +24,7 @@ public class UserController {
     }
 
     @GetMapping("/users/{id}")
-    public ResponseEntity<User> getById(@PathVariable("id") int id) {
+    public ResponseEntity<User> getUserById(@PathVariable("id") int id) {
         try {
             return new ResponseEntity<>(userService.getUser(id), HttpStatus.OK);
         } catch (Exception e) {
@@ -33,7 +33,7 @@ public class UserController {
     }
 
     @PostMapping("/users")
-    public ResponseEntity<User> postUser(@RequestBody User user) {
+    public ResponseEntity<User> createUser(@RequestBody User user) {
         try {
             return new ResponseEntity<>(userService.createUser(user), HttpStatus.CREATED);
         } catch (Exception e) {
@@ -51,7 +51,7 @@ public class UserController {
     }
 
     @DeleteMapping("/users/{id}")
-    public ResponseEntity<HttpStatus> deleteById(@PathVariable("id") int id) {
+    public ResponseEntity<HttpStatus> deleteUserById(@PathVariable("id") int id) {
         try {
             userService.deleteUser(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
