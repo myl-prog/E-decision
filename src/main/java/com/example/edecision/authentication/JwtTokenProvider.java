@@ -1,4 +1,4 @@
-package com.example.edecision;
+package com.example.edecision.authentication;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

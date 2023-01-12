@@ -1,6 +1,6 @@
 package com.example.edecision.controller;
 
-import com.example.edecision.JwtTokenProvider;
+import com.example.edecision.authentication.JwtTokenProvider;
 import com.example.edecision.model.User;
 import com.example.edecision.repository.UserRepository;
 import com.example.edecision.service.UserService;
