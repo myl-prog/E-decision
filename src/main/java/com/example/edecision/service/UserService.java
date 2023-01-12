@@ -14,6 +14,8 @@ public class UserService {
     @Autowired
     public UserRepository userRepository;
 
+    BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
@@ -23,8 +25,6 @@ public class UserService {
     }
 
     public User createUser(User user) {
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
         if (userRepository.findByLogin(user.getLogin()) != null) {
             throw new IllegalArgumentException();
         }

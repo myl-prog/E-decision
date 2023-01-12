@@ -1,10 +1,13 @@
 package com.example.edecision.controller;
 
+import com.example.edecision.JwtTokenProvider;
 import com.example.edecision.model.User;
+import com.example.edecision.repository.UserRepository;
 import com.example.edecision.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,6 +16,15 @@ import java.util.List;
 public class UserController {
     @Autowired
     public UserService userService;
+
+    @Autowired
+    public UserRepository userRepository;
+
+    @Autowired
+    JwtTokenProvider jwtTokenProvider;
+
+
+    public BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers() {
@@ -32,14 +44,28 @@ public class UserController {
         }
     }
 
-    @PostMapping("/users")
-    public ResponseEntity<User> createUser(@RequestBody User user) {
+    @PostMapping("/register")
+    public ResponseEntity<User> register(@RequestBody User user) {
         try {
             return new ResponseEntity<>(userService.createUser(user), HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(null, HttpStatus.CONFLICT);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@RequestBody User user) {
+        try {
+            User foundUser = userRepository.findByLogin(user.getLogin());
+            if (foundUser != null && passwordEncoder.matches(user.getPassword(), foundUser.getPassword())) {
+                return new ResponseEntity<>(jwtTokenProvider.createToken(foundUser.getId()), HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Invalid login or password", HttpStatus.BAD_REQUEST);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
