@@ -1,6 +1,7 @@
 package com.example.edecision.service;
 
-import com.example.edecision.model.User;
+import com.example.edecision.authentication.JwtTokenUtil;
+import com.example.edecision.model.User.User;
 import com.example.edecision.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 public class UserService {
     @Autowired
     public UserRepository userRepository;
+
+    @Autowired
+    JwtTokenUtil jwtTokenUtil;
 
     BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 

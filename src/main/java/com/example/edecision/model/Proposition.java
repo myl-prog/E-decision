@@ -1,10 +1,9 @@
 package com.example.edecision.model;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.example.edecision.model.User.User;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import javax.persistence.*;
 import java.util.Date;
-import java.util.List;
 
 @Data
 @Entity(name = "proposition")

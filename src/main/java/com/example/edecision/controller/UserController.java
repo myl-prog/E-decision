@@ -1,7 +1,6 @@
 package com.example.edecision.controller;
 
-import com.example.edecision.authentication.JwtTokenProvider;
-import com.example.edecision.model.User;
+import com.example.edecision.model.User.User;
 import com.example.edecision.repository.UserRepository;
 import com.example.edecision.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +18,6 @@ public class UserController {
 
     @Autowired
     public UserRepository userRepository;
-
-    @Autowired
-    JwtTokenProvider jwtTokenProvider;
-
 
     public BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -52,20 +47,6 @@ public class UserController {
             return new ResponseEntity<>(null, HttpStatus.CONFLICT);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody User user) {
-        try {
-            User foundUser = userRepository.findByLogin(user.getLogin());
-            if (foundUser != null && passwordEncoder.matches(user.getPassword(), foundUser.getPassword())) {
-                return new ResponseEntity<>(jwtTokenProvider.createToken(foundUser.getId()), HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>("Invalid login or password", HttpStatus.BAD_REQUEST);
-            }
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
