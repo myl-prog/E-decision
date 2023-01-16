@@ -1,4 +1,5 @@
 package com.example.edecision.controller;
+import com.example.edecision.model.AmendPropositionBody;
 import com.example.edecision.model.Proposition;
 import com.example.edecision.model.PropositionBody;
 import com.example.edecision.model.User;
@@ -15,6 +16,11 @@ import java.util.List;
 public class PropositionController {
     @Autowired
     public PropositionService service;
+
+    // ============================
+    // ======= PROPOSITIONS =======
+    // ============================
+
     @GetMapping("/propositions")
     public ResponseEntity<List<Proposition>> getAll() {
         try{
@@ -33,7 +39,7 @@ public class PropositionController {
         }
     }
 
-    @PostMapping("/propositions")
+    @PutMapping("/propositions")
     public ResponseEntity<Proposition> create(@RequestBody PropositionBody proposition) {
         try{
             return new ResponseEntity<>(service.create(proposition), HttpStatus.OK);
@@ -41,4 +47,42 @@ public class PropositionController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @PutMapping("/propositions/{id}/amend")
+    public ResponseEntity<Proposition> create(@PathVariable("id") int id, @RequestBody AmendPropositionBody proposition) {
+        try{
+            return new ResponseEntity<>(service.amend(id, proposition), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/propositions/{id}")
+    public ResponseEntity<Proposition> update(@PathVariable("id") int id, @RequestBody PropositionBody proposition) {
+        try{
+            return new ResponseEntity<>(service.update(id, proposition), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @DeleteMapping("/propositions/{id}")
+    public ResponseEntity<HttpStatus> deletePropositionById(@PathVariable("id") int id) {
+        try {
+            service.deleteProposition(id);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    // ========================
+    // ======= COMMENTS =======
+    // ========================
+
+    // =====================
+    // ======= VOTES =======
+    // =====================
+
+
 }

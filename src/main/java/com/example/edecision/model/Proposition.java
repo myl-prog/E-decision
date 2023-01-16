@@ -1,10 +1,13 @@
 package com.example.edecision.model;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 @Data
-@Entity
+@Entity(name = "proposition")
 @Table(name = "proposition")
 public class Proposition {
     @Id
@@ -24,11 +27,25 @@ public class Proposition {
     @Column(name = "content")
     private String content;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne()
     @JoinColumn(name = "proposition_status_id", referencedColumnName = "id")
     private PropositionStatus proposition_status;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "amend_proposition_id", referencedColumnName = "id")
     private Proposition amend_proposition;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @ManyToOne
+    private User[] users;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @ManyToOne
+    private Team[] teams;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Boolean isEditable;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Boolean isVoteable;
 }

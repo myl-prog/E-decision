@@ -18,9 +18,15 @@ public class Team {
     private int team_type_id;
 
     public Team(String name, int project_id, int team_type_id) {
-        this.setName(name);
-        this.setProject_id(project_id);
-        this.setTeam_type_id(team_type_id);
+        this.name = name;
+        this.project_id = project_id;
+        this.team_type_id = team_type_id;
+    }
+    public Team(int id, String name, int project_id, int team_type_id) {
+        this.id = id;
+        this.name = name;
+        this.project_id = project_id;
+        this.team_type_id = team_type_id;
     }
     public Team(){
 
