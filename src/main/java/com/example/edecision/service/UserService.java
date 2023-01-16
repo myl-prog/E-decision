@@ -7,10 +7,14 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 @Service
 public class UserService {
     @Autowired
     public UserRepository userRepository;
+
+    BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -21,6 +25,11 @@ public class UserService {
     }
 
     public User createUser(User user) {
+        if (userRepository.findByLogin(user.getLogin()) != null) {
+            throw new IllegalArgumentException();
+        }
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 
