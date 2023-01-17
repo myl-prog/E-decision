@@ -42,7 +42,7 @@ public class PropositionService {
         // TODO : filter with token
         User user = Common.GetCurrentUser();
 
-        return propositionRepo.findAll();
+        return propositionRepo.getPropositionsByUser(user.getId());
     }
 
     public Proposition getById(Integer id) {
