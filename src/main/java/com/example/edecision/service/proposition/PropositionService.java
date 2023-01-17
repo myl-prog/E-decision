@@ -1,4 +1,5 @@
 package com.example.edecision.service.proposition;
+import com.example.edecision.Utils.Common;
 import com.example.edecision.model.proposition.AmendPropositionBody;
 import com.example.edecision.model.team.Team;
 import com.example.edecision.model.teamProposition.TeamProposition;
@@ -12,6 +13,7 @@ import com.example.edecision.repository.proposition.PropositionStatusRepository;
 import com.example.edecision.repository.teamProposition.TeamPropositionRepository;
 import com.example.edecision.repository.userProposition.UserPropositionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -38,6 +40,8 @@ public class PropositionService {
     public List<Proposition> getAll(){
 
         // TODO : filter with token
+        User user = Common.GetCurrentUser();
+
         return propositionRepo.findAll();
     }
 

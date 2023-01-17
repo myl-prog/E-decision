@@ -8,6 +8,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.example.edecision.model.user.User;
+import com.example.edecision.repository.user.UserRepository;
+import com.example.edecision.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,6 +23,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class JwtTokenFilter extends OncePerRequestFilter {
     @Autowired
     private JwtTokenUtil jwtUtil;
+
+    @Autowired
+    public UserService userService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -67,12 +72,8 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     }
 
     private UserDetails getUserDetails(String token) {
-        User userDetails = new User();
         String[] jwtSubject = jwtUtil.getSubject(token).split(",");
-
-        userDetails.setId(Integer.parseInt(jwtSubject[0]));
-        userDetails.setLogin(jwtSubject[1]);
-
-        return userDetails;
+        User user = userService.getUser(Integer.parseInt(jwtSubject[0]));
+        return user;
     }
 }
