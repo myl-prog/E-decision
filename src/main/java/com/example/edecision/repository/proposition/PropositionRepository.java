@@ -12,4 +12,6 @@ public interface PropositionRepository extends JpaRepository<Proposition, Intege
     @Modifying
     @Query("delete from proposition where id=:proposition_id")
     void deleteProposition(@Param("proposition_id") Integer proposition_id);
+
+
 }
