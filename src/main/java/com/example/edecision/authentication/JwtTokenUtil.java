@@ -1,13 +1,12 @@
 package com.example.edecision.authentication;
 
-import com.example.edecision.model.User.User;
+import com.example.edecision.model.user.User;
 import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
 @Component

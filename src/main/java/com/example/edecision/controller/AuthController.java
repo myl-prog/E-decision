@@ -3,7 +3,7 @@ package com.example.edecision.controller;
 import com.example.edecision.authentication.AuthRequest;
 import com.example.edecision.authentication.AuthResponse;
 import com.example.edecision.authentication.JwtTokenUtil;
-import com.example.edecision.model.User.User;
+import com.example.edecision.model.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.security.authentication.*;

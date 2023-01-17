@@ -1,6 +1,6 @@
 package com.example.edecision.authentication;
 
-import com.example.edecision.repository.UserRepository;
+import com.example.edecision.repository.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
