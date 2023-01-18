@@ -25,7 +25,4 @@ public interface TeamPropositionRepository extends JpaRepository<TeamProposition
     @Modifying
     @Query("delete from team_proposition where proposition_id=:proposition_id and team_id=:team_id")
     void deleteTeamProposition(@Param("proposition_id") Integer proposition_id, @Param("team_id") Integer team_id);
-
-    @Query(value = "select team.* from team_proposition,team  where proposition_id=:proposition_id and team_id = id", nativeQuery = true)
-    List<Object[]> getTeamPropositionByProposition(@Param("proposition_id") Integer proposition_id);
 }
