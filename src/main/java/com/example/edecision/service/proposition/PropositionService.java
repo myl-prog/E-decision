@@ -10,12 +10,15 @@ import com.example.edecision.model.proposition.PropositionStatus;
 import com.example.edecision.model.userProposition.UserProposition;
 import com.example.edecision.repository.proposition.PropositionRepository;
 import com.example.edecision.repository.proposition.PropositionStatusRepository;
+import com.example.edecision.repository.team.TeamRepository;
 import com.example.edecision.repository.teamProposition.TeamPropositionRepository;
+import com.example.edecision.repository.user.UserRepository;
 import com.example.edecision.repository.userProposition.UserPropositionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -35,6 +38,12 @@ public class PropositionService {
     @Autowired
     public TeamPropositionRepository teamPropositionRepo;
 
+    @Autowired
+    public UserRepository userRepo;
+
+    @Autowired
+    public TeamRepository teamRepo;
+
     // GET
 
     public List<Proposition> getAll(){
@@ -42,7 +51,7 @@ public class PropositionService {
         // TODO : filter with token
         User user = Common.GetCurrentUser();
 
-        return propositionRepo.findAll();
+        return propositionRepo.getPropositionsByUser(user.getId());
     }
 
     public Proposition getById(Integer id) {
@@ -54,40 +63,21 @@ public class PropositionService {
         proposition.setIsVoteable(proposition.getEnd_time().getTime() < System.currentTimeMillis()); // TODO && status != ...
 
         // return user proposition
-        /* try{
-            List<Object[]> usersObject = userPropositionRepo.getUserPropositionByProposition(id);
-            if(usersObject.size() > 0){
-                User[] users = new User[usersObject.size()];
-                for(int i = 0; i< usersObject.size(); i++){
-
-                    Object[] array = Arrays.stream(usersObject.get(i)).toArray();
-                    User u = new User((Integer) array[0], array[1].toString(), array[2].toString(), array[3].toString(), array[4].toString(), 0);
-                    if (array[5] != null) u.setUser_role_id((Integer)array[5]);
-                    users[i] = u;
-                }
-                proposition.setUsers(users);
-            }
-        }catch(Exception e){
-            proposition.setUsers(null);
-            System.out.println(e.getMessage());
-        } */
+        try{
+            ArrayList<User> users = userRepo.getUsersByProposition(proposition.getId());
+            proposition.setUsers(users);
+        }
+        catch(Exception e){
+            proposition.setUsers(new ArrayList<User>());
+        }
 
         // return team proposition
         try{
-            List<Object[]> teamsObject = teamPropositionRepo.getTeamPropositionByProposition(id);
-            if(teamsObject.size() > 0){
-                Team[] teams = new Team[teamsObject.size()];
-                for(int i = 0; i< teamsObject.size(); i++){
-
-                    Object[] array = Arrays.stream(teamsObject.get(i)).toArray();
-                    Team t = new Team((Integer) array[0], array[1].toString(), (Integer) array[2], (Integer) array[3]);
-                    teams[i] = t;
-                }
-                proposition.setTeams(teams);
-            }
-        }catch(Exception e){
-            proposition.setTeams(null);
-            System.out.println(e.getMessage());
+            ArrayList<Team> teams = teamRepo.getTeamsByProposition(proposition.getId());
+            proposition.setTeams(teams);
+        }
+        catch(Exception e){
+            proposition.setTeams(new ArrayList<Team>());
         }
 
         return proposition;
@@ -141,8 +131,8 @@ public class PropositionService {
 
         Proposition oldProposition = getById(id);
 
-        Team[] oldTeams = oldProposition.getTeams();
-        User[] oldUsers = oldProposition.getUsers();
+        List<Team> oldTeams = oldProposition.getTeams();
+        List<User> oldUsers = oldProposition.getUsers();
         oldProposition.setTeams(null);
         oldProposition.setUsers(null);
 
@@ -158,7 +148,7 @@ public class PropositionService {
         // users to create in user_proposition
         if (propositon.users != null) {
             for (int userId : propositon.users){
-                if(oldUsers == null || !(Stream.of(oldUsers).anyMatch(x -> x.getId() == userId))){
+                if(oldUsers == null || !oldUsers.stream().anyMatch(x -> x.getId() == userId)){
                     userPropositionRepo.save(new UserProposition(userId, id));
                 }
             }
@@ -176,7 +166,7 @@ public class PropositionService {
         // teams to create in team_proposition
         if (propositon.teams != null) {
             for (int teamId : propositon.teams){
-                if(oldTeams == null || !(Stream.of(oldTeams).anyMatch(x -> x.getId() == teamId))){
+                if(oldTeams == null || !oldTeams.stream().anyMatch(x -> x.getId() == teamId)){
                     teamPropositionRepo.save(new TeamProposition(teamId, id));
                 }
             }

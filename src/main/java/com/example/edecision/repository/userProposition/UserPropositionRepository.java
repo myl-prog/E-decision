@@ -25,7 +25,4 @@ public interface UserPropositionRepository extends JpaRepository<UserProposition
     @Modifying
     @Query("delete from user_proposition where proposition_id=:proposition_id and user_id=:user_id")
     void deleteUserProposition(@Param("proposition_id") Integer proposition_id, @Param("user_id") Integer user_id);
-
-    @Query(value = "select user.* from user_proposition,user where proposition_id=:proposition_id and user_id = user.id", nativeQuery = true)
-    List<Object[]> getUserPropositionByProposition(@Param("proposition_id") Integer proposition_id);
 }

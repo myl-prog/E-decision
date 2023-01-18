@@ -4,7 +4,12 @@ import com.example.edecision.model.user.User;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.List;
+import java.util.Collection;
 
 @Data
 @Entity(name = "proposition")
@@ -36,16 +41,18 @@ public class Proposition {
     private Proposition amend_proposition;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    @ManyToOne
-    private User[] users;
+    @OneToMany
+    private List<User> users;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    @ManyToOne
-    private Team[] teams;
+    @OneToMany
+    private List<Team> teams;
 
+    @Transient
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Boolean isEditable;
 
+    @Transient
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Boolean isVoteable;
 }
