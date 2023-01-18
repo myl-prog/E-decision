@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.util.Collection;
 
 @Data
@@ -21,19 +22,15 @@ public class User implements UserDetails {
     @Column(name = "id")
     private int id;
 
-    @NotBlank
     @Column(name = "login")
     private String login;
 
-    @NotBlank
     @Column(name = "first_name")
     private String first_name;
 
-    @NotBlank
     @Column(name = "last_name")
     private String last_name;
 
-    @NotBlank
     @Column(name = "password")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
