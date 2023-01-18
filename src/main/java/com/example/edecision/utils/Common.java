@@ -1,4 +1,4 @@
-package com.example.edecision.Utils;
+package com.example.edecision.utils;
 
 import com.example.edecision.model.user.User;
 import org.springframework.security.core.context.SecurityContextHolder;
