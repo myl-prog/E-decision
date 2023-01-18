@@ -16,49 +16,27 @@ public class UserController {
 
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers() {
-        try {
-            return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(userService.getAllUsers());
     }
 
     @GetMapping("/users/{id}")
     public ResponseEntity<User> getUserById(@PathVariable("id") int id) {
-        try {
-            return new ResponseEntity<>(userService.getUser(id), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(userService.getUser(id));
     }
 
     @PostMapping("/register")
     public ResponseEntity<User> register(@RequestBody User user) {
-        try {
-            return new ResponseEntity<>(userService.createUser(user), HttpStatus.CREATED);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(null, HttpStatus.CONFLICT);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(user));
     }
 
     @PutMapping("/users/{id}")
     public ResponseEntity<User> updateUser(@RequestBody User user, @PathVariable("id") int id) {
-        try {
-            return new ResponseEntity<>(userService.updateUser(user, id), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(userService.updateUser(user, id));
     }
 
     @DeleteMapping("/users/{id}")
     public ResponseEntity<HttpStatus> deleteUserById(@PathVariable("id") int id) {
-        try {
-            userService.deleteUser(id);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        userService.deleteUser(id);
+        return new ResponseEntity(HttpStatus.OK);
     }
 }

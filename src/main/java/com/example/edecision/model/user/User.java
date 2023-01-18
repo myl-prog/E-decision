@@ -1,5 +1,7 @@
 package com.example.edecision.model.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,44 +32,56 @@ public class User implements UserDetails {
     private String password;
 
     @ManyToOne
-    @JoinColumn(name = "user_role_id", referencedColumnName = "id")
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private UserRole user_role;
 
-    public User(int id, String login, String first_name, String last_name, String password, UserRole user_role){
-        this.id = id; this.login = login; this.first_name = first_name; this.last_name = last_name; this.password = password; this.user_role = user_role;
-    }
-
-    public User() {
-
-    }
-
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return null;
     }
 
+    @JsonIgnore
     @Override
     public String getUsername() {
         return this.login;
     }
 
+    @JsonIgnore
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
 
+    @JsonIgnore
     @Override
     public boolean isAccountNonLocked() {
         return true;
     }
 
+    @JsonIgnore
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
+    @JsonIgnore
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public User(int id, String login, String first_name, String last_name, String password, UserRole user_role) {
+        this.id = id;
+        this.login = login;
+        this.first_name = first_name;
+        this.last_name = last_name;
+        this.password = password;
+        this.user_role = user_role;
+    }
+
+    public User() {
+
     }
 }

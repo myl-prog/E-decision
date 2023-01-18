@@ -15,9 +15,6 @@ public class UserService {
     @Autowired
     public UserRepository userRepository;
 
-    @Autowired
-    JwtTokenUtil jwtTokenUtil;
-
     BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public List<User> getAllUsers() {
