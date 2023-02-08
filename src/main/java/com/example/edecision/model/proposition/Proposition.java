@@ -40,10 +40,12 @@ public class Proposition {
     @JoinColumn(name = "amend_proposition_id", referencedColumnName = "id")
     private Proposition amend_proposition;
 
+    @Transient
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @OneToMany
     private List<User> users;
 
+    @Transient
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @OneToMany
     private List<Team> teams;
