@@ -1,4 +1,4 @@
-package com.example.edecision.model;
+package com.example.edecision.model.user;
 import lombok.Data;
 import javax.persistence.*;
 import java.util.Set;
