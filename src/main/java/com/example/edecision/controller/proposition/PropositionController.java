@@ -26,7 +26,7 @@ public class PropositionController {
     @GetMapping("/propositions")
     public ResponseEntity<List<Proposition>> getAll() {
         try{
-            return new ResponseEntity<>(service.getAll(), HttpStatus.OK);
+            return new ResponseEntity<>(propositionService.getAll(), HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
