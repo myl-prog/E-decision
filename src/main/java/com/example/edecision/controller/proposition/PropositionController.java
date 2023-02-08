@@ -102,7 +102,7 @@ public class PropositionController {
     }
 
     //Get comment by id of comment
-    @GetMapping("/propositions/comments/{id}")
+    @GetMapping("/propositions/{proposition_id}/comments/{comment_id}")
     public ResponseEntity<Comment> getById(@PathVariable("id") int id) {
         try {
             return new ResponseEntity<>(commentService.getComment(id), HttpStatus.OK);

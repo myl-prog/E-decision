@@ -30,7 +30,6 @@ public class Comment {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "proposition_id", referencedColumnName = "id")
-    private Proposition proposition;
+    @Column(name = "proposition_id")
+    private Integer proposition;
 }
