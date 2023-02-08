@@ -8,8 +8,8 @@ import java.util.Date;
 @Table(name = "proposition")
 public class Proposition {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @Column(name = "title")
