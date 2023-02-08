@@ -25,7 +25,7 @@ public class CommentService {
         return commentRepository.findById(id).get();
     }
     public Comment createComment(Comment comment, Integer id) {
-        comment.setId(id);
+        comment.setProposition(id);
         return commentRepository.save(comment);
     }
 
@@ -36,7 +36,7 @@ public class CommentService {
         List<Comment> comments = commentRepository.findAll();
         List<Comment> commentsByPropositionID = new ArrayList<>();
         for (Comment comment : comments) {
-            if (comment.getProposition().getId() == id) {
+            if (comment.getProposition() == id) {
                 commentsByPropositionID.add(comment);
             }
         }
