@@ -1,4 +1,4 @@
-package com.example.edecision.authentication;
+package com.example.edecision.model.authentication;
 
 import com.sun.istack.NotNull;
 

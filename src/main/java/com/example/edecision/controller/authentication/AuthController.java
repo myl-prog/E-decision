@@ -1,7 +1,7 @@
-package com.example.edecision.controller;
+package com.example.edecision.controller.authentication;
 
-import com.example.edecision.authentication.AuthRequest;
-import com.example.edecision.authentication.AuthResponse;
+import com.example.edecision.model.authentication.AuthRequest;
+import com.example.edecision.model.authentication.AuthResponse;
 import com.example.edecision.authentication.JwtTokenUtil;
 import com.example.edecision.model.user.User;
 import org.springframework.beans.factory.annotation.Autowired;

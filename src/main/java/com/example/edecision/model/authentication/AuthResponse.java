@@ -1,4 +1,4 @@
-package com.example.edecision.authentication;
+package com.example.edecision.model.authentication;
 
 public class AuthResponse {
     private String login;

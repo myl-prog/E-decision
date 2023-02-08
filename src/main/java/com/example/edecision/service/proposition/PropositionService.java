@@ -1,5 +1,5 @@
 package com.example.edecision.service.proposition;
-import com.example.edecision.Utils.Common;
+import com.example.edecision.utils.Common;
 import com.example.edecision.model.proposition.AmendPropositionBody;
 import com.example.edecision.model.team.Team;
 import com.example.edecision.model.teamProposition.TeamProposition;
@@ -15,14 +15,11 @@ import com.example.edecision.repository.teamProposition.TeamPropositionRepositor
 import com.example.edecision.repository.user.UserRepository;
 import com.example.edecision.repository.userProposition.UserPropositionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 @Service
 public class PropositionService {

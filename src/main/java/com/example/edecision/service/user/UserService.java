@@ -1,12 +1,14 @@
 package com.example.edecision.service.user;
 
-import com.example.edecision.authentication.JwtTokenUtil;
+import com.example.edecision.model.exception.CustomException;
 import com.example.edecision.model.user.User;
 import com.example.edecision.repository.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -22,12 +24,12 @@ public class UserService {
     }
 
     public User getUser(int id) {
-        return userRepository.findById(id).get();
+        return userRepository.findById(id).orElseThrow(() -> new CustomException("User not found with id : " + id, HttpStatus.NOT_FOUND));
     }
 
     public User createUser(User user) {
         if (userRepository.findByLogin(user.getLogin()).isPresent()) {
-            throw new IllegalArgumentException();
+            throw new CustomException("User with same login already exist", HttpStatus.CONFLICT);
         }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -40,10 +42,19 @@ public class UserService {
         userUpdated.setFirst_name(user.getFirst_name());
         userUpdated.setLast_name(user.getLast_name());
         userUpdated.setPassword(user.getPassword());
+
+        if (userRepository.findByLogin(userUpdated.getLogin()).isPresent()) {
+            throw new CustomException("User with same login already exist", HttpStatus.CONFLICT);
+        }
+
         return userRepository.save(userUpdated);
     }
 
     public void deleteUser(int id) {
-        userRepository.deleteById(id);
+        if (userRepository.findById(id).isPresent()) {
+            userRepository.deleteById(id);
+        } else {
+            throw new CustomException("User not found with id : " + id, HttpStatus.NOT_FOUND);
+        }
     }
 }
