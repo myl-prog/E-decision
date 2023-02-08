@@ -26,16 +26,15 @@ public class User {
     @Column(name = "password")
     private String password;
 
-    @Column(name = "user_role_id")
-    private int user_role_id;
+    @ManyToOne(cascade = CascadeType.ALL)
+    private UserRole userRole;
 
-    public User(String login, String firstName, String lastName, String password,int userRoleId) {
+    public User(String login, String firstName, String lastName, String password,UserRole userRole) {
         setLogin(login);
         setFirst_name(firstName);
         setLast_name(lastName);
         setPassword(password);
-        setUser_role_id(userRoleId);
-
+        setUserRole(userRole);
     }
     public User(){
 

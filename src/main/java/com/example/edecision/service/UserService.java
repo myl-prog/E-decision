@@ -22,7 +22,7 @@ public class UserService {
 
     public User createUser(User user) {
         User newUser =  userRepository.save(user);
-        System.out.println(newUser);
+        System.out.println("This is my new User : " + newUser);
         return newUser;
     }
 

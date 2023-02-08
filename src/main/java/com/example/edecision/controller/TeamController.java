@@ -1,6 +1,7 @@
 package com.example.edecision.controller;
 
 import com.example.edecision.model.Team;
+import com.example.edecision.model.UserTeam;
 import com.example.edecision.service.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -51,5 +52,17 @@ public class TeamController {
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+    @PostMapping("/Team/{team_id}/User/{user_id}/")
+    public ResponseEntity<Team> addUser(@PathVariable("team_id") int team_id,@PathVariable("user_id") int user_id) {
+
+        /*UserTeam user_team= new UserTeam(team_id,user_id);
+        try {
+            return new ResponseEntity<>(teamService.createTeam(newTeam), HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        */
+        return null;
     }
 }

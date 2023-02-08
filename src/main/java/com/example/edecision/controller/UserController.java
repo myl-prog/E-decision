@@ -1,6 +1,8 @@
 package com.example.edecision.controller;
 
 import com.example.edecision.model.User;
+import com.example.edecision.model.UserRole;
+import com.example.edecision.repository.UserRoleRepository;
 import com.example.edecision.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,6 +15,8 @@ import java.util.List;
 public class UserController {
     @Autowired
     public UserService userService;
+    @Autowired
+    UserRoleRepository userRoleRepository;
 
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAll() {
@@ -34,7 +38,9 @@ public class UserController {
 
     @PostMapping("/user/add/{login}/{firstName}/{lastName}/{password}/{userRoleId}")
     public ResponseEntity<User> postUser(@PathVariable("login") String login,@PathVariable("firstName") String firstName,@PathVariable("lastName") String lastName,@PathVariable("password") String password,@PathVariable("userRoleId") int userRoleId) {
-        User newUser = new User(login,firstName,lastName,password,userRoleId);
+        UserRole userRole = userRoleRepository.getById(userRoleId);
+        System.out.println(userRole.getId());
+        User newUser = new User(login,firstName,lastName,password,userRole);
         try {
             return new ResponseEntity<>(userService.createUser(newUser), HttpStatus.CREATED);
         } catch (Exception e) {
