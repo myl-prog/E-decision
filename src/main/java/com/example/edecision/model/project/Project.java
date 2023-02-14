@@ -6,12 +6,15 @@ import javax.persistence.*;
 @Entity
 @Table(name = "project")
 public class Project {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "project_id")
-    private String project_id;
+    @Column(name = "id")
+    private int id;
+
     @Column(name = "title")
-    private String titile;
+    private String title;
+
     @Column(name = "description")
     private String description;
 }

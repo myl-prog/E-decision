@@ -9,9 +9,9 @@ import java.util.List;
 @Service
 public class ProjectService {
     @Autowired
-    public ProjectRepository repo;
+    public ProjectRepository projectRepository;
 
-    public List<Project> getAll(){
-        return repo.findAll();
+    public List<Project> getAllProjects(){
+        return projectRepository.findAll();
     }
 }
