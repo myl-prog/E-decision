@@ -41,7 +41,7 @@ public class PropositionController {
         }
     }
 
-    @PutMapping("/propositions")
+    @PostMapping("/propositions")
     public ResponseEntity<Proposition> create(@RequestBody PropositionBody proposition) {
         try{
             return new ResponseEntity<>(propositionService.create(proposition), HttpStatus.OK);
@@ -50,7 +50,7 @@ public class PropositionController {
         }
     }
 
-    @PutMapping("/propositions/{id}/amend")
+    @PostMapping("/propositions/{id}/amend")
     public ResponseEntity<Proposition> create(@PathVariable("id") int id, @RequestBody AmendPropositionBody proposition) {
         try{
             return new ResponseEntity<>(propositionService.amend(id, proposition), HttpStatus.OK);
@@ -59,7 +59,7 @@ public class PropositionController {
         }
     }
 
-    @PostMapping("/propositions/{id}")
+    @PutMapping("/propositions/{id}")
     public ResponseEntity<Proposition> update(@PathVariable("id") int id, @RequestBody PropositionBody proposition) {
         try{
             return new ResponseEntity<>(propositionService.update(id, proposition), HttpStatus.OK);
