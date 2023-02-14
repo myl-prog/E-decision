@@ -1,4 +1,5 @@
 package com.example.edecision.model.project;
+import com.example.edecision.model.proposition.PropositionStatus;
 import lombok.Data;
 import javax.persistence.*;
 
@@ -17,4 +18,8 @@ public class Project {
 
     @Column(name = "description")
     private String description;
+
+    @ManyToOne()
+    @JoinColumn(name = "project_status_id", referencedColumnName = "id")
+    private ProjectStatus projectStatus;
 }
