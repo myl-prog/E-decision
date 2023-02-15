@@ -1,6 +1,6 @@
 package com.example.edecision.controller.team;
 
-import com.example.edecision.model.team.Team;
+import com.example.edecision.repository.teamProposition.team.Team;
 import com.example.edecision.service.team.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,9 +33,9 @@ public class TeamController {
     }
 
     @PostMapping("/Team/add/{name}/{project_id}/{team_type_id}")
-    public ResponseEntity<Team> postTeam(@PathVariable("name") String name,@PathVariable("project_id") int project_id,@PathVariable("team_type_id") int team_type_id) {
+    public ResponseEntity<Team> postTeam(@PathVariable("name") String name, @PathVariable("project_id") int project_id, @PathVariable("team_type_id") int team_type_id) {
 
-        Team newTeam=new Team(name,project_id,team_type_id);
+        Team newTeam = new Team(name, project_id, team_type_id);
         try {
             return new ResponseEntity<>(teamService.createTeam(newTeam), HttpStatus.CREATED);
         } catch (Exception e) {
@@ -52,8 +52,9 @@ public class TeamController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
     @PostMapping("/Team/{team_id}/User/{user_id}/")
-    public ResponseEntity<Team> addUser(@PathVariable("team_id") int team_id,@PathVariable("user_id") int user_id) {
+    public ResponseEntity<Team> addUser(@PathVariable("team_id") int team_id, @PathVariable("user_id") int user_id) {
 
         /*UserTeam user_team= new UserTeam(team_id,user_id);
         try {

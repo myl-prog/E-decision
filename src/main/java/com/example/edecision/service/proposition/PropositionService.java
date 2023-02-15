@@ -1,7 +1,8 @@
 package com.example.edecision.service.proposition;
+
 import com.example.edecision.utils.Common;
 import com.example.edecision.model.proposition.AmendPropositionBody;
-import com.example.edecision.model.team.Team;
+import com.example.edecision.repository.teamProposition.team.Team;
 import com.example.edecision.model.teamProposition.TeamProposition;
 import com.example.edecision.model.user.User;
 import com.example.edecision.model.proposition.Proposition;
@@ -43,7 +44,7 @@ public class PropositionService {
 
     // GET
 
-    public List<Proposition> getAll(){
+    public List<Proposition> getAll() {
 
         User user = Common.GetCurrentUser();
 
@@ -55,27 +56,25 @@ public class PropositionService {
         User user = Common.GetCurrentUser();
         Proposition proposition = propositionRepo.getPropositionByUser(id, user.getId());
 
-        if(proposition != null){
+        if (proposition != null) {
 
             // TODO : switch user/team id ?
             proposition.setIsEditable(proposition.getEnd_time().getTime() >= System.currentTimeMillis());
-            proposition.setIsVoteable(proposition.getEnd_time().getTime() < System.currentTimeMillis() && proposition.getProposition_status().getId() == 1 );
+            proposition.setIsVoteable(proposition.getEnd_time().getTime() < System.currentTimeMillis() && proposition.getProposition_status().getId() == 1);
 
             // return user proposition
-            try{
+            try {
                 ArrayList<User> users = userRepo.getUsersByProposition(proposition.getId());
                 proposition.setUsers(users);
-            }
-            catch(Exception e){
+            } catch (Exception e) {
                 proposition.setUsers(new ArrayList<User>());
             }
 
             // return team proposition
-            try{
+            try {
                 ArrayList<Team> teams = teamRepo.getTeamsByProposition(proposition.getId());
                 proposition.setTeams(teams);
-            }
-            catch(Exception e){
+            } catch (Exception e) {
                 proposition.setTeams(new ArrayList<Team>());
             }
         }
@@ -85,11 +84,12 @@ public class PropositionService {
 
     // CREATE
 
-    public Proposition create(PropositionBody propositon){
+    public Proposition create(PropositionBody propositon) {
         // get proposition status
         PropositionStatus status = propositionStatusRepo.findById(propositon.proposition.getProposition_status().getId()).get();
         propositon.proposition.setProposition_status(status);
-        if(propositon.proposition.getAmendment_delay() <= 0) propositon.proposition.setAmendment_delay(1); // default amendment delay one day
+        if (propositon.proposition.getAmendment_delay() <= 0)
+            propositon.proposition.setAmendment_delay(1); // default amendment delay one day
         Proposition createdProposition = propositionRepo.save(propositon.proposition);
 
         // affect user and team to the proposition
@@ -99,31 +99,31 @@ public class PropositionService {
         return getById(createdProposition.getId());
     }
 
-    public void createUsersProposition(int[] users, int proposition){
-        for (int user : users){
+    public void createUsersProposition(int[] users, int proposition) {
+        for (int user : users) {
             userPropositionRepo.createUserProposition(proposition, user);
         }
     }
 
-    public void createTeamsProposition(int[] teams, int proposition){
-        for (int team : teams){
+    public void createTeamsProposition(int[] teams, int proposition) {
+        for (int team : teams) {
             teamPropositionRepo.createTeamProposition(proposition, team);
         }
     }
 
-    public Proposition amend (int amendPropositionId, AmendPropositionBody body){
+    public Proposition amend(int amendPropositionId, AmendPropositionBody body) {
 
         User user = Common.GetCurrentUser();
         Proposition amendProposition = propositionRepo.getPropositionByUser(amendPropositionId, user.getId());
 
-        if(amendProposition != null){
+        if (amendProposition != null) {
             Proposition proposition = new Proposition();
             proposition.setTitle(body.getTitle());
             proposition.setContent(body.getContent());
             proposition.setAmend_proposition(amendProposition);
             proposition.setEnd_time(amendProposition.getEnd_time());
             return propositionRepo.save(proposition);
-        }else{
+        } else {
             // ERROR
             return null;
         }
@@ -131,7 +131,7 @@ public class PropositionService {
     }
 
     // UPDATE
-    public Proposition update(int id, PropositionBody propositon){
+    public Proposition update(int id, PropositionBody propositon) {
 
         // Todo : check user and check if we are in amandment delay, end time etc
 
@@ -153,36 +153,36 @@ public class PropositionService {
 
         // users to create in user_proposition
         if (propositon.users != null) {
-            for (int userId : propositon.users){
-                if(oldUsers == null || !oldUsers.stream().anyMatch(x -> x.getId() == userId)){
+            for (int userId : propositon.users) {
+                if (oldUsers == null || !oldUsers.stream().anyMatch(x -> x.getId() == userId)) {
                     userPropositionRepo.save(new UserProposition(userId, id));
                 }
             }
         }
 
         // users to delete in user_proposition
-        if(oldUsers != null){
-            for(User user : oldUsers){
-                if(propositon.users == null || !(IntStream.of(propositon.users).anyMatch(x -> x == user.getId()))){
-                    userPropositionRepo.deleteUserProposition(id,user.getId());
+        if (oldUsers != null) {
+            for (User user : oldUsers) {
+                if (propositon.users == null || !(IntStream.of(propositon.users).anyMatch(x -> x == user.getId()))) {
+                    userPropositionRepo.deleteUserProposition(id, user.getId());
                 }
             }
         }
 
         // teams to create in team_proposition
         if (propositon.teams != null) {
-            for (int teamId : propositon.teams){
-                if(oldTeams == null || !oldTeams.stream().anyMatch(x -> x.getId() == teamId)){
+            for (int teamId : propositon.teams) {
+                if (oldTeams == null || !oldTeams.stream().anyMatch(x -> x.getId() == teamId)) {
                     teamPropositionRepo.save(new TeamProposition(teamId, id));
                 }
             }
         }
 
         // teams to delete in team_proposition
-        if(oldTeams != null){
-            for(Team team : oldTeams){
-                if(propositon.teams == null || !(IntStream.of(propositon.teams).anyMatch(x -> x == team.getId()))){
-                    teamPropositionRepo.deleteTeamProposition(id,team.getId());
+        if (oldTeams != null) {
+            for (Team team : oldTeams) {
+                if (propositon.teams == null || !(IntStream.of(propositon.teams).anyMatch(x -> x == team.getId()))) {
+                    teamPropositionRepo.deleteTeamProposition(id, team.getId());
                 }
             }
         }

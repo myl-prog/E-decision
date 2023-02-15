@@ -1,15 +1,13 @@
 package com.example.edecision.model.proposition;
-import com.example.edecision.model.team.Team;
+
+import com.example.edecision.repository.teamProposition.team.Team;
 import com.example.edecision.model.user.User;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
+
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
-import java.util.List;
-import java.util.Collection;
 
 @Data
 @Entity(name = "proposition")

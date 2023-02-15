@@ -8,12 +8,14 @@ import com.example.edecision.repository.project.ProjectRepository;
 import com.example.edecision.repository.project.ProjectStatusRepository;
 import com.example.edecision.repository.project.ProjectUserRepository;
 import com.example.edecision.repository.team.TeamRepository;
-import org.apache.tomcat.util.buf.StringUtils;
+import com.example.edecision.repository.teamProposition.team.Team;
+import com.example.edecision.service.team.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProjectService {
@@ -29,6 +31,9 @@ public class ProjectService {
     @Autowired
     public ProjectUserRepository projectUserRepository;
 
+    @Autowired
+    public TeamService teamService;
+
     public List<Project> getAllProjects() {
         return projectRepository.findAll();
     }
@@ -37,15 +42,15 @@ public class ProjectService {
         ProjectStatus projectStatus = projectStatusRepository.findById(project.project.getProject_status().getId()).get();
         project.project.setProject_status(projectStatus);
         Project createdProject = projectRepository.save(project.project);
-        addProjectIdToTeam(project.teams, createdProject.getId());
+        addProjectToFreeTeams(project.teams, project.project.getId());
         addProjectUsersToProject(createdProject.getId(), project.project_users);
         return createdProject;
     }
 
-    private void addProjectIdToTeam(int[] teamsId, int projectId) {
-        String concatTeamsIds = Arrays.toString(teamsId).replace("[", "(").replace("]", ")");
-        System.out.println("ids : " + concatTeamsIds);
-        projectRepository.addProjectToTeam(teamsId, projectId);
+    private void addProjectToFreeTeams(int[] teamsId, int projectId) {
+        List<Team> teams = teamService.getFreeTeamsWithUsers(teamsId);
+        int[] ids = teams.stream().mapToInt(team -> team.getId()).toArray();
+        projectRepository.addProjectToTeam(ids, projectId);
     }
 
     private void addProjectUsersToProject(int projectId, ProjectUser[] projectUsers) {
