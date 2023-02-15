@@ -1,8 +1,8 @@
 package com.example.edecision.model.user;
-import com.example.edecision.model.teamProposition.TeamPropositionId;
+
 import lombok.Data;
+
 import javax.persistence.*;
-import java.util.Set;
 
 @Data
 @Entity(name = "user_team")

@@ -4,8 +4,6 @@ public class AuthResponse {
     private String login;
     private String accessToken;
 
-    public AuthResponse() { }
-
     public AuthResponse(String login, String accessToken) {
         this.login = login;
         this.accessToken = accessToken;

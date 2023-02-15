@@ -1,7 +1,8 @@
 package com.example.edecision.model.proposition;
+
 import lombok.Data;
+
 import javax.persistence.*;
-import java.util.Date;
 
 @Data
 @Entity(name = "proposition_status")

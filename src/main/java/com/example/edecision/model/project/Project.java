@@ -1,6 +1,5 @@
 package com.example.edecision.model.project;
 
-import com.example.edecision.model.user.UserRole;
 import lombok.Data;
 
 import javax.persistence.*;

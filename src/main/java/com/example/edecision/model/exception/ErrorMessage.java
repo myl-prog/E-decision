@@ -1,7 +1,5 @@
 package com.example.edecision.model.exception;
 
-import org.springframework.http.HttpStatus;
-
 import java.util.Date;
 
 public class ErrorMessage {
