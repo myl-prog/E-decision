@@ -2,7 +2,7 @@ package com.example.edecision.service.proposition;
 
 import com.example.edecision.utils.Common;
 import com.example.edecision.model.proposition.AmendPropositionBody;
-import com.example.edecision.repository.teamProposition.team.Team;
+import com.example.edecision.model.team.Team;
 import com.example.edecision.model.teamProposition.TeamProposition;
 import com.example.edecision.model.user.User;
 import com.example.edecision.model.proposition.Proposition;

@@ -1,6 +1,6 @@
 package com.example.edecision.controller.team;
 
-import com.example.edecision.repository.teamProposition.team.Team;
+import com.example.edecision.model.team.Team;
 import com.example.edecision.service.team.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

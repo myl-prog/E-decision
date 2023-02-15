@@ -1,6 +1,7 @@
 package com.example.edecision.service.user;
 
 import com.example.edecision.model.exception.CustomException;
+import com.example.edecision.model.project.ProjectUser;
 import com.example.edecision.model.user.User;
 import com.example.edecision.repository.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,6 +1,6 @@
 package com.example.edecision.service.team;
 
-import com.example.edecision.repository.teamProposition.team.Team;
+import com.example.edecision.model.team.Team;
 import com.example.edecision.repository.team.TeamRepository;
 import com.example.edecision.repository.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

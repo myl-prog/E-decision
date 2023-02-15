@@ -1,4 +1,4 @@
-package com.example.edecision.repository.teamProposition.team;
+package com.example.edecision.model.team;
 
 import com.example.edecision.model.user.User;
 import com.fasterxml.jackson.annotation.JsonInclude;
