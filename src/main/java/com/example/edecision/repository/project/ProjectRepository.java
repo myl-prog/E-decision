@@ -11,7 +11,7 @@ public interface ProjectRepository extends JpaRepository<Project, Integer> {
 
     @Transactional
     @Modifying
-    @Query(value = "UPDATE team SET project_id =:project_id WHERE id IN (:id) AND project_id IS NULL", nativeQuery = true)
-    void addProjectToTeam(@Param("id") String id, @Param("project_id") Integer project_id);
+    @Query(value = "UPDATE team SET project_id =:project_id WHERE id IN :ids AND project_id IS NULL", nativeQuery = true)
+    void addProjectToTeam(@Param("ids") int[] ids, @Param("project_id") Integer project_id);
 
 }
