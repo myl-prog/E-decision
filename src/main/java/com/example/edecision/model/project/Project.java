@@ -1,10 +1,12 @@
 package com.example.edecision.model.project;
+
 import com.example.edecision.model.proposition.PropositionStatus;
 import lombok.Data;
+
 import javax.persistence.*;
 
 @Data
-@Entity
+@Entity(name = "project")
 @Table(name = "project")
 public class Project {
 
@@ -21,5 +23,5 @@ public class Project {
 
     @ManyToOne()
     @JoinColumn(name = "project_status_id", referencedColumnName = "id")
-    private ProjectStatus projectStatus;
+    private ProjectStatus project_status;
 }

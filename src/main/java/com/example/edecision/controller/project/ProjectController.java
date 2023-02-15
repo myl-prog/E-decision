@@ -19,12 +19,13 @@ public class ProjectController {
     public ProjectService projectService;
 
     @GetMapping("/projects")
-    public ResponseEntity<List<Project>> getAllProjects(){
+    public ResponseEntity<List<Project>> getAllProjects() {
         return ResponseEntity.status(HttpStatus.OK).body(projectService.getAllProjects());
     }
 
     @PostMapping("/projects")
-    public ResponseEntity<Project> createProject(@RequestBody ProjectBody project) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(projectService.createProject(project));
+    public ResponseEntity<Project> createProject() {
+        ProjectBody projectBody = null;
+        return ResponseEntity.status(HttpStatus.CREATED).body(projectService.createProject(projectBody));
     }
 }

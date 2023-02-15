@@ -1,4 +1,5 @@
 package com.example.edecision.repository.project;
+
 import com.example.edecision.model.project.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -10,7 +11,7 @@ public interface ProjectRepository extends JpaRepository<Project, Integer> {
 
     @Transactional
     @Modifying
-    @Query(value = "INSERT INTO team (project_id) VALUES (:project_id)", nativeQuery = true)
-    void addProjectToTeam(@Param("project_id") Integer projectId);
+    @Query(value = "UPDATE team SET project_id =:project_id WHERE id IN (:id) AND project_id IS NULL", nativeQuery = true)
+    void addProjectToTeam(@Param("id") String id, @Param("project_id") Integer project_id);
 
 }
