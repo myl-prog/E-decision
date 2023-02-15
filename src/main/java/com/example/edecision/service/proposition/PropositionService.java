@@ -45,7 +45,6 @@ public class PropositionService {
 
     public List<Proposition> getAll(){
 
-        // TODO : filter with token
         User user = Common.GetCurrentUser();
 
         return propositionRepo.getPropositionsByUser(user.getId());
@@ -53,28 +52,32 @@ public class PropositionService {
 
     public Proposition getById(Integer id) {
 
-        Proposition proposition = propositionRepo.findById(id).get();
+        User user = Common.GetCurrentUser();
+        Proposition proposition = propositionRepo.getPropositionByUser(id, user.getId());
 
-        // TODO : switch user/team id ?
-        proposition.setIsEditable(proposition.getEnd_time().getTime() >= System.currentTimeMillis());
-        proposition.setIsVoteable(proposition.getEnd_time().getTime() < System.currentTimeMillis()); // TODO && status != ...
+        if(proposition != null){
 
-        // return user proposition
-        try{
-            ArrayList<User> users = userRepo.getUsersByProposition(proposition.getId());
-            proposition.setUsers(users);
-        }
-        catch(Exception e){
-            proposition.setUsers(new ArrayList<User>());
-        }
+            // TODO : switch user/team id ?
+            proposition.setIsEditable(proposition.getEnd_time().getTime() >= System.currentTimeMillis());
+            proposition.setIsVoteable(proposition.getEnd_time().getTime() < System.currentTimeMillis() && proposition.getProposition_status().getId() == 1 );
 
-        // return team proposition
-        try{
-            ArrayList<Team> teams = teamRepo.getTeamsByProposition(proposition.getId());
-            proposition.setTeams(teams);
-        }
-        catch(Exception e){
-            proposition.setTeams(new ArrayList<Team>());
+            // return user proposition
+            try{
+                ArrayList<User> users = userRepo.getUsersByProposition(proposition.getId());
+                proposition.setUsers(users);
+            }
+            catch(Exception e){
+                proposition.setUsers(new ArrayList<User>());
+            }
+
+            // return team proposition
+            try{
+                ArrayList<Team> teams = teamRepo.getTeamsByProposition(proposition.getId());
+                proposition.setTeams(teams);
+            }
+            catch(Exception e){
+                proposition.setTeams(new ArrayList<Team>());
+            }
         }
 
         return proposition;
@@ -83,7 +86,6 @@ public class PropositionService {
     // CREATE
 
     public Proposition create(PropositionBody propositon){
-
         // get proposition status
         PropositionStatus status = propositionStatusRepo.findById(propositon.proposition.getProposition_status().getId()).get();
         propositon.proposition.setProposition_status(status);
@@ -93,6 +95,7 @@ public class PropositionService {
         // affect user and team to the proposition
         createUsersProposition(propositon.users, createdProposition.getId());
         createTeamsProposition(propositon.teams, createdProposition.getId());
+
         return getById(createdProposition.getId());
     }
 
@@ -109,16 +112,22 @@ public class PropositionService {
     }
 
     public Proposition amend (int amendPropositionId, AmendPropositionBody body){
-        // TODO : check authorization
 
-        Proposition amendProposition = propositionRepo.findById(amendPropositionId).get();
+        User user = Common.GetCurrentUser();
+        Proposition amendProposition = propositionRepo.getPropositionByUser(amendPropositionId, user.getId());
 
-        Proposition proposition = new Proposition();
-        proposition.setTitle(body.getTitle());
-        proposition.setContent(body.getContent());
-        proposition.setAmend_proposition(amendProposition);
-        proposition.setEnd_time(amendProposition.getEnd_time());
-        return propositionRepo.save(proposition);
+        if(amendProposition != null){
+            Proposition proposition = new Proposition();
+            proposition.setTitle(body.getTitle());
+            proposition.setContent(body.getContent());
+            proposition.setAmend_proposition(amendProposition);
+            proposition.setEnd_time(amendProposition.getEnd_time());
+            return propositionRepo.save(proposition);
+        }else{
+            // ERROR
+            return null;
+        }
+
     }
 
     // UPDATE
