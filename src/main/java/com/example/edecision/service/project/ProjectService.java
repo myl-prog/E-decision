@@ -82,7 +82,8 @@ public class ProjectService {
 
     public void deleteProject(int projectId) {
         if (projectRepository.findById(projectId).isPresent()) {
-            // Find all relations to teams and users and remove them
+            projectUserRepository.deleteAllProjectUserByProjectId(projectId);
+            teamRepository.removeProjectIdFromTeams(projectId);
             projectRepository.deleteById(projectId);
         } else {
             throw new CustomException("Project not found with id : " + projectId, HttpStatus.NOT_FOUND);

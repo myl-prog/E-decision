@@ -32,12 +32,12 @@ public class ProjectController {
 
     @PutMapping("/projects/{id}")
     public ResponseEntity<Project> updateProject(@PathVariable("id") int id, @RequestBody ProjectBody projectBody) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(projectService.updateProject(id, projectBody));
+        return ResponseEntity.status(HttpStatus.OK).body(projectService.updateProject(id, projectBody));
     }
 
     @DeleteMapping("/projects/{id}")
     public ResponseEntity<HttpStatus> deleteProject(@PathVariable("id") int id) {
         projectService.deleteProject(id);
-        return new ResponseEntity(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
