@@ -43,16 +43,47 @@ public class ProjectService {
         return projectRepository.findAll();
     }
 
+    public Project getProjectById(int projectId) {
+        return projectRepository.findById(projectId).orElseThrow(() -> new CustomException("Project not found with id : " + projectId, HttpStatus.NOT_FOUND));
+    }
+
     public Project createProject(ProjectBody projectBody) {
         ProjectStatus projectStatus = projectStatusRepository.findById(projectBody.project.getProject_status().getId()).get();
         projectBody.project.setProject_status(projectStatus);
-        Project createdProject = projectRepository.save(projectBody.project);
         List<Team> freeTeams = getFreeTeams(projectBody.teams);
         verifyIfUsersExistsInTeams(List.of(projectBody.project_users), freeTeams);
 
+        Project createdProject = projectRepository.save(projectBody.project);
         projectRepository.addProjectToTeam(projectBody.teams, projectBody.project.getId());
         addProjectUsersToProject(createdProject.getId(), projectBody.project_users);
         return createdProject;
+    }
+
+    public Project updateProject(int projectId, ProjectBody projectBody) {
+        if (projectRepository.findById(projectId).isPresent()) {
+            Project projectUpdated = projectRepository.findById(projectId).get();
+            projectUpdated.setDescription(projectBody.project.getDescription());
+            projectUpdated.setTitle(projectBody.project.getTitle());
+            projectUpdated.setProject_status(projectBody.project.getProject_status());
+
+            List<Team> freeTeams = getFreeTeams(projectBody.teams);
+            verifyIfUsersExistsInTeams(List.of(projectBody.project_users), freeTeams);
+
+            projectRepository.addProjectToTeam(projectBody.teams, projectBody.project.getId());
+            addProjectUsersToProject(projectUpdated.getId(), projectBody.project_users);
+            projectRepository.save(projectUpdated);
+            return projectUpdated;
+        }
+        throw new CustomException("Project not found with id : " + projectId, HttpStatus.NOT_FOUND);
+    }
+
+    public void deleteProject(int projectId) {
+        if (projectRepository.findById(projectId).isPresent()) {
+            // Find all relations to teams and users and remove them
+            projectRepository.deleteById(projectId);
+        } else {
+            throw new CustomException("Project not found with id : " + projectId, HttpStatus.NOT_FOUND);
+        }
     }
 
     private List<Team> getFreeTeams(int[] teamsId) {

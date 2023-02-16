@@ -6,10 +6,7 @@ import com.example.edecision.service.project.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -23,8 +20,24 @@ public class ProjectController {
         return ResponseEntity.status(HttpStatus.OK).body(projectService.getAllProjects());
     }
 
+    @GetMapping("/projects/{id}")
+    public ResponseEntity<Project> getProjectById(@PathVariable("id") int id) {
+        return ResponseEntity.status(HttpStatus.OK).body(projectService.getProjectById(id));
+    }
+
     @PostMapping("/projects")
     public ResponseEntity<Project> createProject(@RequestBody ProjectBody projectBody) {
         return ResponseEntity.status(HttpStatus.CREATED).body(projectService.createProject(projectBody));
+    }
+
+    @PutMapping("/projects/{id}")
+    public ResponseEntity<Project> updateProject(@PathVariable("id") int id, @RequestBody ProjectBody projectBody) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(projectService.updateProject(id, projectBody));
+    }
+
+    @DeleteMapping("/projects/{id}")
+    public ResponseEntity<HttpStatus> deleteProject(@PathVariable("id") int id) {
+        projectService.deleteProject(id);
+        return new ResponseEntity(HttpStatus.OK);
     }
 }
