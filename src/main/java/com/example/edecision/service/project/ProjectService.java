@@ -48,15 +48,18 @@ public class ProjectService {
     }
 
     public Project createProject(ProjectBody projectBody) {
-        ProjectStatus projectStatus = projectStatusRepository.findById(projectBody.project.getProject_status().getId()).get();
-        projectBody.project.setProject_status(projectStatus);
-        List<Team> freeTeams = getFreeTeams(projectBody.teams);
-        verifyIfUsersExistsInTeams(List.of(projectBody.project_users), freeTeams);
+        if (projectStatusRepository.findById(projectBody.project.getProject_status().getId()).isPresent()) {
+            ProjectStatus projectStatus = projectStatusRepository.findById(projectBody.project.getProject_status().getId()).get();
+            projectBody.project.setProject_status(projectStatus);
+            List<Team> freeTeams = getFreeTeams(projectBody.teams);
+            verifyIfUsersExistsInTeams(List.of(projectBody.project_users), freeTeams);
 
-        Project createdProject = projectRepository.save(projectBody.project);
-        projectRepository.addProjectToTeam(projectBody.teams, projectBody.project.getId());
-        addProjectUsersToProject(createdProject.getId(), projectBody.project_users);
-        return createdProject;
+            Project createdProject = projectRepository.save(projectBody.project);
+            projectRepository.addProjectToTeam(projectBody.teams, projectBody.project.getId());
+            addProjectUsersToProject(createdProject.getId(), projectBody.project_users);
+            return createdProject;
+        }
+        throw new CustomException("This project status does not exist", HttpStatus.BAD_REQUEST);
     }
 
     public Project updateProject(int projectId, ProjectBody projectBody) {
