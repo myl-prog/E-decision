@@ -1,6 +1,5 @@
 package com.example.edecision.model.team;
 
-import com.example.edecision.model.project.ProjectStatus;
 import com.example.edecision.model.user.User;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
@@ -34,21 +33,4 @@ public class Team {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @OneToMany
     private List<User> users;
-
-    public Team(String name, int project_id, int team_type_id) {
-        this.name = name;
-        this.project_id = project_id;
-        this.team_type_id = team_type_id;
-    }
-
-    public Team(int id, String name, int project_id, int team_type_id) {
-        this.id = id;
-        this.name = name;
-        this.project_id = project_id;
-        this.team_type_id = team_type_id;
-    }
-
-    public Team() {
-
-    }
 }

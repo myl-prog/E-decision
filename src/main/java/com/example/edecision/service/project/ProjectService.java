@@ -48,6 +48,7 @@ public class ProjectService {
     }
 
     public Project createProject(ProjectBody projectBody) {
+        // TODO stock property project status
         if (projectStatusRepository.findById(projectBody.project.getProject_status().getId()).isPresent()) {
             ProjectStatus projectStatus = projectStatusRepository.findById(projectBody.project.getProject_status().getId()).get();
             projectBody.project.setProject_status(projectStatus);
@@ -63,12 +64,15 @@ public class ProjectService {
     }
 
     public Project updateProject(int projectId, ProjectBody projectBody) {
+        // TODO stock property project status
         if (projectRepository.findById(projectId).isPresent()) {
             Project projectUpdated = projectRepository.findById(projectId).get();
             projectUpdated.setDescription(projectBody.project.getDescription());
             projectUpdated.setTitle(projectBody.project.getTitle());
             projectUpdated.setProject_status(projectBody.project.getProject_status());
 
+            // Todo check teams modification and user modification
+            // TODO send all project body for a REAL PUT Logic
             List<Team> freeTeams = getFreeTeams(projectBody.teams);
             verifyIfUsersExistsInTeams(List.of(projectBody.project_users), freeTeams);
 
@@ -81,6 +85,9 @@ public class ProjectService {
     }
 
     public void deleteProject(int projectId) {
+        // TODO verification if this is user that delete project
+        // Todo delete all propositions, comments, votes
+        // todo refactoring deleteAllForeignKeys
         if (projectRepository.findById(projectId).isPresent()) {
             projectUserRepository.deleteAllProjectUserByProjectId(projectId);
             teamRepository.removeProjectIdFromTeams(projectId);
@@ -99,6 +106,7 @@ public class ProjectService {
     }
 
     private void addProjectUsersToProject(int projectId, ProjectUser[] projectUsers) {
+        // TODO check if possibility to use functional programming
         for (ProjectUser projectUser : projectUsers) {
             projectUser.project_id = projectId;
             projectUserRepository.save(projectUser);
@@ -106,6 +114,7 @@ public class ProjectService {
     }
 
     private void verifyIfUsersExistsInTeams(List<ProjectUser> projectUsers, List<Team> freeTeams) {
+        // TODO check if possibility to use functional programming
         for (ProjectUser projectUser : projectUsers) {
             if (!isUserIsAtLeastInOneTeam(projectUser, freeTeams)) {
                 throw new CustomException("User with id : " + projectUser.getUser_id() + " is not in any team that you have provided", HttpStatus.BAD_REQUEST);
@@ -115,6 +124,7 @@ public class ProjectService {
 
     private boolean isUserIsAtLeastInOneTeam(ProjectUser projectUser, List<Team> freeTeams) {
         User user = userRepository.getById(projectUser.getUser_id());
+        // TODO check if possibility to use functional programming
         for (Team freeTeam : freeTeams) {
             if (freeTeam.getUsers().contains(user)) {
                 return true;

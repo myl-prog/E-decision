@@ -1,5 +1,6 @@
-package com.example.edecision.model.user;
+package com.example.edecision.model.team;
 
+import com.example.edecision.model.user.UserTeamId;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -18,8 +19,11 @@ public class UserTeam {
     @Column(name = "team_id")
     private int team_id;
 
-    public UserTeam() {
-
+    public UserTeam(int userId, int teamId) {
+        this.user_id = userId;
+        this.team_id = teamId;
     }
 
+    public UserTeam() {
+    }
 }
