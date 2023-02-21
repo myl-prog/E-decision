@@ -40,17 +40,4 @@ public class TeamController {
         teamService.deleteTeam(id);
         return new ResponseEntity(HttpStatus.OK);
     }
-
-    @PostMapping("/Team/{team_id}/User/{user_id}/")
-    public ResponseEntity<Team> addUser(@PathVariable("team_id") int team_id, @PathVariable("user_id") int user_id) {
-
-        /*UserTeam user_team= new UserTeam(team_id,user_id);
-        try {
-            return new ResponseEntity<>(teamService.createTeam(newTeam), HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        */
-        return null;
-    }
 }

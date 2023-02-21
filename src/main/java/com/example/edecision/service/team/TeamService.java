@@ -35,65 +35,61 @@ public class TeamService {
     }
 
     public Team createTeam(TeamBody teamBody) {
-        // Todo !! Is the team owner should mandatory be part of the team he has created ?
         if (teamRepository.findByName(teamBody.team.getName()).isPresent()) {
             throw new CustomException("A team with this name already exists", HttpStatus.CONFLICT);
         }
         User owner = Common.GetCurrentUser();
         teamBody.team.setOwner(owner);
-        teamBody.userIdList.forEach(userId -> {
-            if (userRepository.findById(userId).isEmpty()) {
-                throw new CustomException("User with id : " + userId + " does not exists", HttpStatus.BAD_REQUEST);
-            }
-        });
+        List<User> usersToAddInTeam = userRepository.getUsersById(teamBody.userIdList);
+        if (usersToAddInTeam.size() < teamBody.userIdList.size()) {
+            throw new CustomException("One user or more that you have provided don't exist", HttpStatus.NOT_FOUND);
+        }
+        Team createdTeam = teamRepository.save(teamBody.team);
         teamBody.userIdList.forEach((userId) -> {
-            UserTeam userTeam = new UserTeam(userId, teamBody.team.getId());
+            UserTeam userTeam = new UserTeam(userId, createdTeam.getId());
             userTeamRepository.save(userTeam);
         });
-        return teamRepository.save(teamBody.team);
+        return createdTeam;
     }
 
     public Team updateTeam(int teamId, TeamBody teamBody) {
         if (teamRepository.findById(teamId).isPresent()) {
             Team updatedTeam = teamRepository.findById(teamId).get();
-            verifyUserOwnership(teamBody.team);
+            verifyUserOwnership(updatedTeam);
             if (teamRepository.findByName(teamBody.team.getName()).isPresent()) {
-                throw new CustomException("A team with this name already exists", HttpStatus.CONFLICT);
+                Team foundTeam = teamRepository.findByName(teamBody.team.getName()).get();
+                if (foundTeam.getId() != teamId) {
+                    throw new CustomException("A team with this name already exists", HttpStatus.CONFLICT);
+                }
             }
-            List<User> oldUserList = userTeamRepository.findAllUsersByTeamId(teamId);
+            List<User> oldUserList = userRepository.findAllUsersByTeamId(teamId);
 
-            teamBody.userIdList.forEach(userId -> {
-                if (!oldUserList.stream().anyMatch(user -> user.getId() == userId)) {
-                    userTeamRepository.save(new UserTeam(userId, teamId));
-                }
-            });
-
-            teamBody.userIdList.forEach(userId -> {
-                if (oldUserList.stream().anyMatch(user -> user.getId() == userId)) {
-                    userTeamRepository.deleteUserTeam(userId, teamId);
-                }
-            });
+            modifyUsersInTeam(teamId, teamBody, oldUserList);
 
             updatedTeam.setName(teamBody.team.getName());
             updatedTeam.setTeam_type_id(teamBody.team.getTeam_type_id());
-            return updatedTeam;
+            updatedTeam.setOwner(Common.GetCurrentUser());
+            return teamRepository.save(updatedTeam);
+        } else {
+            throw new CustomException("No team found with this id : " + teamBody.team.getId(), HttpStatus.NOT_FOUND);
         }
-        throw new CustomException("No team found with this id : " + teamBody.team.getId(), HttpStatus.NOT_FOUND);
     }
 
     public void deleteTeam(int id) {
         if (teamRepository.findById(id).isPresent()) {
             Team deletedTeam = teamRepository.findById(id).get();
             verifyUserOwnership(deletedTeam);
+            userTeamRepository.deleteAllUserTeam(id);
             teamRepository.deleteById(id);
+        } else {
+            throw new CustomException("No team found with this id : " + id, HttpStatus.NOT_FOUND);
         }
-        throw new CustomException("No team found with this id : " + id, HttpStatus.NOT_FOUND);
     }
 
     public List<Team> getFreeTeamsWithUsers(int[] teamsIds) {
         List<Team> teams = teamRepository.getFreeTeamsForProjectCreation(teamsIds);
         for (Team team : teams) {
-            team.setUsers(userTeamRepository.findAllUsersByTeamId(team.getId()));
+            team.setUsers(userRepository.findAllUsersByTeamId(team.getId()));
         }
         return teams;
     }
@@ -102,5 +98,19 @@ public class TeamService {
         if (Common.GetCurrentUser().getId() != team.getOwner().getId()) {
             throw new CustomException("You are not the team owner, you can't perform this action", HttpStatus.UNAUTHORIZED);
         }
+    }
+
+    private void modifyUsersInTeam(int teamId, TeamBody teamBody, List<User> oldUserList) {
+        teamBody.userIdList.forEach(userId -> {
+            if (!oldUserList.stream().anyMatch(user -> user.getId() == userId)) {
+                userTeamRepository.save(new UserTeam(userId, teamId));
+            }
+        });
+
+        teamBody.userIdList.forEach(userId -> {
+            if (oldUserList.contains(userId) && !teamBody.userIdList.contains(userId)) {
+                userTeamRepository.deleteUserTeam(userId, teamId);
+            }
+        });
     }
 }

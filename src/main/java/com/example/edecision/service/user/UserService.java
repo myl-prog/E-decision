@@ -44,7 +44,10 @@ public class UserService {
             userUpdated.setPassword(user.getPassword());
 
             if (userRepository.findByLogin(userUpdated.getLogin()).isPresent()) {
-                throw new CustomException("User with same login already exist", HttpStatus.CONFLICT);
+                User foundUser = userRepository.findByLogin(userUpdated.getLogin()).get();
+                if (foundUser.getId() != id) {
+                    throw new CustomException("User with same login already exist", HttpStatus.CONFLICT);
+                }
             }
             return userRepository.save(userUpdated);
         }

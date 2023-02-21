@@ -6,11 +6,18 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
     Optional<User> findByLogin(String login);
 
+    @Query(value = "SELECT * FROM user WHERE id in :ids", nativeQuery = true)
+    List<User> getUsersById(@Param("ids") List<Integer> userIdList);
+
     @Query(value = "select user.* from user_proposition,user where proposition_id=:proposition_id and user_id = user.id", nativeQuery = true)
     ArrayList<User> getUsersByProposition(@Param("proposition_id") Integer proposition_id);
+
+    @Query(value = "SELECT user.* FROM user INNER JOIN user_team ON user.id = user_team.user_id WHERE user_team.team_id = :teamId", nativeQuery = true)
+    List<User> findAllUsersByTeamId(@Param("teamId") Integer teamId);
 }
