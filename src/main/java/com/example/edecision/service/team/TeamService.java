@@ -86,7 +86,7 @@ public class TeamService {
         }
     }
 
-    public List<Team> getFreeTeamsWithUsers(int[] teamsIds) {
+    public List<Team> getFreeTeamsWithUsers(List<Integer> teamsIds) {
         List<Team> teams = teamRepository.getFreeTeamsForProjectCreation(teamsIds);
         for (Team team : teams) {
             team.setUsers(userRepository.findAllUsersByTeamId(team.getId()));
@@ -102,14 +102,14 @@ public class TeamService {
 
     private void modifyUsersInTeam(int teamId, TeamBody teamBody, List<User> oldUserList) {
         teamBody.userIdList.forEach(userId -> {
-            if (!oldUserList.stream().anyMatch(user -> user.getId() == userId)) {
+            if (oldUserList.stream().noneMatch(user -> user.getId() == userId)) {
                 userTeamRepository.save(new UserTeam(userId, teamId));
             }
         });
 
-        teamBody.userIdList.forEach(userId -> {
-            if (oldUserList.contains(userId) && !teamBody.userIdList.contains(userId)) {
-                userTeamRepository.deleteUserTeam(userId, teamId);
+        oldUserList.forEach(user -> {
+            if (teamBody.userIdList.stream().noneMatch(userId -> userId == user.getId())) {
+                userTeamRepository.deleteUserTeam(user.getId(), teamId);
             }
         });
     }

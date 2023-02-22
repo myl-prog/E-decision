@@ -41,7 +41,7 @@ public class UserService {
             userUpdated.setLogin(user.getLogin());
             userUpdated.setFirst_name(user.getFirst_name());
             userUpdated.setLast_name(user.getLast_name());
-            userUpdated.setPassword(user.getPassword());
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
 
             if (userRepository.findByLogin(userUpdated.getLogin()).isPresent()) {
                 User foundUser = userRepository.findByLogin(userUpdated.getLogin()).get();

@@ -20,4 +20,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     @Query(value = "SELECT user.* FROM user INNER JOIN user_team ON user.id = user_team.user_id WHERE user_team.team_id = :teamId", nativeQuery = true)
     List<User> findAllUsersByTeamId(@Param("teamId") Integer teamId);
+
+    @Query(value = "SELECT * FROM user INNER JOIN project_user ON user.id = project_user.user_id WHERE project_user.project_id = :projectId", nativeQuery = true)
+    List<User> getUsersByProject(@Param("projectId") int projectId);
 }
