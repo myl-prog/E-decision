@@ -2,6 +2,8 @@ package com.example.edecision.controller.project;
 
 import com.example.edecision.model.project.Project;
 import com.example.edecision.model.project.ProjectBody;
+import com.example.edecision.model.project.ProjectUser;
+import com.example.edecision.model.user.UserRoleBody;
 import com.example.edecision.service.project.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -39,5 +41,10 @@ public class ProjectController {
     public ResponseEntity<HttpStatus> deleteProject(@PathVariable("id") int id) {
         projectService.deleteProject(id);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PatchMapping("/projects/{projectId}/users/{userId}")
+    public ResponseEntity<ProjectUser> changeUserRole(@PathVariable("projectId") int projectId, @PathVariable("userId") int userId, @RequestBody UserRoleBody userRoleBody) {
+        return ResponseEntity.status(HttpStatus.OK).body(projectService.changeUserRole(projectId, userId, userRoleBody));
     }
 }

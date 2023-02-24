@@ -6,6 +6,7 @@ import com.example.edecision.model.project.ProjectBody;
 import com.example.edecision.model.project.ProjectStatus;
 import com.example.edecision.model.project.ProjectUser;
 import com.example.edecision.model.user.User;
+import com.example.edecision.model.user.UserRoleBody;
 import com.example.edecision.repository.project.ProjectRepository;
 import com.example.edecision.repository.project.ProjectStatusRepository;
 import com.example.edecision.repository.project.ProjectUserRepository;
@@ -13,11 +14,12 @@ import com.example.edecision.repository.team.TeamRepository;
 import com.example.edecision.model.team.Team;
 import com.example.edecision.repository.user.UserRepository;
 import com.example.edecision.service.team.TeamService;
+import com.example.edecision.utils.Common;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -70,18 +72,8 @@ public class ProjectService {
             projectUpdated.setDescription(projectBody.project.getDescription());
             projectUpdated.setProject_status(projectBody.project.getProject_status());
 
-            projectBody.teams.forEach(teamId -> {
-                if (teamRepository.findById(teamId).isEmpty()) {
-                    throw new CustomException("Team with id : " + teamId + " doesn't exist", HttpStatus.BAD_REQUEST);
-                } else {
-                    Team team = teamRepository.findById(teamId).get();
-                    if (team.getProject_id() != null && team.getProject_id() != projectId) {
-                        throw new CustomException("Team with id : " + teamId + " is already associated to a project", HttpStatus.CONFLICT);
-                    }
-                }
-            });
-
-            // todo verify users
+            verificationsOnTeamsDuringProjectUpdate(projectId, projectBody);
+            verificationsOnUsersDuringProjectUpdate(projectBody);
 
             List<Team> oldProjectTeamList = teamRepository.getTeamsByProject(projectId);
             List<ProjectUser> oldProjectUserList = projectUserRepository.getAllProjectUserByProject(projectId);
@@ -94,16 +86,68 @@ public class ProjectService {
     }
 
     public void deleteProject(int projectId) {
-        // TODO verification if this is user that delete project
-        // Todo delete all propositions, comments, votes
-        // todo refactoring deleteAllForeignKeys
         if (projectRepository.findById(projectId).isPresent()) {
+            verifyProjectOwnership(projectId);
             projectUserRepository.deleteAllProjectUserByProjectId(projectId);
             teamRepository.removeProjectIdFromTeams(projectId);
             projectRepository.deleteById(projectId);
         } else {
             throw new CustomException("Project not found with id : " + projectId, HttpStatus.NOT_FOUND);
         }
+    }
+
+    public ProjectUser changeUserRole(int projectId, int userId, UserRoleBody userRoleBody) {
+        if (projectRepository.findById(projectId).isEmpty()) {
+            throw new CustomException("Project not found with id : " + projectId, HttpStatus.NOT_FOUND);
+        }
+        if (userRepository.findById(userId).isEmpty()) {
+            throw new CustomException("User not found with id : " + userId, HttpStatus.NOT_FOUND);
+        }
+        if (projectUserRepository.findProjectUserByProjectIdAndUserId(projectId, userId).isEmpty()) {
+            throw new CustomException("This user is not associated to this project", HttpStatus.BAD_REQUEST);
+        } else {
+            ProjectUser projectUserUpdated = projectUserRepository.findProjectUserByProjectIdAndUserId(projectId, userId).get();
+            projectUserUpdated.setUser_role_id(userRoleBody.userRoleId);
+            return projectUserRepository.save(projectUserUpdated);
+        }
+    }
+
+    private void verifyProjectOwnership(int projectId) {
+        User projectOwner = userRepository.getProjectOwner(projectId);
+        if (Common.GetCurrentUser().getId() != projectOwner.getId()) {
+            throw new CustomException("You are not project owner, you can't perform this action", HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    private void verificationsOnUsersDuringProjectUpdate(ProjectBody projectBody) {
+        projectBody.project_users.forEach(projectUser -> {
+            if (userRepository.findById(projectUser.getUser_id()).isEmpty()) {
+                throw new CustomException("User with id : " + projectUser.getUser_id() + " doesn't exists", HttpStatus.BAD_REQUEST);
+            } else {
+                List<Team> teamList = new ArrayList<>();
+                projectBody.teams.forEach(teamId -> {
+                    Team team = teamRepository.getById(teamId);
+                    team.setUsers(userRepository.findAllUsersByTeamId(teamId));
+                    teamList.add(team);
+                });
+                if (!isUserIsAtLeastInOneTeam(projectUser, teamList)) {
+                    throw new CustomException("User with id : " + projectUser.getUser_id() + " is not in any team that you have provided", HttpStatus.BAD_REQUEST);
+                }
+            }
+        });
+    }
+
+    private void verificationsOnTeamsDuringProjectUpdate(int projectId, ProjectBody projectBody) {
+        projectBody.teams.forEach(teamId -> {
+            if (teamRepository.findById(teamId).isEmpty()) {
+                throw new CustomException("Team with id : " + teamId + " doesn't exist", HttpStatus.BAD_REQUEST);
+            } else {
+                Team team = teamRepository.findById(teamId).get();
+                if (team.getProject_id() != null && team.getProject_id() != projectId) {
+                    throw new CustomException("Team with id : " + teamId + " is already associated to a project", HttpStatus.CONFLICT);
+                }
+            }
+        });
     }
 
     private List<Team> getFreeTeams(List<Integer> teamsId) {
