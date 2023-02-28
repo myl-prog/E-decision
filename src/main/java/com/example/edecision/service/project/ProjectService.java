@@ -14,6 +14,7 @@ import com.example.edecision.repository.team.TeamRepository;
 import com.example.edecision.model.team.Team;
 import com.example.edecision.repository.user.UserRepository;
 import com.example.edecision.service.team.TeamService;
+import com.example.edecision.service.user.UserService;
 import com.example.edecision.utils.Common;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -38,6 +39,9 @@ public class ProjectService {
 
     @Autowired
     public TeamService teamService;
+
+    @Autowired
+    public UserService userService;
 
     @Autowired
     public UserRepository userRepository;
@@ -161,7 +165,7 @@ public class ProjectService {
      * @return a teamList
      */
     private List<Team> getFreeTeams(List<Integer> teamsId) {
-        List<Team> freeTeams = teamService.getFreeTeamsWithUsers(teamsId);
+        List<Team> freeTeams = teamService.getFreeTeams(teamsId);
         if (teamsId.size() > freeTeams.size()) {
             throw new CustomException("You have provided one or more team already associated to a project", HttpStatus.BAD_REQUEST);
         }
@@ -176,22 +180,10 @@ public class ProjectService {
      */
     private void verifyIfUsersExistsInTeams(List<ProjectUser> projectUsers, List<Team> freeTeams) {
         projectUsers.forEach(projectUser -> {
-            if (!isUserInTeams(projectUser, freeTeams)) {
+            if (!userService.isUserInTeams(projectUser.getUser_id(), freeTeams)) {
                 throw new CustomException("User with id : " + projectUser.getUser_id() + " is not in any team that you have provided", HttpStatus.BAD_REQUEST);
             }
         });
-    }
-
-    /**
-     * Verify if one user exists in a teamList
-     *
-     * @param freeTeams   teams
-     * @param projectUser user
-     * @return a boolean
-     */
-    private boolean isUserInTeams(ProjectUser projectUser, List<Team> freeTeams) {
-        User user = userRepository.getById(projectUser.getUser_id());
-        return freeTeams.stream().anyMatch(team -> team.getUsers().contains(user));
     }
 
     /**
@@ -244,7 +236,7 @@ public class ProjectService {
                     team.setUsers(userRepository.findAllUsersByTeamId(teamId));
                     teamList.add(team);
                 });
-                if (!isUserInTeams(projectUser, teamList)) {
+                if (!userService.isUserInTeams(projectUser.getUser_id(), teamList)) {
                     throw new CustomException("User with id : " + projectUser.getUser_id() + " is not in any team that you have provided", HttpStatus.BAD_REQUEST);
                 }
             }

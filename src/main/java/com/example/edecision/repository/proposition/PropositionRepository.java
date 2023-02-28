@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PropositionRepository extends JpaRepository<Proposition, Integer> {
     @Transactional
@@ -18,6 +19,10 @@ public interface PropositionRepository extends JpaRepository<Proposition, Intege
     @Query(value = "select * from proposition where id in (select proposition_id from team_proposition where team_id in (select team_id from user_team where user_id =:user_id))", nativeQuery = true)
     List<Proposition> getPropositionsByUser(@Param("user_id") Integer user_id);
 
-    @Query(value = "select * from proposition where id=:proposition_id and id in (select proposition_id from team_proposition where team_id in (select team_id from user_team where user_id =:user_id))", nativeQuery = true)
-    Proposition getPropositionByUser(@Param("proposition_id") Integer proposition_id, @Param("user_id") Integer user_id);
+    @Query(value = "select * from proposition " +
+            "where id = :propositionId " +
+            "and project_id = :projectId " +
+            "and id in (select proposition_id from team_proposition where team_id in (select team_id from user_team where user_id = :userId))",
+            nativeQuery = true)
+    Optional<Proposition> getProjectPropositionById(@Param("projectId") int projectId, @Param("propositionId") int propositionId, @Param("userId") int userId);
 }

@@ -3,8 +3,10 @@ package com.example.edecision.controller.project;
 import com.example.edecision.model.project.Project;
 import com.example.edecision.model.project.ProjectBody;
 import com.example.edecision.model.project.ProjectUser;
+import com.example.edecision.model.proposition.Proposition;
 import com.example.edecision.model.user.UserRoleBody;
 import com.example.edecision.service.project.ProjectService;
+import com.example.edecision.service.proposition.PropositionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,13 @@ import java.util.List;
 public class ProjectController {
     @Autowired
     public ProjectService projectService;
+
+    @Autowired
+    public PropositionService propositionService;
+
+    // ========================
+    // ======= Projects =======
+    // ========================
 
     @GetMapping("/projects")
     public ResponseEntity<List<Project>> getAllProjects() {
@@ -43,8 +52,21 @@ public class ProjectController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    // ========================
+    // ===== Project user =====
+    // ========================
+
     @PatchMapping("/projects/{projectId}/users/{userId}")
     public ResponseEntity<ProjectUser> changeUserRole(@PathVariable("projectId") int projectId, @PathVariable("userId") int userId, @RequestBody UserRoleBody userRoleBody) {
         return ResponseEntity.status(HttpStatus.OK).body(projectService.changeUserRole(projectId, userId, userRoleBody));
+    }
+
+    // ========================
+    // = Project propositions =
+    // ========================
+
+    @GetMapping("/projects/{projectId}/propositions/{propositionId}")
+    public ResponseEntity<Proposition> getProjectPropositionById(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId) {
+        return ResponseEntity.status(HttpStatus.OK).body(propositionService.getProjectPropositionById(projectId, propositionId));
     }
 }

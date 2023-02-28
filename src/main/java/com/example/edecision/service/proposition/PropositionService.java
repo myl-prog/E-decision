@@ -1,5 +1,8 @@
 package com.example.edecision.service.proposition;
 
+import com.example.edecision.model.exception.CustomException;
+import com.example.edecision.service.team.TeamService;
+import com.example.edecision.service.user.UserService;
 import com.example.edecision.utils.Common;
 import com.example.edecision.model.proposition.AmendPropositionBody;
 import com.example.edecision.model.team.Team;
@@ -16,10 +19,12 @@ import com.example.edecision.repository.teamProposition.TeamPropositionRepositor
 import com.example.edecision.repository.user.UserRepository;
 import com.example.edecision.repository.userProposition.UserPropositionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 @Service
@@ -42,49 +47,52 @@ public class PropositionService {
     @Autowired
     public TeamRepository teamRepo;
 
-    // GET
+    @Autowired
+    public UserService userService;
 
-    public List<Proposition> getAll() {
+    @Autowired
+    public TeamService teamService;
 
+    /**
+     * Get all propositions where current user is associated
+     *
+     * @return The proposition list associated to current user
+     */
+    public List<Proposition> getAllPropositionByUser() {
         User user = Common.GetCurrentUser();
-
         return propositionRepo.getPropositionsByUser(user.getId());
     }
 
-    public Proposition getById(Integer id) {
-
+    /**
+     * Get a project proposition by id
+     *
+     * @param projectId     projectId
+     * @param propositionId propositionId
+     */
+    public Proposition getProjectPropositionById(int projectId, int propositionId) {
         User user = Common.GetCurrentUser();
-        Proposition proposition = propositionRepo.getPropositionByUser(id, user.getId());
+        Optional<Proposition> optionalProposition = propositionRepo.getProjectPropositionById(projectId, propositionId, user.getId());
+        if (optionalProposition.isPresent()) {
+            Proposition proposition = optionalProposition.get();
 
-        if (proposition != null) {
+            List<Team> associatedTeams = teamService.getTeamsByProposition(propositionId);
+            proposition.setTeams(associatedTeams);
+            boolean isUserAssociatedToTeams = userService.isUserInTeams(user.getId(), associatedTeams);
 
-            // TODO : switch user/team id ?
-            proposition.setIsEditable(proposition.getEnd_time().getTime() >= System.currentTimeMillis());
-            proposition.setIsVoteable(proposition.getEnd_time().getTime() < System.currentTimeMillis() && proposition.getProposition_status().getId() == 1);
+            List<User> users = userRepo.getUsersByProposition(proposition.getId());
+            proposition.setUsers(users);
 
-            // return user proposition
-            try {
-                ArrayList<User> users = userRepo.getUsersByProposition(proposition.getId());
-                proposition.setUsers(users);
-            } catch (Exception e) {
-                proposition.setUsers(new ArrayList<User>());
-            }
-
-            // return team proposition
-            try {
-                ArrayList<Team> teams = teamRepo.getTeamsByProposition(proposition.getId());
-                proposition.setTeams(teams);
-            } catch (Exception e) {
-                proposition.setTeams(new ArrayList<Team>());
-            }
+            proposition.setIsEditable(proposition.getEnd_time().getTime() >= System.currentTimeMillis() && isUserAssociatedToTeams);
+            proposition.setIsVoteable(proposition.getEnd_time().getTime() < System.currentTimeMillis() && proposition.getProposition_status().getId() == 1 && isUserAssociatedToTeams);
+            return proposition;
+        } else {
+            throw new CustomException("This proposition doesn't exists", HttpStatus.NOT_FOUND);
         }
-
-        return proposition;
     }
 
     // CREATE
 
-    public Proposition create(PropositionBody propositon) {
+    /*public Proposition create(PropositionBody propositon) {
         // get proposition status
         PropositionStatus status = propositionStatusRepo.findById(propositon.proposition.getProposition_status().getId()).get();
         propositon.proposition.setProposition_status(status);
@@ -96,8 +104,8 @@ public class PropositionService {
         createUsersProposition(propositon.users, createdProposition.getId());
         createTeamsProposition(propositon.teams, createdProposition.getId());
 
-        return getById(createdProposition.getId());
-    }
+        return getProjectPropositionById(createdProposition.getId());
+    }*/
 
     public void createUsersProposition(int[] users, int proposition) {
         for (int user : users) {
@@ -111,10 +119,10 @@ public class PropositionService {
         }
     }
 
-    public Proposition amend(int amendPropositionId, AmendPropositionBody body) {
+    /*public Proposition amend(int amendPropositionId, AmendPropositionBody body) {
 
         User user = Common.GetCurrentUser();
-        Proposition amendProposition = propositionRepo.getPropositionByUser(amendPropositionId, user.getId());
+        Proposition amendProposition = propositionRepo.getProjectPropositionById(amendPropositionId, user.getId());
 
         if (amendProposition != null) {
             Proposition proposition = new Proposition();
@@ -128,14 +136,14 @@ public class PropositionService {
             return null;
         }
 
-    }
+    }*/
 
     // UPDATE
-    public Proposition update(int id, PropositionBody propositon) {
+    /*public Proposition update(int id, PropositionBody propositon) {
 
         // Todo : check user and check if we are in amandment delay, end time etc
 
-        Proposition oldProposition = getById(id);
+        Proposition oldProposition = getProjectPropositionById(id);
 
         List<Team> oldTeams = oldProposition.getTeams();
         List<User> oldUsers = oldProposition.getUsers();
@@ -187,8 +195,8 @@ public class PropositionService {
             }
         }
 
-        return getById(oldProposition.getId());
-    }
+        return getProjectPropositionById(oldProposition.getId());
+    }*/
 
     // DELETE
 

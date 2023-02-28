@@ -1,5 +1,6 @@
 package com.example.edecision.model.proposition;
 
+import com.example.edecision.model.project.Project;
 import com.example.edecision.model.team.Team;
 import com.example.edecision.model.user.User;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -37,6 +38,10 @@ public class Proposition {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "amend_proposition_id", referencedColumnName = "id")
     private Proposition amend_proposition;
+
+    @ManyToOne()
+    @JoinColumn(name = "project_id", referencedColumnName = "id")
+    private Project project;
 
     @Transient
     @JsonInclude(JsonInclude.Include.NON_NULL)

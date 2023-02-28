@@ -1,4 +1,5 @@
 package com.example.edecision.controller.proposition;
+
 import com.example.edecision.model.comment.Comment;
 import com.example.edecision.model.proposition.AmendPropositionBody;
 import com.example.edecision.model.proposition.Proposition;
@@ -19,51 +20,12 @@ public class PropositionController {
 
     @Autowired
     public CommentService commentService;
-    // ============================
-    // ======= PROPOSITIONS =======
-    // ============================
 
     @GetMapping("/propositions")
     public ResponseEntity<List<Proposition>> getAll() {
-        try{
-            return new ResponseEntity<>(propositionService.getAll(), HttpStatus.OK);
-        }catch(Exception e){
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @GetMapping("/propositions/{id}")
-    public ResponseEntity<Proposition> getById(@PathVariable("id") Integer id) {
-        try{
-            return new ResponseEntity<>(propositionService.getById(id), HttpStatus.OK);
-        }catch(Exception e){
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @PostMapping("/propositions")
-    public ResponseEntity<Proposition> create(@RequestBody PropositionBody proposition) {
-        try{
-            return new ResponseEntity<>(propositionService.create(proposition), HttpStatus.OK);
-        }catch(Exception e){
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @PostMapping("/propositions/{id}/amend")
-    public ResponseEntity<Proposition> create(@PathVariable("id") int id, @RequestBody AmendPropositionBody proposition) {
-        try{
-            return new ResponseEntity<>(propositionService.amend(id, proposition), HttpStatus.OK);
-        }catch(Exception e){
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @PutMapping("/propositions/{id}")
-    public ResponseEntity<Proposition> update(@PathVariable("id") int id, @RequestBody PropositionBody proposition) {
-        try{
-            return new ResponseEntity<>(propositionService.update(id, proposition), HttpStatus.OK);
-        }catch(Exception e){
+        try {
+            return new ResponseEntity<>(propositionService.getAllPropositionByUser(), HttpStatus.OK);
+        } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -84,9 +46,9 @@ public class PropositionController {
 //Get all comments
     @GetMapping("/propositions/comments")
     public ResponseEntity<List<Comment>> getAllComments(@PathVariable("id") Integer id) {
-        try{
+        try {
             return new ResponseEntity<>(commentService.getAll(), HttpStatus.OK);
-        }catch(Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -94,9 +56,9 @@ public class PropositionController {
     //Get all comments of a proposition
     @GetMapping("/propositions/{id}/comments")
     public ResponseEntity<List<Comment>> getCommentByPropositionId(@PathVariable("id") Integer id) {
-        try{
+        try {
             return new ResponseEntity<>(commentService.getCommentsByPropositionID(id), HttpStatus.OK);
-        }catch(Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -110,6 +72,7 @@ public class PropositionController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
     //Creation of comment
     @PostMapping("/propositions/{id}/comments")
     public ResponseEntity<Comment> postComment(@RequestBody Comment comment, @PathVariable("id") int id) {
@@ -119,6 +82,7 @@ public class PropositionController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
     //Delete comment
     @DeleteMapping("/propositions/comments/{id}")
     public ResponseEntity<HttpStatus> deleteById(@PathVariable("id") int id) {

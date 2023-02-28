@@ -23,4 +23,6 @@ public class Project {
     @ManyToOne()
     @JoinColumn(name = "project_status_id", referencedColumnName = "id")
     private ProjectStatus project_status;
+
+    // Todo add transient teamList property
 }

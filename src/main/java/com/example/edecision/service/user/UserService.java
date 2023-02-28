@@ -1,6 +1,7 @@
 package com.example.edecision.service.user;
 
 import com.example.edecision.model.exception.CustomException;
+import com.example.edecision.model.team.Team;
 import com.example.edecision.model.user.User;
 import com.example.edecision.repository.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,5 +88,16 @@ public class UserService {
         } else {
             throw new CustomException("User not found with id : " + id, HttpStatus.NOT_FOUND);
         }
+    }
+
+    /**
+     * Verify if one user exists in a teamList
+     *
+     * @param userId    userId
+     * @param freeTeams teams
+     * @return a boolean
+     */
+    public boolean isUserInTeams(int userId, List<Team> freeTeams) {
+        return freeTeams.stream().anyMatch(team -> team.getUsers().stream().anyMatch(user -> user.getId() == userId));
     }
 }

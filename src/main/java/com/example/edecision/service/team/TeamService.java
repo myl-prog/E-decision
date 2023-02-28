@@ -120,12 +120,31 @@ public class TeamService {
      * @param teamsIds teamsId
      * @return a team list
      */
-    public List<Team> getFreeTeamsWithUsers(List<Integer> teamsIds) {
-        List<Team> teams = teamRepository.getFreeTeamsForProjectCreation(teamsIds);
-        for (Team team : teams) {
-            team.setUsers(userRepository.findAllUsersByTeamId(team.getId()));
-        }
-        return teams;
+    public List<Team> getFreeTeams(List<Integer> teamsIds) {
+        List<Team> teamList = teamRepository.getFreeTeamsForProjectCreation(teamsIds);
+        return getTeamsWithUsers(teamList);
+    }
+
+    /**
+     * Get all teams associated to a proposition
+     *
+     * @param propositionId propositionId
+     * @return a team list
+     */
+    public List<Team> getTeamsByProposition(int propositionId) {
+        List<Team> teamList = teamRepository.getTeamsByProposition(propositionId);
+        return getTeamsWithUsers(teamList);
+    }
+
+    /**
+     * For each team in teamList, add associated users
+     *
+     * @param teamList teamList
+     * @return a team list
+     */
+    private List<Team> getTeamsWithUsers(List<Team> teamList) {
+        teamList.forEach(team -> team.setUsers(userRepository.findAllUsersByTeamId(team.getId())));
+        return teamList;
     }
 
     /**
