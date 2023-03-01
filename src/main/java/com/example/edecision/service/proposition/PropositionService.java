@@ -1,6 +1,9 @@
 package com.example.edecision.service.proposition;
 
 import com.example.edecision.model.exception.CustomException;
+import com.example.edecision.model.project.Project;
+import com.example.edecision.model.proposition.PropositionBody;
+import com.example.edecision.repository.project.ProjectRepository;
 import com.example.edecision.service.team.TeamService;
 import com.example.edecision.service.user.UserService;
 import com.example.edecision.utils.Common;
@@ -46,6 +49,9 @@ public class PropositionService {
     @Autowired
     public TeamService teamService;
 
+    @Autowired
+    public ProjectRepository projectRepository;
+
     /**
      * Get all propositions where current user is associated
      *
@@ -86,32 +92,31 @@ public class PropositionService {
         }
     }
 
-    // CREATE
-
-    /*public Proposition create(PropositionBody propositon) {
-        // get proposition status
-        PropositionStatus status = propositionStatusRepo.findById(propositon.proposition.getProposition_status().getId()).get();
-        propositon.proposition.setProposition_status(status);
-        if (propositon.proposition.getAmendment_delay() <= 0)
-            propositon.proposition.setAmendment_delay(1); // default amendment delay one day
-        Proposition createdProposition = propositionRepo.save(propositon.proposition);
-
-        // affect user and team to the proposition
-        createUsersProposition(propositon.users, createdProposition.getId());
-        createTeamsProposition(propositon.teams, createdProposition.getId());
-
-        return getProjectPropositionById(createdProposition.getId());
-    }*/
-
-    public void createUsersProposition(int[] users, int proposition) {
-        for (int user : users) {
-            userPropositionRepo.createUserProposition(proposition, user);
-        }
-    }
-
-    public void createTeamsProposition(int[] teams, int proposition) {
-        for (int team : teams) {
-            teamPropositionRepo.createTeamProposition(proposition, team);
+    /**
+     * Permit to create a project proposition
+     *
+     * @param projectId       projectId
+     * @param propositionBody propositionBody
+     * @return the created proposition
+     */
+    public Proposition createProposition(int projectId, PropositionBody propositionBody) {
+        Optional<Project> optionalProject = projectRepository.findById(projectId);
+        if (optionalProject.isPresent()) {
+            if (propositionStatusRepo.findById(propositionBody.proposition.getProposition_status().getId()).isPresent()) {
+                propositionBody.proposition.setProject(optionalProject.get());
+                propositionBody.proposition.setProposition_status(propositionBody.proposition.getProposition_status());
+                if (propositionBody.proposition.getAmendment_delay() <= 0) {
+                    propositionBody.proposition.setAmendment_delay(1);
+                }
+                Proposition createdProposition = propositionRepo.save(propositionBody.proposition);
+                createUsersProposition(propositionBody.users, createdProposition.getId());
+                createTeamsProposition(propositionBody.teams, createdProposition.getId());
+                return createdProposition;
+            } else {
+                throw new CustomException("This project status doesn't exists", HttpStatus.BAD_REQUEST);
+            }
+        } else {
+            throw new CustomException("This project doesn't exists", HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -201,6 +206,18 @@ public class PropositionService {
         userPropositionRepo.deleteUserPropositionsByProposition(id);
         teamPropositionRepo.deleteTeamPropositionsByProposition(id);
         propositionRepo.deleteProposition(id);
+    }
+
+    private void createUsersProposition(int[] users, int proposition) {
+        for (int user : users) {
+            userPropositionRepo.createUserProposition(proposition, user);
+        }
+    }
+
+    private void createTeamsProposition(int[] teams, int proposition) {
+        for (int team : teams) {
+            teamPropositionRepo.createTeamProposition(proposition, team);
+        }
     }
 
 }

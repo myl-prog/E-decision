@@ -4,6 +4,7 @@ import com.example.edecision.model.project.Project;
 import com.example.edecision.model.project.ProjectBody;
 import com.example.edecision.model.project.ProjectUser;
 import com.example.edecision.model.proposition.Proposition;
+import com.example.edecision.model.proposition.PropositionBody;
 import com.example.edecision.model.user.UserRoleBody;
 import com.example.edecision.service.project.ProjectService;
 import com.example.edecision.service.proposition.PropositionService;
@@ -68,5 +69,10 @@ public class ProjectController {
     @GetMapping("/projects/{projectId}/propositions/{propositionId}")
     public ResponseEntity<Proposition> getProjectPropositionById(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId) {
         return ResponseEntity.status(HttpStatus.OK).body(propositionService.getProjectPropositionById(projectId, propositionId));
+    }
+
+    @PostMapping("/projects/{projectId}/propositions")
+    public ResponseEntity<Proposition> createProposition(@PathVariable("projectId") int projectId, @RequestBody PropositionBody propositionBody) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(propositionService.createProposition(projectId, propositionBody));
     }
 }
