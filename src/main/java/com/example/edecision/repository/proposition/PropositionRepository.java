@@ -19,10 +19,10 @@ public interface PropositionRepository extends JpaRepository<Proposition, Intege
     @Query(value = "select * from proposition where id in (select proposition_id from team_proposition where team_id in (select team_id from user_team where user_id =:user_id))", nativeQuery = true)
     List<Proposition> getPropositionsByUser(@Param("user_id") Integer user_id);
 
-    @Query(value = "select * from proposition " +
-            "where id = :propositionId " +
-            "and project_id = :projectId " +
-            "and id in (select proposition_id from team_proposition where team_id in (select team_id from user_team where user_id = :userId))",
+    @Query(
+            value = "SELECT * FROM proposition " +
+                    "WHERE id = :propositionId " +
+                    "AND project_id = :projectId ",
             nativeQuery = true)
-    Optional<Proposition> getProjectPropositionById(@Param("projectId") int projectId, @Param("propositionId") int propositionId, @Param("userId") int userId);
+    Optional<Proposition> getProjectPropositionById(@Param("projectId") int projectId, @Param("propositionId") int propositionId);
 }

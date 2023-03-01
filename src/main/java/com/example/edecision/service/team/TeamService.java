@@ -126,13 +126,13 @@ public class TeamService {
     }
 
     /**
-     * Get all teams associated to a proposition
+     * Get all teams associated to a project
      *
-     * @param propositionId propositionId
+     * @param projectId projectId
      * @return a team list
      */
-    public List<Team> getTeamsByProposition(int propositionId) {
-        List<Team> teamList = teamRepository.getTeamsByProposition(propositionId);
+    public List<Team> getTeamsByProject(int projectId) {
+        List<Team> teamList = teamRepository.getTeamsByProject(projectId);
         return getTeamsWithUsers(teamList);
     }
 

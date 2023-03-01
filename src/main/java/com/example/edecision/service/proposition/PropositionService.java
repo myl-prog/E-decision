@@ -4,14 +4,9 @@ import com.example.edecision.model.exception.CustomException;
 import com.example.edecision.service.team.TeamService;
 import com.example.edecision.service.user.UserService;
 import com.example.edecision.utils.Common;
-import com.example.edecision.model.proposition.AmendPropositionBody;
 import com.example.edecision.model.team.Team;
-import com.example.edecision.model.teamProposition.TeamProposition;
 import com.example.edecision.model.user.User;
 import com.example.edecision.model.proposition.Proposition;
-import com.example.edecision.model.proposition.PropositionBody;
-import com.example.edecision.model.proposition.PropositionStatus;
-import com.example.edecision.model.userProposition.UserProposition;
 import com.example.edecision.repository.proposition.PropositionRepository;
 import com.example.edecision.repository.proposition.PropositionStatusRepository;
 import com.example.edecision.repository.team.TeamRepository;
@@ -22,10 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.IntStream;
 
 @Service
 public class PropositionService {
@@ -58,33 +51,36 @@ public class PropositionService {
      *
      * @return The proposition list associated to current user
      */
-    public List<Proposition> getAllPropositionByUser() {
+    public List<Proposition> getAllPropositionsByUser() {
         User user = Common.GetCurrentUser();
         return propositionRepo.getPropositionsByUser(user.getId());
     }
 
     /**
-     * Get a project proposition by id
+     * Get a project proposition by id for current user
      *
      * @param projectId     projectId
      * @param propositionId propositionId
+     * @return a proposition
      */
     public Proposition getProjectPropositionById(int projectId, int propositionId) {
         User user = Common.GetCurrentUser();
-        Optional<Proposition> optionalProposition = propositionRepo.getProjectPropositionById(projectId, propositionId, user.getId());
+        Optional<Proposition> optionalProposition = propositionRepo.getProjectPropositionById(projectId, propositionId);
         if (optionalProposition.isPresent()) {
             Proposition proposition = optionalProposition.get();
-
-            List<Team> associatedTeams = teamService.getTeamsByProposition(propositionId);
+            List<Team> associatedTeams = teamService.getTeamsByProject(projectId);
             proposition.setTeams(associatedTeams);
-            boolean isUserAssociatedToTeams = userService.isUserInTeams(user.getId(), associatedTeams);
 
-            List<User> users = userRepo.getUsersByProposition(proposition.getId());
-            proposition.setUsers(users);
+            if (userService.isUserInTeams(user.getId(), associatedTeams)) {
+                List<User> users = userRepo.getUsersByProposition(proposition.getId());
+                proposition.setUsers(users);
 
-            proposition.setIsEditable(proposition.getEnd_time().getTime() >= System.currentTimeMillis() && isUserAssociatedToTeams);
-            proposition.setIsVoteable(proposition.getEnd_time().getTime() < System.currentTimeMillis() && proposition.getProposition_status().getId() == 1 && isUserAssociatedToTeams);
-            return proposition;
+                proposition.setIsEditable(proposition.getEnd_time().getTime() >= System.currentTimeMillis());
+                proposition.setIsVoteable(proposition.getEnd_time().getTime() < System.currentTimeMillis() && proposition.getProposition_status().getId() == 1);
+                return proposition;
+            } else {
+                throw new CustomException("You have not access to this proposition", HttpStatus.UNAUTHORIZED);
+            }
         } else {
             throw new CustomException("This proposition doesn't exists", HttpStatus.NOT_FOUND);
         }
