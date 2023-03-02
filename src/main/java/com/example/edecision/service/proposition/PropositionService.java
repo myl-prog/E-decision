@@ -207,10 +207,19 @@ public class PropositionService {
     public void deleteProposition(int projectId, int propositionId) {
         Optional<Project> optionalProject = projectRepository.findById(projectId);
         if (optionalProject.isPresent()) {
-            // Todo check user before delete proposition
-            userPropositionRepo.deleteUserPropositionsByProposition(propositionId);
-            teamPropositionRepo.deleteTeamPropositionsByProposition(propositionId);
-            propositionRepo.deleteProposition(propositionId);
+            Optional<Proposition> optionalProposition = propositionRepo.findById(propositionId);
+            if (optionalProposition.isPresent()) {
+                User currentUser = Common.GetCurrentUser();
+                if (currentUser.getId() == userRepo.getPropositionOwner(propositionId).getId()) {
+                    userPropositionRepo.deleteUserPropositionsByProposition(propositionId);
+                    teamPropositionRepo.deleteTeamPropositionsByProposition(propositionId);
+                    propositionRepo.deleteProposition(propositionId);
+                } else {
+                    throw new CustomException("You can't perform this action", HttpStatus.UNAUTHORIZED);
+                }
+            } else {
+                throw new CustomException("This proposition doesn't exists", HttpStatus.BAD_REQUEST);
+            }
         } else {
             throw new CustomException("This project doesn't exists", HttpStatus.BAD_REQUEST);
         }

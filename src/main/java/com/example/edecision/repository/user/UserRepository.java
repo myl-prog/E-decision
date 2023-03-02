@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,4 +25,12 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     @Query(value = "SELECT * FROM user INNER JOIN project_user ON user.id = project_user.user_id WHERE project_user.is_own = true AND project_user.project_id = :projectId", nativeQuery = true)
     User getProjectOwner(@Param("projectId") int projectId);
+
+    @Query(
+            value = "SELECT * FROM user " +
+                    "INNER JOIN user_proposition ON user.id = user_proposition.user_id " +
+                    "WHERE user_proposition.proposition_id = :propositionId",
+            nativeQuery = true
+    )
+    User getPropositionOwner(@Param("propositionId") int propositionId);
 }
