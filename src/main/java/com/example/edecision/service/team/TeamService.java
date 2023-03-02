@@ -136,7 +136,7 @@ public class TeamService {
         return getTeamsWithUsers(teamList);
     }
 
-    public List<Team> getTeamsByPropositions(int propositionId) {
+    public List<Team> getTeamsByProposition(int propositionId) {
         List<Team> teamList = teamRepository.getTeamsByProposition(propositionId);
         return getTeamsWithUsers(teamList);
     }
