@@ -76,14 +76,14 @@ public class ProjectController {
         return ResponseEntity.status(HttpStatus.CREATED).body(propositionService.createProposition(projectId, propositionBody));
     }
 
-    @PutMapping("/projects/{projectId}/propositions/{propositionId}")
+    /*@PutMapping("/projects/{projectId}/propositions/{propositionId}")
     public ResponseEntity<Proposition> updateProposition(
             @PathVariable("projectId") int projectId,
             @PathVariable("propositionId") int propositionId,
             @RequestBody PropositionBody propositionBody
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(propositionService.updateProjectPropositionById(projectId, propositionId, propositionBody));
-    }
+    }*/
 
     /*@DeleteMapping("/projects/{projectId}/propositions/{propositionId}")
     public ResponseEntity<HttpStatus> deleteProposition(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId) {
