@@ -74,15 +74,15 @@ public class PropositionService {
         Optional<Proposition> optionalProposition = propositionRepo.getProjectPropositionById(projectId, propositionId);
         if (optionalProposition.isPresent()) {
             Proposition proposition = optionalProposition.get();
-            List<Team> associatedTeams = teamService.getTeamsByProject(projectId);
-            proposition.setTeams(associatedTeams);
-
-            if (userService.isUserInTeams(user.getId(), associatedTeams)) {
+            List<Team> projectTeams = teamService.getTeamsByProject(projectId);
+            if (userService.isUserInTeams(user.getId(), projectTeams)) {
+                List<Team> teamPropositionList = teamService.getTeamsByPropositions(propositionId);
+                boolean isUserInTeamsProposition = userService.isUserInTeams(user.getId(), teamPropositionList);
                 List<User> users = userRepo.getUsersByProposition(proposition.getId());
                 proposition.setUsers(users);
 
-                proposition.setIsEditable(proposition.getEnd_time().getTime() >= System.currentTimeMillis());
-                proposition.setIsVoteable(proposition.getEnd_time().getTime() < System.currentTimeMillis() && proposition.getProposition_status().getId() == 1);
+                proposition.setIsEditable(proposition.getEnd_time().getTime() >= System.currentTimeMillis() && isUserInTeamsProposition);
+                proposition.setIsVoteable(proposition.getEnd_time().getTime() < System.currentTimeMillis() && proposition.getProposition_status().getId() == 1 && isUserInTeamsProposition);
                 return proposition;
             } else {
                 throw new CustomException("You have not access to this proposition", HttpStatus.UNAUTHORIZED);

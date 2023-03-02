@@ -93,7 +93,7 @@ public class TeamService {
             updatedTeam.setOwner(Common.GetCurrentUser());
             return teamRepository.save(updatedTeam);
         } else {
-            throw new CustomException("No team found with this id : " + teamBody.team.getId(), HttpStatus.NOT_FOUND);
+            throw new CustomException("No team found with this id : " + teamId, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -133,6 +133,11 @@ public class TeamService {
      */
     public List<Team> getTeamsByProject(int projectId) {
         List<Team> teamList = teamRepository.getTeamsByProject(projectId);
+        return getTeamsWithUsers(teamList);
+    }
+
+    public List<Team> getTeamsByPropositions(int propositionId) {
+        List<Team> teamList = teamRepository.getTeamsByProposition(propositionId);
         return getTeamsWithUsers(teamList);
     }
 
