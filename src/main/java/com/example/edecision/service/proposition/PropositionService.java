@@ -139,7 +139,6 @@ public class PropositionService {
 
     }*/
 
-    // UPDATE
     /*public Proposition update(int id, PropositionBody propositon) {
 
         // Todo : check user and check if we are in amandment delay, end time etc
@@ -199,13 +198,22 @@ public class PropositionService {
         return getProjectPropositionById(oldProposition.getId());
     }*/
 
-    // DELETE
-
-    public void deleteProposition(int id) {
-        // Todo check user before delete proposition
-        userPropositionRepo.deleteUserPropositionsByProposition(id);
-        teamPropositionRepo.deleteTeamPropositionsByProposition(id);
-        propositionRepo.deleteProposition(id);
+    /**
+     * Permit to delete a project proposition
+     *
+     * @param projectId     projectId
+     * @param propositionId proposition id
+     */
+    public void deleteProposition(int projectId, int propositionId) {
+        Optional<Project> optionalProject = projectRepository.findById(projectId);
+        if (optionalProject.isPresent()) {
+            // Todo check user before delete proposition
+            userPropositionRepo.deleteUserPropositionsByProposition(propositionId);
+            teamPropositionRepo.deleteTeamPropositionsByProposition(propositionId);
+            propositionRepo.deleteProposition(propositionId);
+        } else {
+            throw new CustomException("This project doesn't exists", HttpStatus.BAD_REQUEST);
+        }
     }
 
     private void createUsersProposition(int[] users, int proposition) {

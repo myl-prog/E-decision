@@ -75,4 +75,10 @@ public class ProjectController {
     public ResponseEntity<Proposition> createProposition(@PathVariable("projectId") int projectId, @RequestBody PropositionBody propositionBody) {
         return ResponseEntity.status(HttpStatus.CREATED).body(propositionService.createProposition(projectId, propositionBody));
     }
+
+    @DeleteMapping("/projects/{projectId}/propositions/{propositionId}")
+    public ResponseEntity<HttpStatus> deleteProposition(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId) {
+        propositionService.deleteProposition(projectId, propositionId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
