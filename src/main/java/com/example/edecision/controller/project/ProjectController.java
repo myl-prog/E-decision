@@ -85,9 +85,9 @@ public class ProjectController {
         return ResponseEntity.status(HttpStatus.OK).body(propositionService.updateProjectPropositionById(projectId, propositionId, propositionBody));
     }
 
-    @DeleteMapping("/projects/{projectId}/propositions/{propositionId}")
+    /*@DeleteMapping("/projects/{projectId}/propositions/{propositionId}")
     public ResponseEntity<HttpStatus> deleteProposition(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId) {
         propositionService.deleteProposition(projectId, propositionId);
         return new ResponseEntity<>(HttpStatus.OK);
-    }
+    }*/
 }
