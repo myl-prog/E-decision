@@ -1,8 +1,11 @@
 package com.example.edecision.model.project;
 
+import com.example.edecision.model.team.Team;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Data
 @Entity(name = "project")
@@ -24,5 +27,8 @@ public class Project {
     @JoinColumn(name = "project_status_id", referencedColumnName = "id")
     private ProjectStatus project_status;
 
-    // Todo add transient teamList property
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @OneToMany
+    private List<Team> projectTeams;
 }

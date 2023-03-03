@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProjectService {
@@ -50,7 +51,11 @@ public class ProjectService {
      * Get all projects
      */
     public List<Project> getAllProjects() {
-        return projectRepository.findAll();
+        List<Project> allProjects = projectRepository.findAll();
+        allProjects.forEach(project -> {
+            addTeamsToProject(project.getId());
+        });
+        return allProjects;
     }
 
     /**
@@ -60,7 +65,14 @@ public class ProjectService {
      * @return a project
      */
     public Project getProjectById(int projectId) {
-        return projectRepository.findById(projectId).orElseThrow(() -> new CustomException("Project not found with id : " + projectId, HttpStatus.NOT_FOUND));
+        Optional<Project> optionalProject = projectRepository.findById(projectId);
+        if (optionalProject.isPresent()) {
+            Project project = optionalProject.get();
+            addTeamsToProject(projectId);
+            return project;
+        } else {
+            throw new CustomException("This project doesn't exists", HttpStatus.NOT_FOUND);
+        }
     }
 
 
@@ -80,7 +92,7 @@ public class ProjectService {
             Project createdProject = projectRepository.save(projectBody.project);
             projectRepository.addProjectToTeams(projectBody.teams, projectBody.project.getId());
             addProjectUsersToProject(createdProject.getId(), projectBody.project_users);
-            return createdProject;
+            return getProjectById(createdProject.getId());
         } else {
             throw new CustomException("This project status does not exist", HttpStatus.BAD_REQUEST);
         }
@@ -110,8 +122,8 @@ public class ProjectService {
                 List<ProjectUser> oldProjectUserList = projectUserRepository.getAllProjectUserByProject(projectId);
                 modifyAssociatedTeams(projectId, projectBody, oldProjectTeamList);
                 modifyProjectUsers(projectBody, oldProjectUserList);
-
-                return projectRepository.save(projectUpdated);
+                projectRepository.save(projectUpdated);
+                return getProjectById(projectUpdated.getId());
             }
         } else {
             throw new CustomException("Project not found with id : " + projectId, HttpStatus.NOT_FOUND);
@@ -156,6 +168,16 @@ public class ProjectService {
             projectUserUpdated.setUser_role_id(userRoleBody.userRoleId);
             return projectUserRepository.save(projectUserUpdated);
         }
+    }
+
+    /**
+     * Add all associated teams to project
+     *
+     * @param projectId project id
+     */
+    private void addTeamsToProject(int projectId) {
+        Project project = projectRepository.getById(projectId);
+        project.setProjectTeams(teamRepository.getTeamsByProject(projectId));
     }
 
     /**
