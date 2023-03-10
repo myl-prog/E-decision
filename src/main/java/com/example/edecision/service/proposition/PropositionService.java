@@ -5,6 +5,8 @@ import com.example.edecision.model.exception.CustomException;
 import com.example.edecision.model.project.Project;
 import com.example.edecision.model.proposition.PropositionBody;
 import com.example.edecision.model.proposition.PropositionStatus;
+import com.example.edecision.model.teamProposition.TeamProposition;
+import com.example.edecision.model.userProposition.UserProposition;
 import com.example.edecision.repository.project.ProjectRepository;
 import com.example.edecision.service.team.TeamService;
 import com.example.edecision.service.user.UserService;
@@ -18,19 +20,18 @@ import com.example.edecision.repository.team.TeamRepository;
 import com.example.edecision.repository.teamProposition.TeamPropositionRepository;
 import com.example.edecision.repository.user.UserRepository;
 import com.example.edecision.repository.userProposition.UserPropositionRepository;
-import org.apache.tomcat.jni.Local;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
 
 @Service
 public class PropositionService {
@@ -112,10 +113,10 @@ public class PropositionService {
      * @param propositionBody propositionBody
      * @return the created proposition
      */
-    public Proposition createProposition(int projectId, PropositionBody propositionBody)
+    public Proposition createProjectProposition(int projectId, PropositionBody propositionBody)
     {
         // Utilisateur qui demande à créer la proposition
-        User user = Common.GetCurrentUser();
+        User currentUser = Common.GetCurrentUser();
 
         // Variables qui vont nous servir pour initialiser la date de création et vérifier la date de fin
         LocalDateTime localDateTime = LocalDateTime.now();
@@ -124,7 +125,7 @@ public class PropositionService {
         long endDateDayDiff = TimeUnit.DAYS.convert(endDateMilliesDiff, TimeUnit.MILLISECONDS);
 
         Optional<Project> optionalProject = projectRepo.findById(projectId);
-        Optional<Proposition> optionalLastProposition = propositionRepo.getLastPropositionByUserId(user.getId());
+        Optional<Proposition> optionalLastProposition = propositionRepo.getLastPropositionByUserId(currentUser.getId());
 
         // Vérifie que le projet existe
         if(!optionalProject.isPresent())
@@ -168,26 +169,45 @@ public class PropositionService {
         return createdProposition;
     }
 
-    /*public Proposition updateProjectPropositionById(int projectId, int propositionId, PropositionBody propositionBody) {
-        Optional<Project> optionalProject = projectRepository.findById(projectId);
-        // Todo : check user and check if we are in amandment delay, end time etc
+    public Proposition updateProjectPropositionById(int projectId, int propositionId, PropositionBody propositionBody) {
+
+        // Utilisateur qui demande à modifier la proposition
+        User currentUser = Common.GetCurrentUser();
+
+        // Récupération de la proposition et génération d'exception si elle ou le projet n'existe pas
         Proposition oldProposition = getProjectPropositionById(projectId, propositionId);
 
-        List<Team> oldTeams = oldProposition.getTeams();
         List<User> oldUsers = oldProposition.getUsers();
-        oldProposition.setTeams(null);
         oldProposition.setUsers(null);
 
-        // Save in proposition table
+        // Vérification que l'utilisateur qui veut modifier la proposition fasse parti des créateurs
+        if(!oldUsers.stream().anyMatch(u -> u.getId() == currentUser.getId()))
+            throw new CustomException("You do not have the right to modify this proposal", HttpStatus.FORBIDDEN);
+
+        // Variables qui vont nous servir à savoir si il est encore possible de modifier la proposition
+        LocalDateTime localDateTime = LocalDateTime.now();
+        Date now = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(oldProposition.getBegin_time());
+        calendar.add(Calendar.DATE, oldProposition.getAmendment_delay());
+        Date maxDateForUpdate = calendar.getTime();
+
+        // Vérification qu'il est encore temps de modifier la proposition à partir de la date de création et délai d'amendement et statut
+        if(oldProposition.getProposition_status().getId() != 1 || maxDateForUpdate.before(now))
+            throw new CustomException("You no longer have the right to modify this proposal", HttpStatus.FORBIDDEN);
+
+        // Modification des propriétés dans l'objet
         oldProposition.setTitle(propositionBody.proposition.getTitle());
         oldProposition.setEnd_time(propositionBody.proposition.getEnd_time());
         oldProposition.setAmendment_delay(propositionBody.proposition.getAmendment_delay());
         oldProposition.setContent(propositionBody.proposition.getContent());
         oldProposition.setAmend_proposition(propositionBody.proposition.getAmend_proposition());
 
+        // Modification des champs en base de données
         propositionRepo.save(oldProposition);
 
-        // users to create in user_proposition
+        // Création des nouveaux gestionnaires
         if (propositionBody.users != null) {
             for (int userId : propositionBody.users) {
                 if (oldUsers == null || !oldUsers.stream().anyMatch(x -> x.getId() == userId)) {
@@ -196,35 +216,18 @@ public class PropositionService {
             }
         }
 
-        // users to delete in user_proposition
+        // Suppression des utilisateurs qui ne doivent plus être gestionnaires de celle-ci, hormis celui qui est en train de la modifier
         if (oldUsers != null) {
             for (User user : oldUsers) {
-                if (propositionBody.users == null || !(IntStream.of(propositionBody.users).anyMatch(x -> x == user.getId()))) {
+                if ((propositionBody.users == null || !propositionBody.users.stream().anyMatch(x -> x == user.getId())) && user.getId() != currentUser.getId()) {
                     userPropositionRepo.deleteUserProposition(propositionId, user.getId());
                 }
             }
         }
 
-        // teams to create in team_proposition
-        if (propositionBody.teams != null) {
-            for (int teamId : propositionBody.teams) {
-                if (oldTeams == null || !oldTeams.stream().anyMatch(x -> x.getId() == teamId)) {
-                    teamPropositionRepo.save(new TeamProposition(teamId, propositionId));
-                }
-            }
-        }
-
-        // teams to delete in team_proposition
-        if (oldTeams != null) {
-            for (Team team : oldTeams) {
-                if (propositionBody.teams == null || !(IntStream.of(propositionBody.teams).anyMatch(x -> x == team.getId()))) {
-                    teamPropositionRepo.deleteTeamProposition(propositionId, team.getId());
-                }
-            }
-        }
-
-        return getProjectPropositionById(oldProposition.getId());
-    }*/
+        // Retourne la proposition modifiée
+        return getProjectPropositionById(projectId, oldProposition.getId());
+    }
 
     /*public Proposition amend(int amendPropositionId, AmendPropositionBody body) {
 

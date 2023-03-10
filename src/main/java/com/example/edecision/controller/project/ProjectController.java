@@ -73,7 +73,12 @@ public class ProjectController {
 
     @PostMapping("/projects/{projectId}/propositions")
     public ResponseEntity<Proposition> createProposition(@PathVariable("projectId") int projectId, @RequestBody PropositionBody propositionBody) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(propositionService.createProposition(projectId, propositionBody));
+        return ResponseEntity.status(HttpStatus.CREATED).body(propositionService.createProjectProposition(projectId, propositionBody));
+    }
+
+    @PutMapping("/projects/{projectId}/propositions/{propositionId}")
+    public ResponseEntity<Proposition> updateProposition(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @RequestBody PropositionBody propositionBody) {
+        return ResponseEntity.status(HttpStatus.OK).body(propositionService.updateProjectPropositionById(projectId, propositionId, propositionBody));
     }
 
     /*@PutMapping("/projects/{projectId}/propositions/{propositionId}")

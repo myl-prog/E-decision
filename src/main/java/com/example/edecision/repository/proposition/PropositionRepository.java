@@ -16,8 +16,12 @@ public interface PropositionRepository extends JpaRepository<Proposition, Intege
     @Query("delete from proposition where id=:proposition_id")
     void deleteProposition(@Param("proposition_id") Integer proposition_id);
 
-    @Query(value = "select * from proposition where id in (select proposition_id from team_proposition where team_id in (select team_id from user_team where user_id =:user_id))", nativeQuery = true)
-    List<Proposition> getPropositionsByUser(@Param("user_id") Integer user_id);
+    @Query(
+            value = "SELECT * FROM proposition " +
+                    "WHERE id IN (SELECT proposition_id FROM team_proposition WHERE team_id IN (SELECT team_id FROM user_team WHERE user_id =:userId))" +
+                    "OR id IN (SELECT proposition_id FROM user_proposition WHERE user_id = :userId)",
+            nativeQuery = true)
+    List<Proposition> getPropositionsByUser(@Param("userId") Integer userId);
 
     @Query(
             value = "SELECT * FROM proposition " +
