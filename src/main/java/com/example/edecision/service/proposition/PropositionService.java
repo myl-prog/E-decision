@@ -76,42 +76,47 @@ public class PropositionService {
     }
 
     /**
-     * Get a project proposition by id for current user
+     * Récupère une proposition qui est dans un projet
      *
-     * @param projectId     projectId
-     * @param propositionId propositionId
-     * @return a proposition
+     * @param projectId     id du projet
+     * @param propositionId id de la proposition
+     * @return la proposition
      */
     public Proposition getProjectPropositionById(int projectId, int propositionId) {
-        User user = Common.GetCurrentUser();
-        Optional<Proposition> optionalProposition = propositionRepo.getProjectPropositionById(projectId, propositionId);
-        if (optionalProposition.isPresent()) {
-            Proposition proposition = optionalProposition.get();
-            List<Team> projectTeams = teamService.getTeamsByProject(projectId);
-            if (userService.isUserInTeams(user.getId(), projectTeams)) {
-                List<Team> teamPropositionList = teamService.getTeamsByProposition(propositionId);
-                boolean isUserInTeamsProposition = userService.isUserInTeams(user.getId(), teamPropositionList);
-                List<User> users = userRepo.getUsersByProposition(proposition.getId());
-                proposition.setTeams(teamPropositionList);
-                proposition.setUsers(users);
 
-                proposition.setIsEditable(proposition.getEnd_time().getTime() >= System.currentTimeMillis() && isUserInTeamsProposition);
-                proposition.setIsVoteable(proposition.getEnd_time().getTime() < System.currentTimeMillis() && proposition.getProposition_status().getId() == 1 && isUserInTeamsProposition);
-                return proposition;
-            } else {
-                throw new CustomException("You have not access to this proposition", HttpStatus.UNAUTHORIZED);
-            }
-        } else {
+        // Récupération de l'utilisateur qui veut accéder à la proposition
+        User currentUser = Common.GetCurrentUser();
+
+        // Récupération de la proposition
+        Optional<Proposition> optionalProposition = propositionRepo.getProjectPropositionById(projectId, propositionId);
+
+        // Vérification que la proposition existe et qu'elle est visible pour ce user
+        if(!optionalProposition.isPresent())
             throw new CustomException("This proposition doesn't exists", HttpStatus.NOT_FOUND);
-        }
+
+        Proposition proposition = optionalProposition.get();
+
+        // Récupération et affectation des utilisateurs et teams
+        List<Team> teamPropositionList = teamService.getTeamsByProposition(propositionId);
+        List<User> users = userRepo.getUsersByProposition(proposition.getId());
+
+        proposition.setTeams(teamPropositionList);
+        proposition.setUsers(users);
+
+        // Permet de savoir, pour un utilisateur, si la proposition peut être modifiée et/ou votée
+        boolean isUserInTeamsProposition = userService.isUserInTeams(currentUser.getId(), teamPropositionList);
+        proposition.setIsEditable(proposition.getEnd_time().getTime() > System.currentTimeMillis() && proposition.getProposition_status().getId() == 1 && isUserInTeamsProposition && checkAmendDelay(proposition, false, true));
+        proposition.setIsVoteable(proposition.getEnd_time().getTime() > System.currentTimeMillis() && proposition.getProposition_status().getId() == 1 && isUserInTeamsProposition && checkAmendDelay(proposition, true, false));
+
+        return proposition;
     }
 
     /**
      * Permet de créer une proposition dans un projet
      *
-     * @param projectId       projectId
-     * @param propositionBody propositionBody
-     * @return the created proposition
+     * @param projectId       id du projet
+     * @param propositionBody objet de la proposition
+     * @return la proposition créée
      */
     public Proposition createProjectProposition(int projectId, PropositionBody propositionBody)
     {
@@ -169,6 +174,14 @@ public class PropositionService {
         return createdProposition;
     }
 
+    /**
+     * Permet de modifier une proposition qui appartient à un projet, pendant son délais d'amendement
+     *
+     * @param projectId       id du projet
+     * @param propositionId   id de la proposition
+     * @param propositionBody objet de la proposition
+     * @return la modification mise à jour
+     */
     public Proposition updateProjectPropositionById(int projectId, int propositionId, PropositionBody propositionBody) {
 
         // Utilisateur qui demande à modifier la proposition
@@ -184,12 +197,9 @@ public class PropositionService {
         if(!oldUsers.stream().anyMatch(u -> u.getId() == currentUser.getId()))
             throw new CustomException("You do not have the right to modify this proposal", HttpStatus.FORBIDDEN);
 
-        // Vérification statut en cours de la proposition
-        if(oldProposition.getProposition_status().getId() != 1)
+        // Vérification statut en cours de la proposition et qu'on soit dans le délai d'amendement
+        if(oldProposition.getProposition_status().getId() != 1 || !checkAmendDelay(oldProposition, false, true))
             throw new CustomException("You no longer have the right to modify this proposal", HttpStatus.FORBIDDEN);
-
-        // Vérification qu'on soit dans le délai d'amendement
-        checkAmendDelay(oldProposition, false, true);
 
         // Modification des propriétés dans l'objet
         oldProposition.setTitle(propositionBody.proposition.getTitle());
@@ -276,7 +286,7 @@ public class PropositionService {
         }
     }
 
-    private void checkAmendDelay(Proposition proposition, boolean errorIfInsideDelay, boolean errorIfOutsideDelay){
+    private boolean checkAmendDelay(Proposition proposition, boolean errorIfInsideDelay, boolean errorIfOutsideDelay){
 
         // Variables qui vont nous servir à vérifier les dates
         LocalDateTime localDateTime = LocalDateTime.now();
@@ -289,7 +299,9 @@ public class PropositionService {
 
         // Vérification qu'il est encore temps de modifier la proposition à partir de la date de création et délai d'amendement et statut
         if(proposition.getProposition_status().getId() != 1 || (maxDateForUpdate.before(now) && errorIfOutsideDelay) || (maxDateForUpdate.after(now) && errorIfInsideDelay))
-            throw new CustomException("You no longer have the right to modify this proposal", HttpStatus.FORBIDDEN);
+            return false;
+        else
+            return true;
 
     }
 
