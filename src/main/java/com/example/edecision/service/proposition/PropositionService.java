@@ -184,18 +184,12 @@ public class PropositionService {
         if(!oldUsers.stream().anyMatch(u -> u.getId() == currentUser.getId()))
             throw new CustomException("You do not have the right to modify this proposal", HttpStatus.FORBIDDEN);
 
-        // Variables qui vont nous servir à savoir si il est encore possible de modifier la proposition
-        LocalDateTime localDateTime = LocalDateTime.now();
-        Date now = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(oldProposition.getBegin_time());
-        calendar.add(Calendar.DATE, oldProposition.getAmendment_delay());
-        Date maxDateForUpdate = calendar.getTime();
-
-        // Vérification qu'il est encore temps de modifier la proposition à partir de la date de création et délai d'amendement et statut
-        if(oldProposition.getProposition_status().getId() != 1 || maxDateForUpdate.before(now))
+        // Vérification statut en cours de la proposition
+        if(oldProposition.getProposition_status().getId() != 1)
             throw new CustomException("You no longer have the right to modify this proposal", HttpStatus.FORBIDDEN);
+
+        // Vérification qu'on soit dans le délai d'amendement
+        checkAmendDelay(oldProposition, false, true);
 
         // Modification des propriétés dans l'objet
         oldProposition.setTitle(propositionBody.proposition.getTitle());
@@ -280,6 +274,23 @@ public class PropositionService {
         for (int user : users) {
             userPropositionRepo.createUserProposition(proposition, user);
         }
+    }
+
+    private void checkAmendDelay(Proposition proposition, boolean errorIfInsideDelay, boolean errorIfOutsideDelay){
+
+        // Variables qui vont nous servir à vérifier les dates
+        LocalDateTime localDateTime = LocalDateTime.now();
+        Date now = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(proposition.getBegin_time());
+        calendar.add(Calendar.DATE, proposition.getAmendment_delay());
+        Date maxDateForUpdate = calendar.getTime();
+
+        // Vérification qu'il est encore temps de modifier la proposition à partir de la date de création et délai d'amendement et statut
+        if(proposition.getProposition_status().getId() != 1 || (maxDateForUpdate.before(now) && errorIfOutsideDelay) || (maxDateForUpdate.after(now) && errorIfInsideDelay))
+            throw new CustomException("You no longer have the right to modify this proposal", HttpStatus.FORBIDDEN);
+
     }
 
 }
