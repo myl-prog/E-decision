@@ -15,4 +15,7 @@ public class PropositionStatus {
 
     @Column(name = "name")
     private String name;
+
+    public PropositionStatus(){}
+    public PropositionStatus(int id){ this.id = id; }
 }

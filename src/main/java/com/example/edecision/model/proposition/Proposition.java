@@ -22,6 +22,9 @@ public class Proposition {
     @Column(name = "title")
     private String title;
 
+    @Column(name = "begin_time")
+    private Date begin_time;
+
     @Column(name = "end_time")
     private Date end_time;
 

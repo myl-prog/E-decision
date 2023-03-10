@@ -1,8 +1,10 @@
 package com.example.edecision.service.proposition;
 
+import com.example.edecision.model.common.Parameters;
 import com.example.edecision.model.exception.CustomException;
 import com.example.edecision.model.project.Project;
 import com.example.edecision.model.proposition.PropositionBody;
+import com.example.edecision.model.proposition.PropositionStatus;
 import com.example.edecision.repository.project.ProjectRepository;
 import com.example.edecision.service.team.TeamService;
 import com.example.edecision.service.user.UserService;
@@ -16,17 +18,22 @@ import com.example.edecision.repository.team.TeamRepository;
 import com.example.edecision.repository.teamProposition.TeamPropositionRepository;
 import com.example.edecision.repository.user.UserRepository;
 import com.example.edecision.repository.userProposition.UserPropositionRepository;
+import org.apache.tomcat.jni.Local;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class PropositionService {
-
-    // TEST OL
 
     @Autowired
     public PropositionRepository propositionRepo;
@@ -47,13 +54,15 @@ public class PropositionService {
     public TeamRepository teamRepo;
 
     @Autowired
+    public ProjectRepository projectRepo;
+
+    @Autowired
     public UserService userService;
 
     @Autowired
     public TeamService teamService;
 
-    @Autowired
-    public ProjectRepository projectRepository;
+
 
     /**
      * Get all propositions where current user is associated
@@ -97,31 +106,66 @@ public class PropositionService {
     }
 
     /**
-     * Permit to create a project proposition
+     * Permet de créer une proposition dans un projet
      *
      * @param projectId       projectId
      * @param propositionBody propositionBody
      * @return the created proposition
      */
-    public Proposition createProposition(int projectId, PropositionBody propositionBody) {
-        Optional<Project> optionalProject = projectRepository.findById(projectId);
-        if (optionalProject.isPresent()) {
-            if (propositionStatusRepo.findById(propositionBody.proposition.getProposition_status().getId()).isPresent()) {
-                propositionBody.proposition.setProject(optionalProject.get());
-                propositionBody.proposition.setProposition_status(propositionBody.proposition.getProposition_status());
-                if (propositionBody.proposition.getAmendment_delay() <= 0) {
-                    propositionBody.proposition.setAmendment_delay(1);
-                }
-                Proposition createdProposition = propositionRepo.save(propositionBody.proposition);
-                createUsersProposition(propositionBody.users, createdProposition.getId());
-                createTeamsProposition(propositionBody.teams, createdProposition.getId());
-                return createdProposition;
-            } else {
-                throw new CustomException("This project status doesn't exists", HttpStatus.BAD_REQUEST);
-            }
-        } else {
+    public Proposition createProposition(int projectId, PropositionBody propositionBody)
+    {
+        // Utilisateur qui demande à créer la proposition
+        User user = Common.GetCurrentUser();
+
+        // Variables qui vont nous servir pour initialiser la date de création et vérifier la date de fin
+        LocalDateTime localDateTime = LocalDateTime.now();
+        Date now = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+        long endDateMilliesDiff = Math.abs(propositionBody.proposition.getEnd_time().getTime() - now.getTime());
+        long endDateDayDiff = TimeUnit.DAYS.convert(endDateMilliesDiff, TimeUnit.MILLISECONDS);
+
+        Optional<Project> optionalProject = projectRepo.findById(projectId);
+        Optional<Proposition> optionalLastProposition = propositionRepo.getLastPropositionByUserId(user.getId());
+
+        // Vérifie que le projet existe
+        if(!optionalProject.isPresent())
             throw new CustomException("This project doesn't exists", HttpStatus.BAD_REQUEST);
+
+        // Vérifie que la date de fin soit dans 1 semaine au plus tôt et 1 mois au plus tard
+        if(endDateDayDiff < 7 || endDateDayDiff > 31)
+            throw new CustomException("The decision end date must be between 7 and 31 days after the creation of the proposal", HttpStatus.BAD_REQUEST);
+
+        // Vérifie que l'utilisateur a déjà été dans une proposition
+        if(optionalLastProposition.isPresent()){
+
+            Proposition lastProposition = optionalLastProposition.get();
+            long lastPropositionMilliesDiff = Math.abs(now.getTime() - lastProposition.getBegin_time().getTime());
+            long lastPropositionDayDiff = TimeUnit.DAYS.convert(lastPropositionMilliesDiff, TimeUnit.MILLISECONDS);
+
+            // Vérifie si l'utilisateur fait déjà partie d'une propoposition créée il y a moins de 7 jours
+            if(lastPropositionDayDiff <= 7)
+                throw new CustomException("You already belong to a proposal created less than a week ago", HttpStatus.FORBIDDEN);
         }
+
+        // Prend le délais d'amendement par défaut s'il y en a pas dans le body
+        if (propositionBody.proposition.getAmendment_delay() <= 0)
+            propositionBody.proposition.setAmendment_delay(Parameters.PROPOSITION_AMENDMENT_DELAY);
+
+        propositionBody.proposition.setBegin_time(now);
+        propositionBody.proposition.setProject(optionalProject.get());
+
+        // Une proposition qui vient d'être créée est forcément au statut "en cours"
+        propositionBody.proposition.setProposition_status(new PropositionStatus(1));
+
+        // Création de la proposition
+        Proposition createdProposition = propositionRepo.save(propositionBody.proposition);
+
+        // Affectation des utilisateurs qui sont à la base de la création de cette proposition, il s'agit des gestionnaires
+        createUsersProposition(propositionBody.users, createdProposition.getId());
+
+        // Affectation de l'équipe qui est en charge de la proposition
+        teamPropositionRepo.createTeamProposition(createdProposition.getId(), propositionBody.team.getId());
+
+        return createdProposition;
     }
 
     /*public Proposition updateProjectPropositionById(int projectId, int propositionId, PropositionBody propositionBody) {
@@ -227,15 +271,11 @@ public class PropositionService {
         }
     }*/
 
-    private void createUsersProposition(int[] users, int proposition) {
+    private void createUsersProposition(List<Integer> users, int proposition) {
+        int currentUserId = Common.GetCurrentUser().getId();
+        if(!users.contains(currentUserId)) users.add(currentUserId);
         for (int user : users) {
             userPropositionRepo.createUserProposition(proposition, user);
-        }
-    }
-
-    private void createTeamsProposition(int[] teams, int proposition) {
-        for (int team : teams) {
-            teamPropositionRepo.createTeamProposition(proposition, team);
         }
     }
 

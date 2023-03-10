@@ -25,4 +25,12 @@ public interface PropositionRepository extends JpaRepository<Proposition, Intege
                     "AND project_id = :projectId ",
             nativeQuery = true)
     Optional<Proposition> getProjectPropositionById(@Param("projectId") int projectId, @Param("propositionId") int propositionId);
+
+    @Query(
+            value = "SELECT * FROM proposition " +
+                    "WHERE :userId IN (SELECT user_id FROM user_proposition WHERE proposition_id = proposition.id) " +
+                    "OR :userId IN (SELECT user_id FROM user_team WHERE user_team.team_id IN (SELECT team_id from team_proposition WHERE proposition_id = proposition.id)) " +
+                    "ORDER BY begin_time DESC LIMIT 1",
+            nativeQuery = true)
+    Optional<Proposition> getLastPropositionByUserId(@Param("userId") int userId);
 }
