@@ -3,6 +3,7 @@ package com.example.edecision.controller.project;
 import com.example.edecision.model.project.Project;
 import com.example.edecision.model.project.ProjectBody;
 import com.example.edecision.model.project.ProjectUser;
+import com.example.edecision.model.proposition.AmendPropositionBody;
 import com.example.edecision.model.proposition.Proposition;
 import com.example.edecision.model.proposition.PropositionBody;
 import com.example.edecision.model.user.UserRoleBody;
@@ -81,14 +82,10 @@ public class ProjectController {
         return ResponseEntity.status(HttpStatus.OK).body(propositionService.updateProjectPropositionById(projectId, propositionId, propositionBody));
     }
 
-    /*@PutMapping("/projects/{projectId}/propositions/{propositionId}")
-    public ResponseEntity<Proposition> updateProposition(
-            @PathVariable("projectId") int projectId,
-            @PathVariable("propositionId") int propositionId,
-            @RequestBody PropositionBody propositionBody
-    ) {
-        return ResponseEntity.status(HttpStatus.OK).body(propositionService.updateProjectPropositionById(projectId, propositionId, propositionBody));
-    }*/
+    @PostMapping("/projects/{projectId}/propositions/{propositionId}/amend")
+    public ResponseEntity<Proposition> amendProposition(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @RequestBody AmendPropositionBody amendBody) {
+        return ResponseEntity.status(HttpStatus.OK).body(propositionService.amendProjectProposition(projectId, propositionId, amendBody));
+    }
 
     /*@DeleteMapping("/projects/{projectId}/propositions/{propositionId}")
     public ResponseEntity<HttpStatus> deleteProposition(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId) {

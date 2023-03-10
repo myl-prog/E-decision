@@ -3,6 +3,7 @@ package com.example.edecision.service.proposition;
 import com.example.edecision.model.common.Parameters;
 import com.example.edecision.model.exception.CustomException;
 import com.example.edecision.model.project.Project;
+import com.example.edecision.model.proposition.AmendPropositionBody;
 import com.example.edecision.model.proposition.PropositionBody;
 import com.example.edecision.model.proposition.PropositionStatus;
 import com.example.edecision.model.teamProposition.TeamProposition;
@@ -160,7 +161,7 @@ public class PropositionService {
         propositionBody.proposition.setProject(optionalProject.get());
 
         // Une proposition qui vient d'être créée est forcément au statut "en cours"
-        propositionBody.proposition.setProposition_status(new PropositionStatus(1));
+        propositionBody.proposition.setProposition_status(propositionStatusRepo.getById(1));
 
         // Création de la proposition
         Proposition createdProposition = propositionRepo.save(propositionBody.proposition);
@@ -233,24 +234,41 @@ public class PropositionService {
         return getProjectPropositionById(projectId, oldProposition.getId());
     }
 
-    /*public Proposition amend(int amendPropositionId, AmendPropositionBody body) {
+    public Proposition amendProjectProposition(int projectId, int amendPropositionId, AmendPropositionBody body)
+    {
+        // Récupération de l'utilisateur qui veut amender la proposition
+        User currentUser = Common.GetCurrentUser();
 
-        User user = Common.GetCurrentUser();
-        Proposition amendProposition = propositionRepo.getProjectPropositionById(amendPropositionId, user.getId());
+        // Variables utilisées pour la date de création de l'amendement
+        LocalDateTime localDateTime = LocalDateTime.now();
+        Date now = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 
-        if (amendProposition != null) {
-            Proposition proposition = new Proposition();
-            proposition.setTitle(body.getTitle());
-            proposition.setContent(body.getContent());
-            proposition.setAmend_proposition(amendProposition);
-            proposition.setEnd_time(amendProposition.getEnd_time());
-            return propositionRepo.save(proposition);
-        } else {
-            // ERROR
-            return null;
-        }
+        // Récupération de la proposition à amender
+        Proposition amendProposition = getProjectPropositionById(projectId, amendPropositionId);
 
-    }*/
+        // Vérification statut en cours de la proposition et qu'on soit dans le délai d'amendement
+        if(amendProposition.getProposition_status().getId() != 1 || !checkAmendDelay(amendProposition, false, true))
+            throw new CustomException("You no longer have the right to modify this proposal", HttpStatus.FORBIDDEN);
+
+        // Vérification que le user soit dans les gestionnaires ou une team de la proposition
+        if(!userService.isUserInTeams(currentUser.getId(), amendProposition.getTeams()) && !amendProposition.getUsers().stream().anyMatch(u -> u.getId() == currentUser.getId()))
+            throw new CustomException("You no longer have the right to amend this proposal", HttpStatus.FORBIDDEN);
+
+        Proposition amend = new Proposition();
+        amend.setTitle(body.getTitle());
+        amend.setContent(body.getContent());
+        amend.setAmend_proposition(amendProposition);
+        amend.setBegin_time(now);
+        amend.setEnd_time(amendProposition.getEnd_time());
+        amend.setProposition_status(propositionStatusRepo.getById(1));
+        amend.setProject(projectRepo.getById(projectId));
+
+        Proposition proposition = propositionRepo.save(amend);
+
+        userPropositionRepo.save(new UserProposition(currentUser.getId(), proposition.getId()));
+
+        return getProjectPropositionById(projectId, proposition.getId());
+    }
 
     /*/**
      * Permit to delete a project proposition

@@ -31,4 +31,5 @@ public class Project {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @OneToMany
     private List<Team> projectTeams;
+
 }
