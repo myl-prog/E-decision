@@ -1,12 +1,14 @@
 package com.example.edecision.controller.project;
 
+import com.example.edecision.model.amendement.Amendement;
 import com.example.edecision.model.project.Project;
 import com.example.edecision.model.project.ProjectBody;
 import com.example.edecision.model.project.ProjectUser;
-import com.example.edecision.model.proposition.AmendPropositionBody;
+import com.example.edecision.model.amendement.AmendementBody;
 import com.example.edecision.model.proposition.Proposition;
 import com.example.edecision.model.proposition.PropositionBody;
 import com.example.edecision.model.user.UserRoleBody;
+import com.example.edecision.service.amendement.AmendementService;
 import com.example.edecision.service.project.ProjectService;
 import com.example.edecision.service.proposition.PropositionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,10 @@ public class ProjectController {
 
     @Autowired
     public PropositionService propositionService;
+
+    @Autowired
+    public AmendementService amendementService;
+
 
     // ========================
     // ======= Projects =======
@@ -82,14 +88,19 @@ public class ProjectController {
         return ResponseEntity.status(HttpStatus.OK).body(propositionService.updateProjectPropositionById(projectId, propositionId, propositionBody));
     }
 
-    @PostMapping("/projects/{projectId}/propositions/{propositionId}/amend")
-    public ResponseEntity<Proposition> amendProposition(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @RequestBody AmendPropositionBody amendBody) {
-        return ResponseEntity.status(HttpStatus.OK).body(propositionService.amendProjectProposition(projectId, propositionId, amendBody));
-    }
-
     /*@DeleteMapping("/projects/{projectId}/propositions/{propositionId}")
     public ResponseEntity<HttpStatus> deleteProposition(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId) {
         propositionService.deleteProposition(projectId, propositionId);
         return new ResponseEntity<>(HttpStatus.OK);
     }*/
+
+    // ===================================
+    // = Project proposition amendements =
+    // ===================================
+
+    @PostMapping("/projects/{projectId}/propositions/{propositionId}/amendements")
+    public ResponseEntity<Amendement> amendProposition(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @RequestBody AmendementBody amendBody) {
+        return ResponseEntity.status(HttpStatus.OK).body(amendementService.createProjectPropositionAmendement(projectId, propositionId, amendBody));
+    }
+
 }
