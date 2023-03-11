@@ -3,9 +3,16 @@ package com.example.edecision.service.proposition;
 import com.example.edecision.model.common.Parameters;
 import com.example.edecision.model.exception.CustomException;
 import com.example.edecision.model.project.Project;
+import com.example.edecision.model.proposition.DeletePropositionResult;
 import com.example.edecision.model.proposition.PropositionBody;
 import com.example.edecision.model.userProposition.UserProposition;
+import com.example.edecision.model.comment.Comment;
+import com.example.edecision.model.vote.CommentVote;
+import com.example.edecision.repository.amendement.AmendementRepository;
+import com.example.edecision.repository.comment.CommentRepository;
 import com.example.edecision.repository.project.ProjectRepository;
+import com.example.edecision.repository.vote.CommentVoteRepository;
+import com.example.edecision.repository.vote.VoteTypeRepository;
 import com.example.edecision.service.team.TeamService;
 import com.example.edecision.service.user.UserService;
 import com.example.edecision.utils.Common;
@@ -29,6 +36,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 public class PropositionService {
@@ -53,6 +61,18 @@ public class PropositionService {
 
     @Autowired
     public ProjectRepository projectRepo;
+
+    @Autowired
+    public CommentRepository commentRepo;
+
+    @Autowired
+    public CommentVoteRepository commentVoteRepo;
+
+    @Autowired
+    public VoteTypeRepository voteTypeRepo;
+
+    @Autowired
+    public AmendementRepository amendementRepo;
 
     @Autowired
     public UserService userService;
@@ -203,7 +223,6 @@ public class PropositionService {
         oldProposition.setEnd_time(propositionBody.proposition.getEnd_time());
         oldProposition.setAmendment_delay(propositionBody.proposition.getAmendment_delay());
         oldProposition.setContent(propositionBody.proposition.getContent());
-        oldProposition.setAmend_proposition(propositionBody.proposition.getAmend_proposition());
 
         // Modification des champs en base de données
         propositionRepo.save(oldProposition);
@@ -230,31 +249,87 @@ public class PropositionService {
         return getProjectPropositionById(projectId, oldProposition.getId());
     }
 
-    /*/**
-     * Permit to delete a project proposition
+    /**
+     * Permet de supprimer et/ou proposer la suppression d'une proposition, il faut que toutes les personnes qui l'ont créées soit ok
      *
      * @param projectId     projectId
      * @param propositionId proposition id
-    public void deleteProposition(int projectId, int propositionId) {
-        Optional<Project> optionalProject = projectRepository.findById(projectId);
-        if (optionalProject.isPresent()) {
-            Optional<Proposition> optionalProposition = propositionRepo.findById(propositionId);
-            if (optionalProposition.isPresent()) {
-                User currentUser = Common.GetCurrentUser();
-                if (currentUser.getId() == userRepo.getPropositionOwner(propositionId).getId()) {
-                    userPropositionRepo.deleteUserPropositionsByProposition(propositionId);
-                    teamPropositionRepo.deleteTeamPropositionsByProposition(propositionId);
-                    propositionRepo.deleteProposition(propositionId);
-                } else {
-                    throw new CustomException("You can't perform this action", HttpStatus.UNAUTHORIZED);
-                }
-            } else {
-                throw new CustomException("This proposition doesn't exists", HttpStatus.BAD_REQUEST);
-            }
-        } else {
-            throw new CustomException("This project doesn't exists", HttpStatus.BAD_REQUEST);
+     */
+    public DeletePropositionResult deleteProjectProposition(int projectId, int propositionId)
+    {
+        // Objet de retour
+        DeletePropositionResult result = new DeletePropositionResult();
+
+        // Récupération de l'utilisateur qui veut supprimer la proposition
+        User currentUser = Common.GetCurrentUser();
+
+        // Permet de récupérer la proposition et générer une erreur si elle n'existe pas
+        Proposition proposition = getProjectPropositionById(projectId, propositionId);
+
+        // On vérifie que l'utilisateur fasse parti des créateurs de la proposition
+        if(!proposition.getUsers().stream().anyMatch(u -> u.getId() == currentUser.getId()))
+            throw new CustomException("You do not have the right to delete this proposal", HttpStatus.FORBIDDEN);
+
+        // Récupère le commentaire de suppression s'il existe déjà
+        Comment deletedComment = null;
+        Optional<Comment> optionalDeletedComment = commentRepo.getPropositionDeletedComment(projectId, propositionId);
+
+        System.out.println("J'ai passé 1");
+
+        if(optionalDeletedComment.isPresent()){ // Si un utilisateur gestionnaire de la prop a déjà fait une proposition de suppression
+
+            // On récupère le commentaire de suppression
+            deletedComment = optionalDeletedComment.get();
+
+            // On récupère les votes déjà existant sur ce commentaire de suppression
+            List<CommentVote> commentVotes = commentVoteRepo.getCommentVotes(deletedComment.getId());
+
+            // On vérifie si l'utilisateur courant a déjà voté ou non pour la suppression
+            if(commentVotes != null && commentVotes.stream().anyMatch(v -> v.getUser_id() == currentUser.getId()))
+                throw new CustomException("You have already voted to delete this proposal", HttpStatus.FORBIDDEN);
+
         }
-    }*/
+        else{
+
+            System.out.println("J'ai passé 2");
+            System.out.println(currentUser);
+
+            // On créé le commentaire de suppression
+            deletedComment = commentRepo.save(new Comment(propositionId, true, currentUser));
+
+        }
+
+        // On ajoute le vote de l'utilisateur courant
+        commentVoteRepo.save(new CommentVote(currentUser.getId(), deletedComment.getId(), voteTypeRepo.getById(1)));
+
+        // On récupère la liste des votes pour ce commentaire de suppression
+        List<CommentVote> commentVotes = commentVoteRepo.getCommentVotes(deletedComment.getId());
+
+        // On récupère la liste des utilisateurs qui doivent voter pour ce commentaire afin que la prop soit supprimée
+        List<User> propositionUsers = proposition.getUsers();
+
+        // On récupère les utilisateurs qui ont voté
+        result.voteUsers = propositionUsers.stream().filter(u -> commentVotes.stream().anyMatch(v -> v.getUser_id() == u.getId())).collect(Collectors.toList());
+
+        // On récupère les utilisateurs qui n'ont pas voté
+        result.notVoteUsers = propositionUsers.stream().filter(u -> !commentVotes.stream().anyMatch(v -> v.getUser_id() == u.getId())).collect(Collectors.toList());
+
+        // On regarde si tous les utilisateurs ont voté
+        result.deleted = result.notVoteUsers.stream().count() == 0;
+
+        if(result.deleted){ // Si tout les utilisateurs ont voté
+            userPropositionRepo.deleteUserPropositionsByProposition(propositionId);
+            teamPropositionRepo.deleteTeamPropositionsByProposition(propositionId);
+            amendementRepo.deleteAmendementsByProposition(propositionId);
+            commentVoteRepo.deleteCommentVotesByProposition(propositionId);
+            commentRepo.deleteCommentsByProposition(propositionId);
+            // TODO add delete proposition vote and amendement vote
+            propositionRepo.deleteProposition(propositionId);
+        }
+
+        return result;
+
+    }
 
     private void createUsersProposition(List<Integer> users, int proposition) {
         int currentUserId = Common.GetCurrentUser().getId();

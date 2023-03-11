@@ -11,11 +11,13 @@ public interface UserTeamRepository extends JpaRepository<UserTeam, Integer> {
 
     @Transactional
     @Modifying
-    @Query("delete from user_team where user_id = :userId and team_id = :teamId")
+    @Query(value = "DELETE FROM user_team WHERE user_id = :userId AND team_id = :teamId",
+            nativeQuery = true)
     void deleteUserTeam(@Param("userId") Integer userId, @Param("teamId") Integer teamId);
 
     @Transactional
     @Modifying
-    @Query("delete from user_team where team_id = :teamId")
+    @Query(value = "DELETE FROM user_team WHERE team_id = :teamId",
+            nativeQuery = true)
     void deleteAllUserTeam(@Param("teamId") Integer teamId);
 }

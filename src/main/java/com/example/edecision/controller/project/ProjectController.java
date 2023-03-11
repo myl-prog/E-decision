@@ -5,6 +5,7 @@ import com.example.edecision.model.project.Project;
 import com.example.edecision.model.project.ProjectBody;
 import com.example.edecision.model.project.ProjectUser;
 import com.example.edecision.model.amendement.AmendementBody;
+import com.example.edecision.model.proposition.DeletePropositionResult;
 import com.example.edecision.model.proposition.Proposition;
 import com.example.edecision.model.proposition.PropositionBody;
 import com.example.edecision.model.user.UserRoleBody;
@@ -88,11 +89,10 @@ public class ProjectController {
         return ResponseEntity.status(HttpStatus.OK).body(propositionService.updateProjectPropositionById(projectId, propositionId, propositionBody));
     }
 
-    /*@DeleteMapping("/projects/{projectId}/propositions/{propositionId}")
-    public ResponseEntity<HttpStatus> deleteProposition(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId) {
-        propositionService.deleteProposition(projectId, propositionId);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }*/
+    @DeleteMapping("/projects/{projectId}/propositions/{propositionId}")
+    public ResponseEntity<DeletePropositionResult> deleteProposition(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId) {
+        return ResponseEntity.status(HttpStatus.OK).body(propositionService.deleteProjectProposition(projectId, propositionId));
+    }
 
     // ===================================
     // = Project proposition amendements =

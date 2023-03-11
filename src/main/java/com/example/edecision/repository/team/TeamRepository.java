@@ -15,26 +15,29 @@ public interface TeamRepository extends JpaRepository<Team, Integer> {
 
     Optional<Team> findByName(String name);
 
-    @Query(value = "SELECT * FROM team WHERE project_id = :projectId", nativeQuery = true)
+    @Query(value = "SELECT * FROM team WHERE project_id = :projectId",
+            nativeQuery = true)
     List<Team> getTeamsByProject(@Param("projectId") int projectId);
 
-    @Query(
-            value = "SELECT * FROM team " +
+    @Query(value = "SELECT * FROM team " +
                     "INNER JOIN team_proposition ON team.id = team_proposition.team_id " +
                     "WHERE team_proposition.proposition_id = :propositionId",
             nativeQuery = true)
     List<Team> getTeamsByProposition(@Param("propositionId") int propositionId);
 
-    @Query(value = "SELECT team.* FROM team WHERE team.project_id is NULL AND id in :ids", nativeQuery = true)
+    @Query(value = "SELECT team.* FROM team WHERE team.project_id is NULL AND id in :ids",
+            nativeQuery = true)
     ArrayList<Team> getFreeTeamsForProjectCreation(@Param("ids") List<Integer> ids);
 
     @Transactional
     @Modifying
-    @Query(value = "UPDATE team SET project_id = NULL WHERE project_id=:projectId", nativeQuery = true)
+    @Query(value = "UPDATE team SET project_id = NULL WHERE project_id=:projectId",
+            nativeQuery = true)
     void removeProjectIdFromTeams(@Param("projectId") int projectId);
 
     @Transactional
     @Modifying
-    @Query(value = "UPDATE team SET project_id = NULL WHERE project_id = :projectId AND id = :teamId", nativeQuery = true)
+    @Query(value = "UPDATE team SET project_id = NULL WHERE project_id = :projectId AND id = :teamId",
+            nativeQuery = true)
     void removeProjectIdFromTeam(@Param("projectId") int projectId, @Param("teamId") int teamId);
 }

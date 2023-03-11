@@ -13,7 +13,7 @@ public class CommentService {
     @Autowired
     public CommentRepository commentRepository;
 
-    public List<Comment> getAll() {
+    /*public List<Comment> getAll() {
         return commentRepository.findAll();
     }
 
@@ -39,5 +39,5 @@ public class CommentService {
             }
         }
         return commentsByPropositionID;
-    }
+    }*/
 }

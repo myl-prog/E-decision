@@ -175,9 +175,6 @@ public class AmendementService {
     public void deleteProjectPropositionAmendementById(int projectId, int propositionId, int amendementId)
     {
 
-        // Utilisateur qui demande à modifier la proposition
-        User currentUser = Common.GetCurrentUser();
-
         // Récupération de l'amendement et génération d'exception si il ou le projet/proposition n'existe pas
         Amendement oldAmendement = getProjectPropositionAmendementById(projectId, propositionId, amendementId);
 

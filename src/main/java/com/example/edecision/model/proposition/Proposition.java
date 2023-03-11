@@ -38,10 +38,6 @@ public class Proposition {
     @JoinColumn(name = "proposition_status_id", referencedColumnName = "id")
     private PropositionStatus proposition_status;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "amend_proposition_id", referencedColumnName = "id")
-    private Proposition amend_proposition;
-
     @ManyToOne()
     @JoinColumn(name = "project_id", referencedColumnName = "id")
     private Project project;

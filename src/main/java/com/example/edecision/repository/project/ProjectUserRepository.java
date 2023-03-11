@@ -14,12 +14,15 @@ public interface ProjectUserRepository extends JpaRepository<ProjectUser, Intege
 
     @Transactional
     @Modifying
-    @Query(value = "DELETE FROM project_user WHERE project_id = :projectId", nativeQuery = true)
+    @Query(value = "DELETE FROM project_user WHERE project_id = :projectId",
+            nativeQuery = true)
     void deleteAllProjectUserByProjectId(@Param("projectId") int projectId);
 
-    @Query(value = "SELECT * FROM project_user WHERE project_id = :projectId", nativeQuery = true)
+    @Query(value = "SELECT * FROM project_user WHERE project_id = :projectId",
+            nativeQuery = true)
     List<ProjectUser> getAllProjectUserByProject(@Param("projectId") int projectId);
 
-    @Query(value = "SELECT * FROM project_user WHERE project_id = :projectId AND user_id = :userId", nativeQuery = true)
+    @Query(value = "SELECT * FROM project_user WHERE project_id = :projectId AND user_id = :userId",
+            nativeQuery = true)
     Optional<ProjectUser> findProjectUserByProjectIdAndUserId(@Param("projectId") int projectId, @Param("userId") int userId);
 }

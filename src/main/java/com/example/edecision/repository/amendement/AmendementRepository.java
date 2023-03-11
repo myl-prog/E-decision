@@ -13,8 +13,7 @@ import java.util.Optional;
 
 public interface AmendementRepository extends JpaRepository<Amendement, Integer> {
 
-    @Query(
-            value = "SELECT * FROM amendement " +
+    @Query(value = "SELECT * FROM amendement " +
                     "INNER JOIN proposition ON proposition.id = amendement.amend_proposition_id " +
                     "WHERE amendement.id = :amendementId " +
                     "AND proposition.id = :propositionId " +
@@ -22,8 +21,7 @@ public interface AmendementRepository extends JpaRepository<Amendement, Integer>
             nativeQuery = true)
     Optional<Amendement> getProjectPropositionAmendementById(@Param("projectId") int projectId, @Param("propositionId") int propositionId, @Param("amendementId") int amendementId);
 
-    @Query(
-            value = "SELECT * FROM amendement " +
+    @Query(value = "SELECT * FROM amendement " +
                     "INNER JOIN proposition ON proposition.id = amendement.amend_proposition_id " +
                     "WHERE proposition.id = :propositionId " +
                     "AND project_id = :projectId ",
@@ -32,6 +30,13 @@ public interface AmendementRepository extends JpaRepository<Amendement, Integer>
 
     @Transactional
     @Modifying
-    @Query("DELETE from amendement where id = :amendementId")
+    @Query(value = "DELETE from amendement where id = :amendementId",
+            nativeQuery = true)
     void deleteAmendementById(@Param("amendementId") int amendementId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "DELETE FROM amendement WHERE amend_proposition_id = :propositionId",
+            nativeQuery = true)
+    void deleteAmendementsByProposition(@Param("propositionId") int propositionId);
 }

@@ -1,5 +1,6 @@
 package com.example.edecision.model.comment;
 
+import com.example.edecision.model.proposition.PropositionStatus;
 import com.example.edecision.model.user.User;
 import lombok.Data;
 
@@ -7,12 +8,13 @@ import javax.persistence.*;
 import java.util.Date;
 
 @Data
-@Entity
+@Entity(name = "comment")
 @Table(name = "comment")
 public class Comment {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private Integer id;
+    private int id;
 
     @Column(name = "title")
     private String title;
@@ -26,10 +28,17 @@ public class Comment {
     @Column(name = "is_deleted")
     private Boolean isDeleted;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @Column(name = "proposition_id")
+    private int proposition_id;
+
+    @ManyToOne()
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
-    @Column(name = "proposition_id")
-    private Integer proposition;
+    public Comment(){}
+    public Comment(int proposition_id, boolean isDeleted, User user){
+        this.proposition_id = proposition_id;
+        this.isDeleted = isDeleted;
+        this.user = user;
+    }
 }
