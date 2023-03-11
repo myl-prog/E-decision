@@ -1,5 +1,6 @@
 package com.example.edecision.service.proposition;
 
+import com.example.edecision.model.amendement.Amendement;
 import com.example.edecision.model.common.Parameters;
 import com.example.edecision.model.exception.CustomException;
 import com.example.edecision.model.project.Project;
@@ -7,7 +8,9 @@ import com.example.edecision.model.proposition.*;
 import com.example.edecision.model.userProposition.UserProposition;
 import com.example.edecision.model.comment.Comment;
 import com.example.edecision.model.vote.CommentVote;
+import com.example.edecision.model.vote.JudgeVoteResult;
 import com.example.edecision.model.vote.PropositionVote;
+import com.example.edecision.model.vote.VoteType;
 import com.example.edecision.repository.amendement.AmendementRepository;
 import com.example.edecision.repository.comment.CommentRepository;
 import com.example.edecision.repository.project.ProjectRepository;
@@ -270,7 +273,7 @@ public class PropositionService {
         result.teams = proposition.getTeams();
 
         // On vérifie que la proposition n'a pas déjà été escaladée
-        if(proposition.getTeams().stream().count() > 1)
+        if(proposition.getTeams().size() > 1)
             throw new CustomException("The proposal has already been escalated", HttpStatus.FORBIDDEN);
 
         // On vérifie que l'utilisateur fasse parti des utilisateurs des teams
@@ -318,7 +321,7 @@ public class PropositionService {
         result.notVoteUsers = propositionTeamUsers.stream().filter(u -> !commentVotes.stream().anyMatch(v -> v.getUser_id() == u.getId())).collect(Collectors.toList());
 
         // On regarde si tous les utilisateurs veulent escalader
-        result.escalated = result.notVoteUsers.stream().count() == 0;
+        result.escalated = result.notVoteUsers.size() == 0;
 
         // Si tout le monde est ok pour escalader alors on ajoute toutes les teams du projet à la proposition
         if(result.escalated){
@@ -389,7 +392,7 @@ public class PropositionService {
         result.notVoteUsers = propositionUsers.stream().filter(u -> !commentVotes.stream().anyMatch(v -> v.getUser_id() == u.getId())).collect(Collectors.toList());
 
         // On regarde si tous les utilisateurs ont voté
-        result.deleted = result.notVoteUsers.stream().count() == 0;
+        result.deleted = result.notVoteUsers.size() == 0;
 
         if(result.deleted){ // Si tout les utilisateurs ont voté
             userPropositionRepo.deleteUserPropositionsByProposition(propositionId);
@@ -456,6 +459,56 @@ public class PropositionService {
         return propositionVoteRepo.getProjectPropositionVotesById(projectId, propositionId);
     }
 
+    /**
+     * Permet de juger les votes d'une proposition et de ses amendements pour savoir ce qui est validé/refusé
+     *
+     * @param projectId     id du projet
+     * @param propositionId id de la proposition
+     */
+    public JudgeVoteResult judgeProjectProposition(int projectId, int propositionId)
+    {
+        // Objet de retour
+        JudgeVoteResult result = new JudgeVoteResult();
+
+        // Variables qui vont nous servir pour savoir si il est temps de juger la proposition
+        LocalDateTime localDateTime = LocalDateTime.now();
+        Date now = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+
+        // Récupération de l'utilisateur qui veut supprimer la proposition
+        User currentUser = Common.GetCurrentUser();
+
+        // Permet de récupérer la proposition et générer une erreur si elle n'existe pas
+        Proposition proposition = getProjectPropositionById(projectId, propositionId);
+
+        // On vérifie que la proposition n'ai pas déjà été jugée
+        if(proposition.getProposition_status().getId() > 1)
+            throw new CustomException("The proposal has already been judged", HttpStatus.FORBIDDEN);
+
+        // On vérifie que la proposition ne soit plus dans les délais d'amendement / de votes
+        if(proposition.getEnd_time().after(now))
+            throw new CustomException("It is not yet time to judge this proposal and its amendments", HttpStatus.FORBIDDEN);
+
+        // On vérifie que l'utilisateur fasse parti des créateurs de la proposition
+        if(!proposition.getUsers().stream().anyMatch(u -> u.getId() == currentUser.getId()))
+            throw new CustomException("You do not have the right to judge this proposal", HttpStatus.FORBIDDEN);
+
+        // On récupère tous les amendements à juger avec la proposition
+        List<Amendement> propositionAmendements = amendementRepo.getProjectPropositionAmendements(projectId, propositionId);
+
+        // Gestion de la proposition
+        proposition.setProposition_status(propositionStatusRepo.getById(judgeVotes(propositionVoteRepo.getProjectPropositionVotesById(projectId, propositionId), proposition.getTeams())));
+        propositionRepo.save(proposition);
+
+        // Gestion des amendements
+        propositionAmendements.forEach(a -> {
+            a.setAmendement_status(propositionStatusRepo.getById(judgeVotes(propositionVoteRepo.getProjectPropositionAmendementVotesById(projectId, propositionId, a.getId()), proposition.getTeams())));
+            amendementRepo.save(a);
+        });
+
+        result.setProposition(getProjectPropositionById(projectId, propositionId));
+        return result;
+    }
+
     // =============
     // === Utils ===
     // =============
@@ -485,6 +538,38 @@ public class PropositionService {
         else
             return true;
 
+    }
+
+    /**
+     * Détermine, avec les votes, si une proposition ou un amendement est accepté ou décliné
+     *
+     * @param votes     votes
+     * @param teams     équipes concernées
+     */
+    private int judgeVotes(List<PropositionVote> votes, List<Team> teams)
+    {
+        int validatedStatus = 2;
+        int declinedStatus = 3;
+
+        int totalVote = (int)votes.size();
+        int totalVoteOk = (int)votes.stream().filter(v -> v.getVote_type().getId() == 1).count();
+        int minVotes;
+
+        // Le niveau à la communauté n'est pas encore géré
+
+        if(teams.size() == 1) // Une proposition à l'échelle d'une équipe sera adoptée à la majorité simple (50%+1 voix pour)
+        {
+            minVotes = (int)(totalVote * 0.5) + 1;
+        }
+        else // À l'échelle d'un projet à la majorité qualifiée de 60% (60%+1 voix pour)
+        {
+            minVotes = (int)(totalVote * 0.6) + 1;
+        }
+
+        if(totalVoteOk >= minVotes)
+            return validatedStatus;
+        else
+            return declinedStatus;
     }
 
 }

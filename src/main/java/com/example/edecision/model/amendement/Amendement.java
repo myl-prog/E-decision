@@ -2,6 +2,7 @@ package com.example.edecision.model.amendement;
 
 import com.example.edecision.model.proposition.Proposition;
 import com.example.edecision.model.user.User;
+import com.example.edecision.model.vote.PropositionStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
@@ -21,6 +22,10 @@ public class Amendement {
 
     @Column(name = "content")
     private String content;
+
+    @ManyToOne()
+    @JoinColumn(name = "amendement_status", referencedColumnName = "id")
+    private PropositionStatus amendement_status;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "amend_proposition_id", referencedColumnName = "id")

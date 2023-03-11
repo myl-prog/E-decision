@@ -7,6 +7,7 @@ import com.example.edecision.model.project.ProjectUser;
 import com.example.edecision.model.amendement.AmendementBody;
 import com.example.edecision.model.proposition.*;
 import com.example.edecision.model.user.UserRoleBody;
+import com.example.edecision.model.vote.JudgeVoteResult;
 import com.example.edecision.model.vote.PropositionVote;
 import com.example.edecision.service.amendement.AmendementService;
 import com.example.edecision.service.project.ProjectService;
@@ -110,6 +111,11 @@ public class ProjectController {
     @PostMapping("/projects/{projectId}/propositions/{propositionId}/votes")
     public ResponseEntity<List<PropositionVote>> voteProjectProposition(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @RequestBody PropositionVoteBody voteBody) {
         return ResponseEntity.status(HttpStatus.OK).body(propositionService.voteProjectProposition(projectId, propositionId, voteBody));
+    }
+
+    @PostMapping("/projects/{projectId}/propositions/{propositionId}/judge")
+    public ResponseEntity<JudgeVoteResult> judgeProjectProposition(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId) {
+        return ResponseEntity.status(HttpStatus.OK).body(propositionService.judgeProjectProposition(projectId, propositionId));
     }
 
     // ===================================
