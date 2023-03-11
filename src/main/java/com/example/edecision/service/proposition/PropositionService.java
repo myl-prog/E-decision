@@ -274,8 +274,6 @@ public class PropositionService {
         Comment deletedComment = null;
         Optional<Comment> optionalDeletedComment = commentRepo.getPropositionDeletedComment(projectId, propositionId);
 
-        System.out.println("J'ai passé 1");
-
         if(optionalDeletedComment.isPresent()){ // Si un utilisateur gestionnaire de la prop a déjà fait une proposition de suppression
 
             // On récupère le commentaire de suppression
@@ -290,10 +288,6 @@ public class PropositionService {
 
         }
         else{
-
-            System.out.println("J'ai passé 2");
-            System.out.println(currentUser);
-
             // On créé le commentaire de suppression
             deletedComment = commentRepo.save(new Comment(propositionId, true, currentUser));
 
