@@ -22,7 +22,7 @@ public class Comment {
     private String content;
 
     @Column(name = "date")
-    private Date description;
+    private Date date;
 
     @Column(name = "is_escalated")
     private Boolean isEscalated;
@@ -38,6 +38,11 @@ public class Comment {
     private User user;
 
     public Comment(){}
+    public Comment(int proposition_id, String title, String content){
+        this.proposition_id = proposition_id;
+        this.title = title;
+        this.content = content;
+    }
     public Comment(int proposition_id, boolean isEscalated, boolean isDeleted, User user){
         this.proposition_id = proposition_id;
         this.isDeleted = isDeleted;

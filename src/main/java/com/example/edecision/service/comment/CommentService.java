@@ -1,6 +1,7 @@
 package com.example.edecision.service.comment;
 
 import com.example.edecision.model.comment.Comment;
+import com.example.edecision.model.comment.CommentBody;
 import com.example.edecision.repository.comment.CommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,33 +12,21 @@ import java.util.List;
 @Service
 public class CommentService {
     @Autowired
-    public CommentRepository commentRepository;
+    public CommentRepository commentRepo;
 
-    /*public List<Comment> getAll() {
-        return commentRepository.findAll();
+    public List<Comment> getProjectPropositionCommentsById(int projectId, int propositionId){
+        return new ArrayList<Comment>();
     }
 
-    public Comment getComment(Integer id) {
-        return commentRepository.findById(id).get();
+    public Comment createProjectPropositionComment(int projectId, int propositionId, CommentBody body){
+        return new Comment(propositionId, body.getTitle(), body.getContent());
     }
 
-    public Comment createComment(Comment comment, Integer id) {
-        comment.setProposition(id);
-        return commentRepository.save(comment);
+    public Comment updateProjectPropositionComment(int projectId, int propositionId, int commentId, CommentBody body){
+        return new Comment(propositionId, body.getTitle(), body.getContent());
     }
 
-    public void deleteUser(Integer id) {
-        commentRepository.deleteById(id);
+    public void deleteProjectPropositionCommentById(int projectId, int propositionId, int commentId){
     }
 
-    public List<Comment> getCommentsByPropositionID(Integer id) {
-        List<Comment> comments = commentRepository.findAll();
-        List<Comment> commentsByPropositionID = new ArrayList<>();
-        for (Comment comment : comments) {
-            if (comment.getProposition() == id) {
-                commentsByPropositionID.add(comment);
-            }
-        }
-        return commentsByPropositionID;
-    }*/
 }

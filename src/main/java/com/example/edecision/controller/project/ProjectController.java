@@ -1,6 +1,8 @@
 package com.example.edecision.controller.project;
 
 import com.example.edecision.model.amendement.Amendement;
+import com.example.edecision.model.comment.Comment;
+import com.example.edecision.model.comment.CommentBody;
 import com.example.edecision.model.project.Project;
 import com.example.edecision.model.project.ProjectBody;
 import com.example.edecision.model.project.ProjectUser;
@@ -10,6 +12,7 @@ import com.example.edecision.model.user.UserRoleBody;
 import com.example.edecision.model.vote.JudgeVoteResult;
 import com.example.edecision.model.vote.PropositionVote;
 import com.example.edecision.service.amendement.AmendementService;
+import com.example.edecision.service.comment.CommentService;
 import com.example.edecision.service.project.ProjectService;
 import com.example.edecision.service.proposition.PropositionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +33,8 @@ public class ProjectController {
     @Autowired
     public AmendementService amendementService;
 
+    @Autowired
+    public CommentService commentService;
 
     // ========================
     // ======= Projects =======
@@ -116,6 +121,31 @@ public class ProjectController {
     @PostMapping("/projects/{projectId}/propositions/{propositionId}/judge")
     public ResponseEntity<JudgeVoteResult> judgeProjectProposition(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId) {
         return ResponseEntity.status(HttpStatus.OK).body(propositionService.judgeProjectProposition(projectId, propositionId));
+    }
+
+    // ====================================
+    // === Project proposition comments ===
+    // ====================================
+
+    @GetMapping("/projects/{projectId}/propositions/{propositionId}/comments")
+    public ResponseEntity<List<Comment>> getProjectPropositionComments(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId) {
+        return ResponseEntity.status(HttpStatus.OK).body(commentService.getProjectPropositionCommentsById(projectId, propositionId));
+    }
+
+    @PostMapping("/projects/{projectId}/propositions/{propositionId}/comments")
+    public ResponseEntity<Comment> createProjectPropositionComment(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @RequestBody CommentBody commentBody) {
+        return ResponseEntity.status(HttpStatus.OK).body(commentService.createProjectPropositionComment(projectId, propositionId, commentBody));
+    }
+
+    @PutMapping("/projects/{projectId}/propositions/{propositionId}/comments/{commentId}")
+    public ResponseEntity<Comment> updateProjectPropositionComment(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @PathVariable("commentId") int commentId,  @RequestBody CommentBody commentBody) {
+        return ResponseEntity.status(HttpStatus.OK).body(commentService.updateProjectPropositionComment(projectId, propositionId, commentId, commentBody));
+    }
+
+    @DeleteMapping("/projects/{projectId}/propositions/{propositionId}/comments/{commentId}")
+    public ResponseEntity<HttpStatus> getProjectPropositionComments(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @PathVariable("commentId") int commentId) {
+        commentService.deleteProjectPropositionCommentById(projectId, propositionId, commentId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     // ===================================
