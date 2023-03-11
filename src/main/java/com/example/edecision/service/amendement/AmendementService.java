@@ -5,10 +5,13 @@ import com.example.edecision.model.amendement.AmendementBody;
 import com.example.edecision.model.exception.CustomException;
 import com.example.edecision.model.proposition.Proposition;
 import com.example.edecision.model.proposition.PropositionBody;
+import com.example.edecision.model.proposition.PropositionVoteBody;
 import com.example.edecision.model.team.Team;
 import com.example.edecision.model.user.User;
 import com.example.edecision.model.userProposition.UserProposition;
+import com.example.edecision.model.vote.PropositionVote;
 import com.example.edecision.repository.amendement.AmendementRepository;
+import com.example.edecision.repository.vote.PropositionVoteRepository;
 import com.example.edecision.service.project.ProjectService;
 import com.example.edecision.service.proposition.PropositionService;
 import com.example.edecision.service.user.UserService;
@@ -28,6 +31,8 @@ public class AmendementService {
 
     @Autowired
     public AmendementRepository amendementRepo;
+    @Autowired
+    public PropositionVoteRepository propositionVoteRepo;
 
     @Autowired
     public PropositionService propositionService;
@@ -85,7 +90,7 @@ public class AmendementService {
             // Récupération de la proposition concernée
             Proposition proposition = propositionService.getProjectPropositionById(projectId, propositionId);
             boolean propositionIsEditable = proposition.getIsEditable();
-            boolean propositionIsVoteable = proposition.getIsEditable();
+            boolean propositionIsVoteable = proposition.getIsVoteable();
 
             // Permet de savoir si l'amendement peut être voté et modifié pour l'utilisateur connecté
             propositionAmendements.stream().forEach( a -> {
@@ -184,5 +189,57 @@ public class AmendementService {
             throw new CustomException("You do not have the right to delete this proposal amendement", HttpStatus.FORBIDDEN);
 
         amendementRepo.deleteAmendementById(amendementId);
+    }
+
+    // =======================
+    // === Amendement vote ===
+    // =======================
+
+    /**
+     * Permet de récupérer les votes d'un amendement
+     *
+     * @param projectId     id du projet
+     * @param propositionId id de la proposition
+     * @param amendementId  id de l'amendement
+     */
+    public List<PropositionVote> getProjectPropositionAmendementVotesById(int projectId, int propositionId, int amendementId)
+    {
+        // Permet de récupérer l'amendement et générer une erreur si existe pas
+        Amendement amendement = getProjectPropositionAmendementById(projectId, propositionId, amendementId);
+
+        return propositionVoteRepo.getProjectPropositionAmendementVotesById(projectId, propositionId, amendementId);
+    }
+
+    /**
+     * Permet de voter un amendement si l'utilisateur a le droit et que c'est dans les délais de la proposition
+     *
+     * @param projectId     id du projet
+     * @param propositionId id de la proposition
+     * @param amendementId  id de l'amendement
+     * @param body          vote de l'utilisateur
+     */
+    public List<PropositionVote> voteProjectPropositionAmendement(int projectId, int propositionId, int amendementId, PropositionVoteBody body)
+    {
+        // Récupération de l'utilisateur qui veut voter l'amendement
+        User currentUser = Common.GetCurrentUser();
+
+        // Permet de récupérer l'amendement et générer une erreur si il n'existe pas
+        Amendement amendement = getProjectPropositionAmendementById(projectId, propositionId, amendementId);
+
+        // On vérifie que l'amendement soit en période de vote et accessible par l'utilisateur
+        if(!amendement.getIsVoteable())
+            throw new CustomException("You do not have the right to vote this amendement", HttpStatus.FORBIDDEN);
+
+        // On récupère la liste des votes déjà existant
+        List<PropositionVote> amendementVotes = propositionVoteRepo.getProjectPropositionAmendementVotesById(projectId, propositionId, amendementId);
+
+        // On vérifie que l'utilisateur n'ai pas déjà voté pour cet amendement
+        if(amendementVotes != null && amendementVotes.stream().anyMatch(v -> v.getUser().getId() == currentUser.getId()))
+            throw new CustomException("You have already voted for this amendement", HttpStatus.FORBIDDEN);
+
+        // Si tout est bon alors on ajoute son vote
+        propositionVoteRepo.createProjectPropositionAmendementVote(currentUser.getId(), propositionId, amendementId, body.getVote_type().getId());
+
+        return propositionVoteRepo.getProjectPropositionAmendementVotesById(projectId, propositionId, amendementId);
     }
 }

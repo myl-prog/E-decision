@@ -22,14 +22,13 @@ public class PropositionVote {
     @JsonIgnore
     private int proposition_id;
 
+    @Id
+    @Column(name = "amendement_id")
+    @JsonIgnore
+    private int amendement_id;
+
     @ManyToOne()
     @JoinColumn(name = "vote_type_id", referencedColumnName = "id")
     private VoteType vote_type;
 
-    public PropositionVote(){}
-    public PropositionVote(User user, int proposition_id, VoteType vote_type){
-        this.user = user;
-        this.proposition_id = proposition_id;
-        this.vote_type = vote_type;
-    }
 }
