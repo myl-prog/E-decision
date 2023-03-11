@@ -5,10 +5,7 @@ import com.example.edecision.model.project.Project;
 import com.example.edecision.model.project.ProjectBody;
 import com.example.edecision.model.project.ProjectUser;
 import com.example.edecision.model.amendement.AmendementBody;
-import com.example.edecision.model.proposition.DeletePropositionResult;
-import com.example.edecision.model.proposition.Proposition;
-import com.example.edecision.model.proposition.PropositionBody;
-import com.example.edecision.model.proposition.PropositionVoteBody;
+import com.example.edecision.model.proposition.*;
 import com.example.edecision.model.user.UserRoleBody;
 import com.example.edecision.model.vote.PropositionVote;
 import com.example.edecision.service.amendement.AmendementService;
@@ -89,6 +86,11 @@ public class ProjectController {
     @PutMapping("/projects/{projectId}/propositions/{propositionId}")
     public ResponseEntity<Proposition> updateProjectProposition(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @RequestBody PropositionBody propositionBody) {
         return ResponseEntity.status(HttpStatus.OK).body(propositionService.updateProjectPropositionById(projectId, propositionId, propositionBody));
+    }
+
+    @PostMapping("/projects/{projectId}/propositions/{propositionId}/escalate")
+    public ResponseEntity<EscalatePropositionResult> escalateProjectProposition(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId) {
+        return ResponseEntity.status(HttpStatus.OK).body(propositionService.escalateProjectProposition(projectId, propositionId));
     }
 
     @DeleteMapping("/projects/{projectId}/propositions/{propositionId}")

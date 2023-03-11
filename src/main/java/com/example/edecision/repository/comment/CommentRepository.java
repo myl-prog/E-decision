@@ -16,9 +16,18 @@ public interface CommentRepository extends JpaRepository<Comment, Integer> {
     @Query(value = "SELECT * FROM comment " +
                     "INNER JOIN proposition ON proposition.id = comment.proposition_id " +
                     "WHERE proposition.id = :propositionId " +
-                    "AND project_id = :projectId ",
+                    "AND project_id = :projectId " +
+                    "AND is_deleted = 1",
             nativeQuery = true)
     Optional<Comment> getPropositionDeletedComment(@Param("projectId") int projectId, @Param("propositionId") int propositionId);
+
+    @Query(value = "SELECT * FROM comment " +
+                    "INNER JOIN proposition ON proposition.id = comment.proposition_id " +
+                    "WHERE proposition.id = :propositionId " +
+                    "AND project_id = :projectId " +
+                    "AND is_escalated = 1",
+            nativeQuery = true)
+    Optional<Comment> getPropositionEscalateComment(@Param("projectId") int projectId, @Param("propositionId") int propositionId);
 
     @Transactional
     @Modifying

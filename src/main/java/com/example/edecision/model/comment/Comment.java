@@ -24,6 +24,9 @@ public class Comment {
     @Column(name = "date")
     private Date description;
 
+    @Column(name = "is_escalated")
+    private Boolean isEscalated;
+
     @Column(name = "is_deleted")
     private Boolean isDeleted;
 
@@ -35,9 +38,10 @@ public class Comment {
     private User user;
 
     public Comment(){}
-    public Comment(int proposition_id, boolean isDeleted, User user){
+    public Comment(int proposition_id, boolean isEscalated, boolean isDeleted, User user){
         this.proposition_id = proposition_id;
         this.isDeleted = isDeleted;
+        this.isEscalated = isEscalated;
         this.user = user;
     }
 }

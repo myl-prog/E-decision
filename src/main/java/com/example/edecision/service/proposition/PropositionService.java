@@ -252,6 +252,85 @@ public class PropositionService {
     }
 
     /**
+     * Permet d'escalader une proposition, actuellement seulement d'une proposition → à toutes celles du projet (1 niveau d'escalade au lieu de 2)
+     *
+     * @param projectId     id du projet
+     * @param propositionId id de la proposition
+     */
+    public EscalatePropositionResult escalateProjectProposition(int projectId, int propositionId)
+    {
+        // Objet de retour
+        EscalatePropositionResult result = new EscalatePropositionResult();
+
+        // Récupération de l'utilisateur qui veut escalader la proposition
+        User currentUser = Common.GetCurrentUser();
+
+        // Permet de récupérer la proposition et générer une erreur si elle n'existe pas
+        Proposition proposition = getProjectPropositionById(projectId, propositionId);
+        result.teams = proposition.getTeams();
+
+        // On vérifie que la proposition n'a pas déjà été escaladée
+        if(proposition.getTeams().stream().count() > 1)
+            throw new CustomException("The proposal has already been escalated", HttpStatus.FORBIDDEN);
+
+        // On vérifie que l'utilisateur fasse parti des utilisateurs des teams
+        if(!userService.isUserInTeams(currentUser.getId(), proposition.getTeams()))
+            throw new CustomException("You do not have the right to escalate this proposal", HttpStatus.FORBIDDEN);
+
+        // Récupère le commentaire de suppression s'il existe déjà
+        Comment escalatedComment = null;
+        Optional<Comment> optionalEscalatedComment = commentRepo.getPropositionEscalateComment(projectId, propositionId);
+
+        if(optionalEscalatedComment.isPresent()){ // Si un utilisateur a déjà fait la proposition d'escalade
+
+            // On récupère le commentaire d'escalade
+            escalatedComment = optionalEscalatedComment.get();
+
+            // On récupère les votes déjà existant sur ce commentaire d'escalade
+            List<CommentVote> commentVotes = commentVoteRepo.getCommentVotes(escalatedComment.getId());
+
+            // On vérifie si l'utilisateur courant a déjà voté ou non pour l'escalade
+            if(commentVotes != null && commentVotes.stream().anyMatch(v -> v.getUser_id() == currentUser.getId()))
+                throw new CustomException("You have already voted to escalate this proposal", HttpStatus.FORBIDDEN);
+        }
+        else{
+            // On créé le commentaire d'escalade
+            escalatedComment = commentRepo.save(new Comment(propositionId, true, false, currentUser));
+        }
+
+        // On ajoute le vote de l'utilisateur courant
+        commentVoteRepo.save(new CommentVote(currentUser.getId(), escalatedComment.getId(), voteTypeRepo.getById(1)));
+
+        // On récupère la liste des votes pour ce commentaire de suppression
+        List<CommentVote> commentVotes = commentVoteRepo.getCommentVotes(escalatedComment.getId());
+
+        // On récupère la liste des utilisateurs qui doivent voter pour ce commentaire afin que la prop soit escaladée
+        List<User> propositionTeamUsers = new ArrayList<User>();
+        for (Team team : proposition.getTeams()) {
+            propositionTeamUsers.addAll(team.getUsers()); // Ne marche pas en lambda...
+        }
+        propositionTeamUsers = propositionTeamUsers.stream().distinct().collect(Collectors.toList());
+
+        // On récupère les utilisateurs qui veulent escalader
+        result.voteUsers = propositionTeamUsers.stream().filter(u -> commentVotes.stream().anyMatch(v -> v.getUser_id() == u.getId())).collect(Collectors.toList());
+
+        // On récupère les utilisateurs qui ne veulent pas encore escalader
+        result.notVoteUsers = propositionTeamUsers.stream().filter(u -> !commentVotes.stream().anyMatch(v -> v.getUser_id() == u.getId())).collect(Collectors.toList());
+
+        // On regarde si tous les utilisateurs veulent escalader
+        result.escalated = result.notVoteUsers.stream().count() == 0;
+
+        // Si tout le monde est ok pour escalader alors on ajoute toutes les teams du projet à la proposition
+        if(result.escalated){
+            List<Team> projectTeams = teamRepo.getTeamsByProject(projectId);
+            projectTeams.stream().filter(t -> !proposition.getTeams().contains(t)).forEach(t -> teamPropositionRepo.createTeamProposition(propositionId, t.getId()));
+            result.teams = projectTeams;
+        }
+
+        return result;
+    }
+
+    /**
      * Permet de supprimer et/ou proposer la suppression d'une proposition, il faut que toutes les personnes qui l'ont créées soit ok
      *
      * @param projectId     id du projet
@@ -291,8 +370,7 @@ public class PropositionService {
         }
         else{
             // On créé le commentaire de suppression
-            deletedComment = commentRepo.save(new Comment(propositionId, true, currentUser));
-
+            deletedComment = commentRepo.save(new Comment(propositionId, false, true, currentUser));
         }
 
         // On ajoute le vote de l'utilisateur courant
@@ -324,7 +402,6 @@ public class PropositionService {
         }
 
         return result;
-
     }
 
     // ================================
