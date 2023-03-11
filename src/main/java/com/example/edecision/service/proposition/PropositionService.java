@@ -254,8 +254,8 @@ public class PropositionService {
     /**
      * Permet de supprimer et/ou proposer la suppression d'une proposition, il faut que toutes les personnes qui l'ont créées soit ok
      *
-     * @param projectId     projectId
-     * @param propositionId proposition id
+     * @param projectId     id du projet
+     * @param propositionId id de la proposition
      */
     public DeletePropositionResult deleteProjectProposition(int projectId, int propositionId)
     {
@@ -327,6 +327,32 @@ public class PropositionService {
 
     }
 
+    // ================================
+    // === Project proposition vote ===
+    // ================================
+
+    /**
+     * Permet de récupérer les votes d'une proposition
+     *
+     * @param projectId     id du projet
+     * @param propositionId id de la proposition
+     */
+    public List<PropositionVote> getProjectPropositionVotesById(int projectId, int propositionId)
+    {
+
+        // Permet de récupérer la proposition et générer une erreur si elle n'existe pas
+        Proposition proposition = getProjectPropositionById(projectId, propositionId);
+
+        return propositionVoteRepo.getProjectPropositionVotesById(projectId, propositionId);
+    }
+
+    /**
+     * Permet de voter une proposition si l'utilisateur a le droit et que c'est dans les délais
+     *
+     * @param projectId     id du projet
+     * @param propositionId id de la proposition
+     * @param body          vote de l'utilisateur
+     */
     public List<PropositionVote> voteProjectProposition(int projectId, int propositionId, PropositionVoteBody body)
     {
 
@@ -346,8 +372,6 @@ public class PropositionService {
         // On vérifie que l'utilisateur n'ai pas déjà voté pour cette proposition
         if(propositionVotes != null && propositionVotes.stream().anyMatch(v -> v.getUser().getId() == currentUser.getId()))
             throw new CustomException("You have already voted for this proposal", HttpStatus.FORBIDDEN);
-
-        System.out.println("Hola");
 
         // Si tout est bon alors on ajoute son vote
         propositionVoteRepo.createProjectPropositionVote(currentUser.getId(), propositionId, body.getVote_type().getId());

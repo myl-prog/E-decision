@@ -130,9 +130,14 @@ public class ProjectController {
     // === Project proposition votes ===
     // =================================
 
+    @GetMapping("/projects/{projectId}/propositions/{propositionId}/votes")
+    public ResponseEntity<List<PropositionVote>> getProjectPropositionVotes(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId) {
+        return ResponseEntity.status(HttpStatus.OK).body(propositionService.getProjectPropositionVotesById(projectId, propositionId));
+    }
+
     @PostMapping("/projects/{projectId}/propositions/{propositionId}/votes")
     public ResponseEntity<List<PropositionVote>> voteProjectProposition(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @RequestBody PropositionVoteBody voteBody) {
-        return ResponseEntity.status(HttpStatus.OK).body(amendementService.propositionService.voteProjectProposition(projectId, propositionId, voteBody));
+        return ResponseEntity.status(HttpStatus.OK).body(propositionService.voteProjectProposition(projectId, propositionId, voteBody));
     }
 
 }
