@@ -177,7 +177,7 @@ public class PropositionService {
      * @param projectId       id du projet
      * @param propositionId   id de la proposition
      * @param propositionBody objet de la proposition
-     * @return la modification mise à jour
+     * @return la proposition mise à jour
      */
     public Proposition updateProjectPropositionById(int projectId, int propositionId, PropositionBody propositionBody) {
 

@@ -79,12 +79,12 @@ public class ProjectController {
     }
 
     @PostMapping("/projects/{projectId}/propositions")
-    public ResponseEntity<Proposition> createProposition(@PathVariable("projectId") int projectId, @RequestBody PropositionBody propositionBody) {
+    public ResponseEntity<Proposition> createProjectProposition(@PathVariable("projectId") int projectId, @RequestBody PropositionBody propositionBody) {
         return ResponseEntity.status(HttpStatus.CREATED).body(propositionService.createProjectProposition(projectId, propositionBody));
     }
 
     @PutMapping("/projects/{projectId}/propositions/{propositionId}")
-    public ResponseEntity<Proposition> updateProposition(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @RequestBody PropositionBody propositionBody) {
+    public ResponseEntity<Proposition> updateProjectProposition(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @RequestBody PropositionBody propositionBody) {
         return ResponseEntity.status(HttpStatus.OK).body(propositionService.updateProjectPropositionById(projectId, propositionId, propositionBody));
     }
 
@@ -98,9 +98,29 @@ public class ProjectController {
     // = Project proposition amendements =
     // ===================================
 
+    @GetMapping("/projects/{projectId}/propositions/{propositionId}/amendements")
+    public ResponseEntity<List<Amendement>> getProjectPropositionAmendements(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId) {
+        return ResponseEntity.status(HttpStatus.OK).body(amendementService.getProjectPropositionAmendements(projectId, propositionId));
+    }
+
+    @GetMapping("/projects/{projectId}/propositions/{propositionId}/amendements/{amendementId}")
+    public ResponseEntity<Amendement> getProjectPropositionAmendement(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @PathVariable("amendementId") int amendementId) {
+        return ResponseEntity.status(HttpStatus.OK).body(amendementService.getProjectPropositionAmendementById(projectId, propositionId, amendementId));
+    }
+
     @PostMapping("/projects/{projectId}/propositions/{propositionId}/amendements")
-    public ResponseEntity<Amendement> amendProposition(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @RequestBody AmendementBody amendBody) {
+    public ResponseEntity<Amendement> createProjectPropositionAmendement(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @RequestBody AmendementBody amendBody) {
         return ResponseEntity.status(HttpStatus.OK).body(amendementService.createProjectPropositionAmendement(projectId, propositionId, amendBody));
     }
 
+    @PutMapping("/projects/{projectId}/propositions/{propositionId}/amendements/{amendementId}")
+    public ResponseEntity<Amendement> updateProjectPropositionAmendement(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @PathVariable("amendementId") int amendementId, @RequestBody AmendementBody amendBody) {
+        return ResponseEntity.status(HttpStatus.OK).body(amendementService.updateProjectPropositionAmendementById(projectId, propositionId, amendementId, amendBody));
+    }
+
+    @DeleteMapping("/projects/{projectId}/propositions/{propositionId}/amendements/{amendementId}")
+    public ResponseEntity<HttpStatus> updateProjectPropositionAmendement(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @PathVariable("amendementId") int amendementId) {
+        amendementService.deleteProjectPropositionAmendementById(projectId, propositionId, amendementId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
