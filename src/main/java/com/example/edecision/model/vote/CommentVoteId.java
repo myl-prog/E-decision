@@ -1,11 +1,14 @@
 package com.example.edecision.model.vote;
 
+import lombok.Data;
+
 import java.io.Serializable;
 
+@Data
 public class CommentVoteId implements Serializable {
 
-    public int user_id;
-    public int comment_id;
+    private int user_id;
+    private int comment_id;
 
     public CommentVoteId(){}
     public CommentVoteId(int user_id, int comment_id) {

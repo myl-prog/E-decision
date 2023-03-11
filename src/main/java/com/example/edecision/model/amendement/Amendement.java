@@ -1,14 +1,11 @@
 package com.example.edecision.model.amendement;
 
 import com.example.edecision.model.proposition.Proposition;
-import com.example.edecision.model.proposition.PropositionStatus;
 import com.example.edecision.model.user.User;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.util.Date;
-import java.util.List;
 
 @Data
 @Entity(name = "amendement")

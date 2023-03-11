@@ -3,22 +3,22 @@ package com.example.edecision.service.proposition;
 import com.example.edecision.model.common.Parameters;
 import com.example.edecision.model.exception.CustomException;
 import com.example.edecision.model.project.Project;
-import com.example.edecision.model.proposition.DeletePropositionResult;
-import com.example.edecision.model.proposition.PropositionBody;
+import com.example.edecision.model.proposition.*;
 import com.example.edecision.model.userProposition.UserProposition;
 import com.example.edecision.model.comment.Comment;
 import com.example.edecision.model.vote.CommentVote;
+import com.example.edecision.model.vote.PropositionVote;
 import com.example.edecision.repository.amendement.AmendementRepository;
 import com.example.edecision.repository.comment.CommentRepository;
 import com.example.edecision.repository.project.ProjectRepository;
 import com.example.edecision.repository.vote.CommentVoteRepository;
+import com.example.edecision.repository.vote.PropositionVoteRepository;
 import com.example.edecision.repository.vote.VoteTypeRepository;
 import com.example.edecision.service.team.TeamService;
 import com.example.edecision.service.user.UserService;
 import com.example.edecision.utils.Common;
 import com.example.edecision.model.team.Team;
 import com.example.edecision.model.user.User;
-import com.example.edecision.model.proposition.Proposition;
 import com.example.edecision.repository.proposition.PropositionRepository;
 import com.example.edecision.repository.proposition.PropositionStatusRepository;
 import com.example.edecision.repository.team.TeamRepository;
@@ -31,10 +31,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -73,6 +70,9 @@ public class PropositionService {
 
     @Autowired
     public AmendementRepository amendementRepo;
+
+    @Autowired
+    public PropositionVoteRepository propositionVoteRepo;
 
     @Autowired
     public UserService userService;
@@ -122,8 +122,10 @@ public class PropositionService {
 
         // Permet de savoir, pour un utilisateur, si la proposition peut être modifiée et/ou votée
         boolean isUserInTeamsProposition = userService.isUserInTeams(currentUser.getId(), teamPropositionList);
-        proposition.setIsEditable(proposition.getEnd_time().getTime() > System.currentTimeMillis() && proposition.getProposition_status().getId() == 1 && isUserInTeamsProposition && checkAmendDelay(proposition, false, true));
-        proposition.setIsVoteable(proposition.getEnd_time().getTime() > System.currentTimeMillis() && proposition.getProposition_status().getId() == 1 && isUserInTeamsProposition && checkAmendDelay(proposition, true, false));
+        boolean isUserInUsersProposition = users.stream().anyMatch(u -> u.getId() == currentUser.getId());
+
+        proposition.setIsEditable(proposition.getEnd_time().getTime() > System.currentTimeMillis() && proposition.getProposition_status().getId() == 1 && (isUserInTeamsProposition || isUserInUsersProposition) && checkAmendDelay(proposition, false, true));
+        proposition.setIsVoteable(proposition.getEnd_time().getTime() > System.currentTimeMillis() && proposition.getProposition_status().getId() == 1 && (isUserInTeamsProposition || isUserInUsersProposition) && checkAmendDelay(proposition, true, false));
 
         return proposition;
     }
@@ -324,6 +326,38 @@ public class PropositionService {
         return result;
 
     }
+
+    public List<PropositionVote> voteProjectProposition(int projectId, int propositionId, PropositionVoteBody body)
+    {
+
+        // Récupération de l'utilisateur qui veut voter la proposition
+        User currentUser = Common.GetCurrentUser();
+
+        // Permet de récupérer la proposition et générer une erreur si elle n'existe pas
+        Proposition proposition = getProjectPropositionById(projectId, propositionId);
+
+        // On vérifie que la proposition soit en période de vote et accessible par l'utilisateur
+        if(!proposition.getIsVoteable())
+            throw new CustomException("You do not have the right to vote this proposal", HttpStatus.FORBIDDEN);
+
+        // On récupère la liste des votes déjà existant
+        List<PropositionVote> propositionVotes = propositionVoteRepo.getProjectPropositionVotesById(projectId, propositionId);
+
+        // On vérifie que l'utilisateur n'ai pas déjà voté pour cette proposition
+        if(propositionVotes != null && propositionVotes.stream().anyMatch(v -> v.getUser().getId() == currentUser.getId()))
+            throw new CustomException("You have already voted for this proposal", HttpStatus.FORBIDDEN);
+
+        System.out.println("Hola");
+
+        // Si tout est bon alors on ajoute son vote
+        propositionVoteRepo.createProjectPropositionVote(currentUser.getId(), propositionId, body.getVote_type().getId());
+
+        return propositionVoteRepo.getProjectPropositionVotesById(projectId, propositionId);
+    }
+
+    // =============
+    // === Utils ===
+    // =============
 
     private void createUsersProposition(List<Integer> users, int proposition) {
         int currentUserId = Common.GetCurrentUser().getId();

@@ -1,6 +1,5 @@
 package com.example.edecision.model.vote;
 
-import com.example.edecision.model.proposition.PropositionStatus;
 import lombok.Data;
 
 import javax.persistence.*;

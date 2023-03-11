@@ -8,7 +8,9 @@ import com.example.edecision.model.amendement.AmendementBody;
 import com.example.edecision.model.proposition.DeletePropositionResult;
 import com.example.edecision.model.proposition.Proposition;
 import com.example.edecision.model.proposition.PropositionBody;
+import com.example.edecision.model.proposition.PropositionVoteBody;
 import com.example.edecision.model.user.UserRoleBody;
+import com.example.edecision.model.vote.PropositionVote;
 import com.example.edecision.service.amendement.AmendementService;
 import com.example.edecision.service.project.ProjectService;
 import com.example.edecision.service.proposition.PropositionService;
@@ -123,4 +125,14 @@ public class ProjectController {
         amendementService.deleteProjectPropositionAmendementById(projectId, propositionId, amendementId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    // =================================
+    // === Project proposition votes ===
+    // =================================
+
+    @PostMapping("/projects/{projectId}/propositions/{propositionId}/votes")
+    public ResponseEntity<List<PropositionVote>> voteProjectProposition(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @RequestBody PropositionVoteBody voteBody) {
+        return ResponseEntity.status(HttpStatus.OK).body(amendementService.propositionService.voteProjectProposition(projectId, propositionId, voteBody));
+    }
+
 }

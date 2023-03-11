@@ -1,6 +1,5 @@
 package com.example.edecision.model.comment;
 
-import com.example.edecision.model.proposition.PropositionStatus;
 import com.example.edecision.model.user.User;
 import lombok.Data;
 
