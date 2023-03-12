@@ -170,7 +170,7 @@ public class PropositionService {
             long lastPropositionDayDiff = TimeUnit.DAYS.convert(lastPropositionMilliesDiff, TimeUnit.MILLISECONDS);
 
             // Vérifie si l'utilisateur fait déjà partie d'une propoposition créée il y a moins de 7 jours
-            if(lastPropositionDayDiff <= 7)
+            if(lastPropositionDayDiff <= Parameters.DAYS_BETWEEN_TWO_PROPOSITIONS)
                 throw new CustomException("You already belong to a proposal created less than a week ago", HttpStatus.FORBIDDEN);
         }
 
