@@ -20,13 +20,13 @@ import java.util.List;
 @Service
 public class TeamService {
     @Autowired
-    public TeamRepository teamRepository;
+    public TeamRepository teamRepo;
 
     @Autowired
-    public UserTeamRepository userTeamRepository;
+    public UserTeamRepository userTeamRepo;
 
     @Autowired
-    public UserRepository userRepository;
+    public UserRepository userRepo;
 
     @Autowired
     public TeamTypeRepository teamTypeRepo;
@@ -40,7 +40,7 @@ public class TeamService {
      * @return la liste des équipes
      */
     public List<Team> getAllTeams() {
-        return teamRepository.findAll();
+        return teamRepo.findAll();
     }
 
     /**
@@ -50,7 +50,7 @@ public class TeamService {
      * @return l'équipe
      */
     public Team getTeamById(int id) {
-        return teamRepository.findById(id).orElseThrow(() -> new CustomException("No team found with this id : " + id, HttpStatus.NOT_FOUND));
+        return teamRepo.findById(id).orElseThrow(() -> new CustomException("No team found with this id : " + id, HttpStatus.NOT_FOUND));
     }
 
     /**
@@ -60,19 +60,19 @@ public class TeamService {
      * @return l'équipe créée
      */
     public Team createTeam(TeamBody teamBody) {
-        if (teamRepository.findByName(teamBody.getTeam().getName()).isPresent()) {
+        if (teamRepo.findByName(teamBody.getTeam().getName()).isPresent()) {
             throw new CustomException("A team with this name already exists", HttpStatus.CONFLICT);
         }
         User owner = Common.GetCurrentUser();
         teamBody.getTeam().setOwner(owner);
-        List<User> usersToAddInTeam = userRepository.getUsersById(teamBody.getUserIdList());
+        List<User> usersToAddInTeam = userRepo.getUsersById(teamBody.getUserIdList());
         if (usersToAddInTeam.size() < teamBody.getUserIdList().size()) {
             throw new CustomException("One user or more that you have provided don't exist", HttpStatus.NOT_FOUND);
         }
-        Team createdTeam = teamRepository.save(teamBody.getTeam());
+        Team createdTeam = teamRepo.save(teamBody.getTeam());
         teamBody.getUserIdList().forEach((userId) -> {
             UserTeam userTeam = new UserTeam(userId, createdTeam.getId());
-            userTeamRepository.save(userTeam);
+            userTeamRepo.save(userTeam);
         });
         return createdTeam;
     }
@@ -85,23 +85,23 @@ public class TeamService {
      * @return l'équipe mise à jour
      */
     public Team updateTeam(int teamId, TeamBody teamBody) {
-        if (teamRepository.findById(teamId).isPresent()) {
-            Team updatedTeam = teamRepository.findById(teamId).get();
+        if (teamRepo.findById(teamId).isPresent()) {
+            Team updatedTeam = teamRepo.findById(teamId).get();
             verifyUserOwnership(updatedTeam);
-            if (teamRepository.findByName(teamBody.getTeam().getName()).isPresent()) {
-                Team foundTeam = teamRepository.findByName(teamBody.getTeam().getName()).get();
+            if (teamRepo.findByName(teamBody.getTeam().getName()).isPresent()) {
+                Team foundTeam = teamRepo.findByName(teamBody.getTeam().getName()).get();
                 if (foundTeam.getId() != teamId) {
                     throw new CustomException("A team with this name already exists", HttpStatus.CONFLICT);
                 }
             }
-            List<User> oldUserList = userRepository.findAllUsersByTeamId(teamId);
+            List<User> oldUserList = userRepo.findAllUsersByTeamId(teamId);
 
             modifyUsersInTeam(teamId, teamBody, oldUserList);
 
             updatedTeam.setName(teamBody.getTeam().getName());
             updatedTeam.setTeamType(teamBody.getTeam().getTeamType());
             updatedTeam.setOwner(Common.GetCurrentUser());
-            return teamRepository.save(updatedTeam);
+            return teamRepo.save(updatedTeam);
         } else {
             throw new CustomException("No team found with this id : " + teamId, HttpStatus.NOT_FOUND);
         }
@@ -113,11 +113,11 @@ public class TeamService {
      * @param id id de la team
      */
     public void deleteTeam(int id) {
-        if (teamRepository.findById(id).isPresent()) {
-            Team deletedTeam = teamRepository.findById(id).get();
+        if (teamRepo.findById(id).isPresent()) {
+            Team deletedTeam = teamRepo.findById(id).get();
             verifyUserOwnership(deletedTeam);
-            userTeamRepository.deleteAllUserTeam(id);
-            teamRepository.deleteById(id);
+            userTeamRepo.deleteAllUserTeam(id);
+            teamRepo.deleteById(id);
         } else {
             throw new CustomException("No team found with this id : " + id, HttpStatus.NOT_FOUND);
         }
@@ -130,7 +130,7 @@ public class TeamService {
      * @return la liste des équipes libres avec leurs utilisateurs
      */
     public List<Team> getFreeTeams(List<Integer> teamsIds) {
-        List<Team> teamList = teamRepository.getFreeTeamsForProjectCreation(teamsIds);
+        List<Team> teamList = teamRepo.getFreeTeamsForProjectCreation(teamsIds);
         return getTeamsWithUsers(teamList);
     }
 
@@ -141,7 +141,7 @@ public class TeamService {
      * @return la liste des équipes rattachées à la proposition avec leurs utilisateurs
      */
     public List<Team> getTeamsByProposition(int propositionId) {
-        List<Team> teamList = teamRepository.getTeamsByProposition(propositionId);
+        List<Team> teamList = teamRepo.getTeamsByProposition(propositionId);
         return getTeamsWithUsers(teamList);
     }
 
@@ -152,7 +152,7 @@ public class TeamService {
      * @return liste d'équipes avec utilisateurs associés
      */
     private List<Team> getTeamsWithUsers(List<Team> teamList) {
-        teamList.forEach(team -> team.setUsers(userRepository.findAllUsersByTeamId(team.getId())));
+        teamList.forEach(team -> team.setUsers(userRepo.findAllUsersByTeamId(team.getId())));
         return teamList;
     }
 
@@ -166,13 +166,13 @@ public class TeamService {
     private void modifyUsersInTeam(int teamId, TeamBody teamBody, List<User> oldUserList) {
         teamBody.getUserIdList().forEach(userId -> {
             if (oldUserList.stream().noneMatch(user -> user.getId() == userId)) {
-                userTeamRepository.save(new UserTeam(userId, teamId));
+                userTeamRepo.save(new UserTeam(userId, teamId));
             }
         });
 
         oldUserList.forEach(user -> {
             if (teamBody.getUserIdList().stream().noneMatch(userId -> userId == user.getId())) {
-                userTeamRepository.deleteUserTeam(user.getId(), teamId);
+                userTeamRepo.deleteUserTeam(user.getId(), teamId);
             }
         });
     }
