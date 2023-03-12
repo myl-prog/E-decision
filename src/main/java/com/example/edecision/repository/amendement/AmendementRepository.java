@@ -13,16 +13,16 @@ import java.util.Optional;
 
 public interface AmendementRepository extends JpaRepository<Amendement, Integer> {
 
-    @Query(value = "SELECT * FROM amendement " +
-                    "INNER JOIN proposition ON proposition.id = amendement.amend_proposition_id " +
-                    "WHERE amendement.id = :amendementId " +
+    @Query(value = "SELECT * FROM proposition_amendement " +
+                    "INNER JOIN proposition ON proposition.id = proposition_amendement.proposition_id " +
+                    "WHERE proposition_amendement.id = :amendementId " +
                     "AND proposition.id = :propositionId " +
                     "AND project_id = :projectId ",
             nativeQuery = true)
     Optional<Amendement> getProjectPropositionAmendementById(@Param("projectId") int projectId, @Param("propositionId") int propositionId, @Param("amendementId") int amendementId);
 
-    @Query(value = "SELECT * FROM amendement " +
-                    "INNER JOIN proposition ON proposition.id = amendement.amend_proposition_id " +
+    @Query(value = "SELECT * FROM proposition_amendement " +
+                    "INNER JOIN proposition ON proposition.id = proposition_amendement.proposition_id " +
                     "WHERE proposition.id = :propositionId " +
                     "AND project_id = :projectId ",
             nativeQuery = true)
@@ -30,13 +30,13 @@ public interface AmendementRepository extends JpaRepository<Amendement, Integer>
 
     @Transactional
     @Modifying
-    @Query(value = "DELETE from amendement where id = :amendementId",
+    @Query(value = "DELETE from proposition_amendement where id = :amendementId",
             nativeQuery = true)
     void deleteAmendementById(@Param("amendementId") int amendementId);
 
     @Transactional
     @Modifying
-    @Query(value = "DELETE FROM amendement WHERE amend_proposition_id = :propositionId",
+    @Query(value = "DELETE FROM proposition_amendement WHERE proposition_id = :propositionId",
             nativeQuery = true)
     void deleteAmendementsByProposition(@Param("propositionId") int propositionId);
 }

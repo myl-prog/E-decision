@@ -4,10 +4,12 @@ import com.example.edecision.model.amendement.Amendement;
 import com.example.edecision.model.amendement.AmendementBody;
 import com.example.edecision.model.exception.CustomException;
 import com.example.edecision.model.proposition.Proposition;
+import com.example.edecision.model.proposition.PropositionStatus;
 import com.example.edecision.model.proposition.PropositionVoteBody;
 import com.example.edecision.model.user.User;
 import com.example.edecision.model.vote.PropositionVote;
 import com.example.edecision.repository.amendement.AmendementRepository;
+import com.example.edecision.repository.proposition.PropositionStatusRepository;
 import com.example.edecision.repository.vote.PropositionVoteRepository;
 import com.example.edecision.service.proposition.PropositionService;
 import com.example.edecision.service.user.UserService;
@@ -29,6 +31,9 @@ public class AmendementService {
     public AmendementRepository amendementRepo;
     @Autowired
     public PropositionVoteRepository propositionVoteRepo;
+
+    @Autowired
+    public PropositionStatusRepository propositionStatusRepo;
 
     @Autowired
     public PropositionService propositionService;
@@ -131,6 +136,7 @@ public class AmendementService {
         amend.setContent(body.getContent());
         amend.setAmendProposition(amendProposition);
         amend.setUser(currentUser);
+        amend.setAmendementStatus(amendProposition.getPropositionStatus());
 
         Amendement amendement = amendementRepo.save(amend);
 

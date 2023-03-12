@@ -9,8 +9,8 @@ import lombok.Data;
 import javax.persistence.*;
 
 @Data
-@Entity(name = "amendement")
-@Table(name = "amendement")
+@Entity(name = "proposition_amendement")
+@Table(name = "proposition_amendement")
 public class Amendement {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,11 +24,11 @@ public class Amendement {
     private String content;
 
     @ManyToOne()
-    @JoinColumn(name = "amendement_status", referencedColumnName = "id")
+    @JoinColumn(name = "amendement_status_id", referencedColumnName = "id")
     private PropositionStatus amendementStatus;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "amend_proposition_id", referencedColumnName = "id")
+    @JoinColumn(name = "proposition_id", referencedColumnName = "id")
     private Proposition amendProposition;
 
     @ManyToOne()
