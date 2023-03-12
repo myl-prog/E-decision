@@ -1,6 +1,7 @@
 package com.example.edecision.model.comment;
 
 import com.example.edecision.model.user.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -21,8 +22,11 @@ public class Comment {
     @Column(name = "content")
     private String content;
 
-    @Column(name = "date")
-    private Date date;
+    @Column(name = "creation_date")
+    private Date creationDate;
+
+    @Column(name = "last_change_date")
+    private Date lastChangeDate;
 
     @Column(name = "is_escalated")
     private Boolean isEscalated;
@@ -30,21 +34,22 @@ public class Comment {
     @Column(name = "is_deleted")
     private Boolean isDeleted;
 
+    @JsonIgnore
     @Column(name = "proposition_id")
-    private int proposition_id;
+    private int propositionId;
 
     @ManyToOne()
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
     public Comment(){}
-    public Comment(int proposition_id, String title, String content){
-        this.proposition_id = proposition_id;
+    public Comment(int propositionId, String title, String content){
+        this.propositionId = propositionId;
         this.title = title;
         this.content = content;
     }
-    public Comment(int proposition_id, boolean isEscalated, boolean isDeleted, User user){
-        this.proposition_id = proposition_id;
+    public Comment(int propositionId, boolean isEscalated, boolean isDeleted, User user){
+        this.propositionId = propositionId;
         this.isDeleted = isDeleted;
         this.isEscalated = isEscalated;
         this.user = user;
