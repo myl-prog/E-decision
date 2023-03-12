@@ -20,15 +20,15 @@ public class PropositionVote {
     @Id
     @Column(name = "proposition_id")
     @JsonIgnore
-    private int proposition_id;
+    private int propositionId;
 
     @Id
     @Column(name = "amendement_id")
     @JsonIgnore
-    private int amendement_id;
+    private int amendementId;
 
     @ManyToOne()
     @JoinColumn(name = "vote_type_id", referencedColumnName = "id")
-    private VoteType vote_type;
+    private VoteType voteType;
 
 }

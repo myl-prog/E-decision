@@ -1,10 +1,12 @@
 package com.example.edecision.model.proposition;
 import com.example.edecision.model.user.User;
+import lombok.Data;
 
 import java.util.List;
 
+@Data
 public class DeletePropositionResult {
-    public boolean deleted;
-    public List<User> voteUsers;
-    public List<User> notVoteUsers;
+    private boolean deleted;
+    private List<User> voteUsers;
+    private List<User> notVoteUsers;
 }

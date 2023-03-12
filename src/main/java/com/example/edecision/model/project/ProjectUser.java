@@ -12,16 +12,16 @@ public class ProjectUser {
 
     @Id
     @Column(name = "user_id")
-    public int user_id;
+    private int userId;
 
     @Id
     @Column(name = "project_id")
-    public int project_id;
+    private int projectId;
 
     @Column(name = "user_role_id")
-    private int user_role_id;
+    private int userRoleId;
 
     @Column(name = "is_own")
-    private boolean is_own;
+    private boolean isOwn;
 
 }

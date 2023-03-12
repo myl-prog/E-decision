@@ -20,10 +20,10 @@ public class Team {
     private String name;
 
     @Column(name = "project_id")
-    private Integer project_id;
+    private Integer projectId;
 
     @Column(name = "team_type_id")
-    private int team_type_id;
+    private int teamTypeId;
 
     @ManyToOne()
     @JoinColumn(name = "user_id", referencedColumnName = "id")

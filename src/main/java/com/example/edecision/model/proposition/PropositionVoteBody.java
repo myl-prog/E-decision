@@ -5,5 +5,5 @@ import lombok.Data;
 
 @Data
 public class PropositionVoteBody {
-    private BodyId vote_type;
+    private BodyId voteType;
 }

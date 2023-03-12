@@ -1,7 +1,9 @@
 package com.example.edecision.model.exception;
 
+import lombok.Data;
 import org.springframework.http.HttpStatus;
 
+@Data
 public class CustomException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
@@ -12,7 +14,4 @@ public class CustomException extends RuntimeException {
         this.statusCode = statusCode;
     }
 
-    public HttpStatus getStatusCode() {
-        return statusCode;
-    }
 }

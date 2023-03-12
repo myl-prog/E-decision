@@ -1,5 +1,8 @@
 package com.example.edecision.model.authentication;
 
+import lombok.Data;
+
+@Data
 public class AuthResponse {
     private String login;
     private String accessToken;
@@ -9,19 +12,4 @@ public class AuthResponse {
         this.accessToken = accessToken;
     }
 
-    public String getLogin() {
-        return login;
-    }
-
-    public void setLogin(String login) {
-        this.login = login;
-    }
-
-    public String getAccessToken() {
-        return accessToken;
-    }
-
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
-    }
 }

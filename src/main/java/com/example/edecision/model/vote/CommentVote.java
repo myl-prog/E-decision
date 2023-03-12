@@ -11,20 +11,20 @@ import javax.persistence.*;
 public class CommentVote {
     @Id
     @Column(name = "user_id")
-    private int user_id;
+    private int userId;
 
     @Id
     @Column(name = "comment_id")
-    private int comment_id;
+    private int commentId;
 
     @ManyToOne()
     @JoinColumn(name = "vote_type_id", referencedColumnName = "id")
-    private VoteType vote_type;
+    private VoteType voteType;
 
     public CommentVote(){}
-    public CommentVote(int user_id, int comment_id, VoteType vote_type){
-        this.user_id = user_id;
-        this.comment_id = comment_id;
-        this.vote_type = vote_type;
+    public CommentVote(int userId, int commentId, VoteType voteType){
+        this.userId = userId;
+        this.commentId = commentId;
+        this.voteType = voteType;
     }
 }

@@ -11,15 +11,15 @@ public class TeamProposition {
 
     @Id
     @Column(name = "team_id")
-    public int team_id;
+    private int teamId;
 
     @Id
     @Column(name = "proposition_id")
-    public int proposition_id;
+    private int propositionId;
 
-    public TeamProposition(int team_id, int proposition_id){
-        this.team_id = team_id;
-        this.proposition_id = proposition_id;
+    public TeamProposition(int teamId, int propositionId){
+        this.teamId = teamId;
+        this.propositionId = propositionId;
     }
 
     public TeamProposition(){}

@@ -50,17 +50,17 @@ public class TeamService {
      * @return the created team
      */
     public Team createTeam(TeamBody teamBody) {
-        if (teamRepository.findByName(teamBody.team.getName()).isPresent()) {
+        if (teamRepository.findByName(teamBody.getTeam().getName()).isPresent()) {
             throw new CustomException("A team with this name already exists", HttpStatus.CONFLICT);
         }
         User owner = Common.GetCurrentUser();
-        teamBody.team.setOwner(owner);
-        List<User> usersToAddInTeam = userRepository.getUsersById(teamBody.userIdList);
-        if (usersToAddInTeam.size() < teamBody.userIdList.size()) {
+        teamBody.getTeam().setOwner(owner);
+        List<User> usersToAddInTeam = userRepository.getUsersById(teamBody.getUserIdList());
+        if (usersToAddInTeam.size() < teamBody.getUserIdList().size()) {
             throw new CustomException("One user or more that you have provided don't exist", HttpStatus.NOT_FOUND);
         }
-        Team createdTeam = teamRepository.save(teamBody.team);
-        teamBody.userIdList.forEach((userId) -> {
+        Team createdTeam = teamRepository.save(teamBody.getTeam());
+        teamBody.getUserIdList().forEach((userId) -> {
             UserTeam userTeam = new UserTeam(userId, createdTeam.getId());
             userTeamRepository.save(userTeam);
         });
@@ -78,8 +78,8 @@ public class TeamService {
         if (teamRepository.findById(teamId).isPresent()) {
             Team updatedTeam = teamRepository.findById(teamId).get();
             verifyUserOwnership(updatedTeam);
-            if (teamRepository.findByName(teamBody.team.getName()).isPresent()) {
-                Team foundTeam = teamRepository.findByName(teamBody.team.getName()).get();
+            if (teamRepository.findByName(teamBody.getTeam().getName()).isPresent()) {
+                Team foundTeam = teamRepository.findByName(teamBody.getTeam().getName()).get();
                 if (foundTeam.getId() != teamId) {
                     throw new CustomException("A team with this name already exists", HttpStatus.CONFLICT);
                 }
@@ -88,8 +88,8 @@ public class TeamService {
 
             modifyUsersInTeam(teamId, teamBody, oldUserList);
 
-            updatedTeam.setName(teamBody.team.getName());
-            updatedTeam.setTeam_type_id(teamBody.team.getTeam_type_id());
+            updatedTeam.setName(teamBody.getTeam().getName());
+            updatedTeam.setTeamTypeId(teamBody.getTeam().getTeamTypeId());
             updatedTeam.setOwner(Common.GetCurrentUser());
             return teamRepository.save(updatedTeam);
         } else {
@@ -160,14 +160,14 @@ public class TeamService {
      * @param oldUserList oldUserList
      */
     private void modifyUsersInTeam(int teamId, TeamBody teamBody, List<User> oldUserList) {
-        teamBody.userIdList.forEach(userId -> {
+        teamBody.getUserIdList().forEach(userId -> {
             if (oldUserList.stream().noneMatch(user -> user.getId() == userId)) {
                 userTeamRepository.save(new UserTeam(userId, teamId));
             }
         });
 
         oldUserList.forEach(user -> {
-            if (teamBody.userIdList.stream().noneMatch(userId -> userId == user.getId())) {
+            if (teamBody.getUserIdList().stream().noneMatch(userId -> userId == user.getId())) {
                 userTeamRepository.deleteUserTeam(user.getId(), teamId);
             }
         });

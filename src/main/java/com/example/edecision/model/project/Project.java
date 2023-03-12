@@ -25,7 +25,7 @@ public class Project {
 
     @ManyToOne()
     @JoinColumn(name = "project_status_id", referencedColumnName = "id")
-    private ProjectStatus project_status;
+    private ProjectStatus projectStatus;
 
     @Transient
     @JsonInclude(JsonInclude.Include.NON_NULL)

@@ -1,11 +1,14 @@
 package com.example.edecision.model.proposition;
 
 import com.example.edecision.model.common.BodyId;
+import lombok.Data;
 
 import java.util.List;
 
+@Data
 public class PropositionBody {
-    public Proposition proposition;
-    public BodyId team;
-    public List<Integer> users;
+    private Proposition proposition;
+    private BodyId team;
+    private List<Integer> userIdList;
 }
+

@@ -83,15 +83,15 @@ public class ProjectService {
      * @return the created project
      */
     public Project createProject(ProjectBody projectBody) {
-        if (projectStatusRepository.findById(projectBody.project.getProject_status().getId()).isPresent()) {
-            ProjectStatus projectStatus = projectStatusRepository.findById(projectBody.project.getProject_status().getId()).get();
-            projectBody.project.setProject_status(projectStatus);
-            List<Team> freeTeams = getFreeTeams(projectBody.teams);
-            verifyIfUsersExistsInTeams(projectBody.project_users, freeTeams);
+        if (projectStatusRepository.findById(projectBody.getProject().getProjectStatus().getId()).isPresent()) {
+            ProjectStatus projectStatus = projectStatusRepository.findById(projectBody.getProject().getProjectStatus().getId()).get();
+            projectBody.getProject().setProjectStatus(projectStatus);
+            List<Team> freeTeams = getFreeTeams(projectBody.getTeamIdList());
+            verifyIfUsersExistsInTeams(projectBody.getProjectUsers(), freeTeams);
 
-            Project createdProject = projectRepository.save(projectBody.project);
-            projectRepository.addProjectToTeams(projectBody.teams, projectBody.project.getId());
-            addProjectUsersToProject(createdProject.getId(), projectBody.project_users);
+            Project createdProject = projectRepository.save(projectBody.getProject());
+            projectRepository.addProjectToTeams(projectBody.getTeamIdList(), projectBody.getProject().getId());
+            addProjectUsersToProject(createdProject.getId(), projectBody.getProjectUsers());
             return getProjectById(createdProject.getId());
         } else {
             throw new CustomException("This project status does not exist", HttpStatus.BAD_REQUEST);
@@ -107,13 +107,13 @@ public class ProjectService {
      */
     public Project updateProject(int projectId, ProjectBody projectBody) {
         if (projectRepository.findById(projectId).isPresent()) {
-            if (projectStatusRepository.findById(projectBody.project.getProject_status().getId()).isEmpty()) {
+            if (projectStatusRepository.findById(projectBody.getProject().getProjectStatus().getId()).isEmpty()) {
                 throw new CustomException("This project status does not exist", HttpStatus.BAD_REQUEST);
             } else {
                 Project projectUpdated = projectRepository.findById(projectId).get();
-                projectUpdated.setTitle(projectBody.project.getTitle());
-                projectUpdated.setDescription(projectBody.project.getDescription());
-                projectUpdated.setProject_status(projectBody.project.getProject_status());
+                projectUpdated.setTitle(projectBody.getProject().getTitle());
+                projectUpdated.setDescription(projectBody.getProject().getDescription());
+                projectUpdated.setProjectStatus(projectBody.getProject().getProjectStatus());
 
                 verificationsOnTeamsDuringProjectUpdate(projectId, projectBody);
                 verificationsOnUsersDuringProjectUpdate(projectBody);
@@ -165,7 +165,7 @@ public class ProjectService {
             throw new CustomException("This user is not associated to this project", HttpStatus.BAD_REQUEST);
         } else {
             ProjectUser projectUserUpdated = projectUserRepository.findProjectUserByProjectIdAndUserId(projectId, userId).get();
-            projectUserUpdated.setUser_role_id(userRoleBody.userRoleId);
+            projectUserUpdated.setUserRoleId(userRoleBody.getUserRole().getId());
             return projectUserRepository.save(projectUserUpdated);
         }
     }
@@ -202,8 +202,8 @@ public class ProjectService {
      */
     private void verifyIfUsersExistsInTeams(List<ProjectUser> projectUsers, List<Team> freeTeams) {
         projectUsers.forEach(projectUser -> {
-            if (!userService.isUserInTeams(projectUser.getUser_id(), freeTeams)) {
-                throw new CustomException("User with id : " + projectUser.getUser_id() + " is not in any team that you have provided", HttpStatus.BAD_REQUEST);
+            if (!userService.isUserInTeams(projectUser.getUserId(), freeTeams)) {
+                throw new CustomException("User with id : " + projectUser.getUserId() + " is not in any team that you have provided", HttpStatus.BAD_REQUEST);
             }
         });
     }
@@ -216,7 +216,7 @@ public class ProjectService {
      */
     private void addProjectUsersToProject(int projectId, List<ProjectUser> projectUsers) {
         for (ProjectUser projectUser : projectUsers) {
-            projectUser.project_id = projectId;
+            projectUser.setProjectId(projectId);
             projectUserRepository.save(projectUser);
         }
     }
@@ -229,12 +229,12 @@ public class ProjectService {
      * @param projectBody projectBody
      */
     private void verificationsOnTeamsDuringProjectUpdate(int projectId, ProjectBody projectBody) {
-        projectBody.teams.forEach(teamId -> {
+        projectBody.getTeamIdList().forEach(teamId -> {
             if (teamRepository.findById(teamId).isEmpty()) {
                 throw new CustomException("Team with id : " + teamId + " doesn't exist", HttpStatus.BAD_REQUEST);
             } else {
                 Team team = teamRepository.findById(teamId).get();
-                if (team.getProject_id() != null && team.getProject_id() != projectId) {
+                if (team.getProjectId() != null && team.getProjectId() != projectId) {
                     throw new CustomException("Team with id : " + teamId + " is already associated to a project", HttpStatus.CONFLICT);
                 }
             }
@@ -248,18 +248,18 @@ public class ProjectService {
      * @param projectBody projectBody
      */
     private void verificationsOnUsersDuringProjectUpdate(ProjectBody projectBody) {
-        projectBody.project_users.forEach(projectUser -> {
-            if (userRepository.findById(projectUser.getUser_id()).isEmpty()) {
-                throw new CustomException("User with id : " + projectUser.getUser_id() + " doesn't exists", HttpStatus.BAD_REQUEST);
+        projectBody.getProjectUsers().forEach(projectUser -> {
+            if (userRepository.findById(projectUser.getUserId()).isEmpty()) {
+                throw new CustomException("User with id : " + projectUser.getUserId() + " doesn't exists", HttpStatus.BAD_REQUEST);
             } else {
                 List<Team> teamList = new ArrayList<>();
-                projectBody.teams.forEach(teamId -> {
+                projectBody.getTeamIdList().forEach(teamId -> {
                     Team team = teamRepository.getById(teamId);
                     team.setUsers(userRepository.findAllUsersByTeamId(teamId));
                     teamList.add(team);
                 });
-                if (!userService.isUserInTeams(projectUser.getUser_id(), teamList)) {
-                    throw new CustomException("User with id : " + projectUser.getUser_id() + " is not in any team that you have provided", HttpStatus.BAD_REQUEST);
+                if (!userService.isUserInTeams(projectUser.getUserId(), teamList)) {
+                    throw new CustomException("User with id : " + projectUser.getUserId() + " is not in any team that you have provided", HttpStatus.BAD_REQUEST);
                 }
             }
         });
@@ -273,14 +273,14 @@ public class ProjectService {
      * @param oldProjectTeamList oldProjectTeamList
      */
     private void modifyAssociatedTeams(int projectId, ProjectBody projectBody, List<Team> oldProjectTeamList) {
-        projectBody.teams.forEach(teamId -> {
+        projectBody.getTeamIdList().forEach(teamId -> {
             if (oldProjectTeamList.stream().noneMatch(team -> teamId == team.getId())) {
                 projectRepository.addProjectToTeam(teamId, projectId);
             }
         });
 
         oldProjectTeamList.forEach(team -> {
-            if (!projectBody.teams.contains(team.getId())) {
+            if (!projectBody.getTeamIdList().contains(team.getId())) {
                 teamRepository.removeProjectIdFromTeam(projectId, team.getId());
             }
         });
@@ -293,14 +293,14 @@ public class ProjectService {
      * @param oldProjectUserList oldProjectUserList
      */
     private void modifyProjectUsers(ProjectBody projectBody, List<ProjectUser> oldProjectUserList) {
-        projectBody.project_users.forEach(projectUser -> {
-            if (oldProjectUserList.stream().noneMatch(oldProjectUser -> projectUser.getUser_id() == oldProjectUser.getUser_id())) {
+        projectBody.getProjectUsers().forEach(projectUser -> {
+            if (oldProjectUserList.stream().noneMatch(oldProjectUser -> projectUser.getUserId() == oldProjectUser.getUserId())) {
                 projectUserRepository.save(projectUser);
             }
         });
 
         oldProjectUserList.forEach(oldProjectUser -> {
-            if (projectBody.project_users.stream().noneMatch(projectUser -> oldProjectUser.getUser_id() == projectUser.getUser_id())) {
+            if (projectBody.getProjectUsers().stream().noneMatch(projectUser -> oldProjectUser.getUserId() == projectUser.getUserId())) {
                 projectUserRepository.delete(oldProjectUser);
             }
         });

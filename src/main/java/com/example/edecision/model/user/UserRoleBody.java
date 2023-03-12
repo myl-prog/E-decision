@@ -1,5 +1,9 @@
 package com.example.edecision.model.user;
 
+import com.example.edecision.model.common.BodyId;
+import lombok.Data;
+
+@Data
 public class UserRoleBody {
-    public int userRoleId;
+    private BodyId userRole;
 }

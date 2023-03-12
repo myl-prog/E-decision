@@ -1,8 +1,11 @@
 package com.example.edecision.model.team;
 
+import lombok.Data;
+
 import java.util.List;
 
+@Data
 public class TeamBody {
-    public Team team;
-    public List<Integer> userIdList;
+    private Team team;
+    private List<Integer> userIdList;
 }

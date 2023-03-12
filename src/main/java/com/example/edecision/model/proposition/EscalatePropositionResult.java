@@ -2,12 +2,14 @@ package com.example.edecision.model.proposition;
 
 import com.example.edecision.model.team.Team;
 import com.example.edecision.model.user.User;
+import lombok.Data;
 
 import java.util.List;
 
+@Data
 public class EscalatePropositionResult {
-    public boolean escalated;
-    public List<User> voteUsers;
-    public List<User> notVoteUsers;
-    public List<Team> teams;
+    private boolean escalated;
+    private List<User> voteUsers;
+    private List<User> notVoteUsers;
+    private List<Team> teams;
 }

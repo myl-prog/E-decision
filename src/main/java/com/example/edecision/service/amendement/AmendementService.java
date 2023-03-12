@@ -4,15 +4,11 @@ import com.example.edecision.model.amendement.Amendement;
 import com.example.edecision.model.amendement.AmendementBody;
 import com.example.edecision.model.exception.CustomException;
 import com.example.edecision.model.proposition.Proposition;
-import com.example.edecision.model.proposition.PropositionBody;
 import com.example.edecision.model.proposition.PropositionVoteBody;
-import com.example.edecision.model.team.Team;
 import com.example.edecision.model.user.User;
-import com.example.edecision.model.userProposition.UserProposition;
 import com.example.edecision.model.vote.PropositionVote;
 import com.example.edecision.repository.amendement.AmendementRepository;
 import com.example.edecision.repository.vote.PropositionVoteRepository;
-import com.example.edecision.service.project.ProjectService;
 import com.example.edecision.service.proposition.PropositionService;
 import com.example.edecision.service.user.UserService;
 import com.example.edecision.utils.Common;
@@ -129,7 +125,7 @@ public class AmendementService {
         Amendement amend = new Amendement();
         amend.setTitle(body.getTitle());
         amend.setContent(body.getContent());
-        amend.setAmend_proposition(amendProposition);
+        amend.setAmendProposition(amendProposition);
         amend.setUser(currentUser);
 
         Amendement amendement = amendementRepo.save(amend);
@@ -238,7 +234,7 @@ public class AmendementService {
             throw new CustomException("You have already voted for this amendement", HttpStatus.FORBIDDEN);
 
         // Si tout est bon alors on ajoute son vote
-        propositionVoteRepo.createProjectPropositionAmendementVote(currentUser.getId(), propositionId, amendementId, body.getVote_type().getId());
+        propositionVoteRepo.createProjectPropositionAmendementVote(currentUser.getId(), propositionId, amendementId, body.getVoteType().getId());
 
         return propositionVoteRepo.getProjectPropositionAmendementVotesById(projectId, propositionId, amendementId);
     }

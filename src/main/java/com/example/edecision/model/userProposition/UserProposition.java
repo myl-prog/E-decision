@@ -12,15 +12,15 @@ public class UserProposition implements Serializable {
 
     @Id
     @Column(name = "user_id")
-    public int user_id;
+    private int userId;
 
     @Id
     @Column(name = "proposition_id")
-    public int proposition_id;
+    private int propositionId;
 
-    public UserProposition(int user_id, int proposition_id){
-        this.user_id = user_id;
-        this.proposition_id = proposition_id;
+    public UserProposition(int userId, int propositionId){
+        this.userId = userId;
+        this.propositionId = propositionId;
     }
 
     public UserProposition(){}

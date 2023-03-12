@@ -62,8 +62,8 @@ public class UserService {
         if (userRepository.findById(id).isPresent()) {
             User userUpdated = userRepository.findById(id).get();
             userUpdated.setLogin(user.getLogin());
-            userUpdated.setFirst_name(user.getFirst_name());
-            userUpdated.setLast_name(user.getLast_name());
+            userUpdated.setFirstName(user.getFirstName());
+            userUpdated.setLastName(user.getLastName());
             user.setPassword(passwordEncoder.encode(user.getPassword()));
 
             if (userRepository.findByLogin(userUpdated.getLogin()).isPresent()) {

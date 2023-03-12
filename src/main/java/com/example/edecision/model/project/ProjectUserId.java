@@ -1,8 +1,11 @@
 package com.example.edecision.model.project;
 
+import lombok.Data;
+
 import java.io.Serializable;
 
+@Data
 public class ProjectUserId implements Serializable {
-    public int user_id;
-    public int project_id;
+    private int userId;
+    private int projectId;
 }

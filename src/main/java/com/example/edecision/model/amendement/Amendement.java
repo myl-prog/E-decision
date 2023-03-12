@@ -25,11 +25,11 @@ public class Amendement {
 
     @ManyToOne()
     @JoinColumn(name = "amendement_status", referencedColumnName = "id")
-    private PropositionStatus amendement_status;
+    private PropositionStatus amendementStatus;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "amend_proposition_id", referencedColumnName = "id")
-    private Proposition amend_proposition;
+    private Proposition amendProposition;
 
     @ManyToOne()
     @JoinColumn(name = "user_id", referencedColumnName = "id")

@@ -24,10 +24,10 @@ public class User implements UserDetails {
     private String login;
 
     @Column(name = "first_name")
-    private String first_name;
+    private String firstName;
 
     @Column(name = "last_name")
-    private String last_name;
+    private String lastName;
 
     @Column(name = "password")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
@@ -36,7 +36,7 @@ public class User implements UserDetails {
     @ManyToOne
     @Transient
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private UserRole user_role;
+    private UserRole userRole;
 
     @JsonIgnore
     @Override
@@ -74,13 +74,13 @@ public class User implements UserDetails {
         return true;
     }
 
-    public User(int id, String login, String first_name, String last_name, String password, UserRole user_role) {
+    public User(int id, String login, String firstName, String lastName, String password, UserRole userRole) {
         this.id = id;
         this.login = login;
-        this.first_name = first_name;
-        this.last_name = last_name;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.password = password;
-        this.user_role = user_role;
+        this.userRole = userRole;
     }
 
     public User() {

@@ -1,9 +1,12 @@
 package com.example.edecision.model.project;
 
+import lombok.Data;
+
 import java.util.List;
 
+@Data
 public class ProjectBody {
-    public Project project;
-    public List<Integer> teams;
-    public List<ProjectUser> project_users;
+    private Project project;
+    private List<Integer> teamIdList;
+    private List<ProjectUser> projectUsers;
 }

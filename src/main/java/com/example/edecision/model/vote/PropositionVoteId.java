@@ -9,17 +9,17 @@ import java.io.Serializable;
 public class PropositionVoteId implements Serializable {
 
     private User user;
-    private int proposition_id;
-    private int amendement_id;
+    private int propositionId;
+    private int amendementId;
 
     public PropositionVoteId(){}
-    public PropositionVoteId(User user, int proposition_id) {
+    public PropositionVoteId(User user, int propositionId) {
         this.user = user;
-        this.proposition_id = proposition_id;
+        this.propositionId = propositionId;
     }
-    public PropositionVoteId(User user, int proposition_id, int amendement_id) {
+    public PropositionVoteId(User user, int propositionId, int amendementId) {
         this.user = user;
-        this.proposition_id = proposition_id;
-        this.amendement_id = amendement_id;
+        this.propositionId = propositionId;
+        this.amendementId = amendementId;
     }
 }

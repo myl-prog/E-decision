@@ -1,17 +1,18 @@
 package com.example.edecision.model.userProposition;
 
+import lombok.Data;
+
 import java.io.Serializable;
 
+@Data
 public class UserPropositionId implements Serializable {
-    public int user_id;
+    private int userId;
 
-    public int proposition_id;
+    private int propositionId;
 
-    // default constructor
-
-    public UserPropositionId(int user_id, int proposition_id) {
-        this.user_id = user_id;
-        this.proposition_id = proposition_id;
+    public UserPropositionId(int userId, int propositionId) {
+        this.userId = userId;
+        this.propositionId = propositionId;
     }
     public UserPropositionId(){}
 }

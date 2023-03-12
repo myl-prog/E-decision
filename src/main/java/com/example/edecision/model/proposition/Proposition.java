@@ -24,20 +24,20 @@ public class Proposition {
     private String title;
 
     @Column(name = "begin_time")
-    private Date begin_time;
+    private Date beginTime;
 
     @Column(name = "end_time")
-    private Date end_time;
+    private Date endTime;
 
     @Column(name = "amendment_delay")
-    private int amendment_delay;
+    private int amendmentDelay;
 
     @Column(name = "content")
     private String content;
 
     @ManyToOne()
     @JoinColumn(name = "proposition_status_id", referencedColumnName = "id")
-    private PropositionStatus proposition_status;
+    private PropositionStatus propositionStatus;
 
     @ManyToOne()
     @JoinColumn(name = "project_id", referencedColumnName = "id")
