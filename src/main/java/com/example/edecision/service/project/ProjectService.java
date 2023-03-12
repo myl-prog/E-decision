@@ -234,7 +234,7 @@ public class ProjectService {
                 throw new CustomException("Team with id : " + teamId + " doesn't exist", HttpStatus.BAD_REQUEST);
             } else {
                 Team team = teamRepository.findById(teamId).get();
-                if (team.getProjectId() != null && team.getProjectId() != projectId) {
+                if (team.getProjectId() != projectId) {
                     throw new CustomException("Team with id : " + teamId + " is already associated to a project", HttpStatus.CONFLICT);
                 }
             }

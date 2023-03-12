@@ -20,7 +20,7 @@ public class Team {
     private String name;
 
     @Column(name = "project_id")
-    private Integer projectId;
+    private int projectId;
 
     @Column(name = "team_type_id")
     private int teamTypeId;
