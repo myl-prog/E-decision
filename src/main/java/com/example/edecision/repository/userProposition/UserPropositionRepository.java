@@ -11,19 +11,19 @@ public interface UserPropositionRepository extends JpaRepository<UserProposition
 
     @Transactional
     @Modifying
-    @Query(value = "INSERT INTO user_proposition (user_id, proposition_id) VALUES (:user_id, :proposition_id)",
+    @Query(value = "INSERT INTO user_proposition (user_id, proposition_id) VALUES (:userId, :propositionId)",
             nativeQuery = true)
-    void createUserProposition(@Param("proposition_id") int proposition_id, @Param("user_id") int user_id);
+    void createUserProposition(@Param("propositionId") int propositionId, @Param("userId") int userId);
 
     @Transactional
     @Modifying
-    @Query(value = "DELETE FROM user_proposition WHERE proposition_id=:proposition_id",
+    @Query(value = "DELETE FROM user_proposition WHERE proposition_id = :propositionId",
             nativeQuery = true)
-    void deleteUserPropositionsByProposition(@Param("proposition_id") int proposition_id);
+    void deleteUserPropositionsByProposition(@Param("propositionId") int propositionId);
 
     @Transactional
     @Modifying
-    @Query(value = "DELETe FROM user_proposition WHERE proposition_id=:proposition_id AND user_id=:user_id",
+    @Query(value = "DELETe FROM user_proposition WHERE proposition_id = :propositionId AND user_id = :userId",
             nativeQuery = true)
-    void deleteUserProposition(@Param("proposition_id") int proposition_id, @Param("user_id") int user_id);
+    void deleteUserProposition(@Param("propositionId") int propositionId, @Param("userId") int userId);
 }

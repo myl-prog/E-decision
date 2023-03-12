@@ -11,19 +11,19 @@ public interface TeamPropositionRepository extends JpaRepository<TeamProposition
 
     @Transactional
     @Modifying
-    @Query(value = "INSERT INTO team_proposition (team_id, proposition_id) VALUES (:team_id, :proposition_id)",
+    @Query(value = "INSERT INTO team_proposition (team_id, proposition_id) VALUES (:teamId, :propositionId)",
             nativeQuery = true)
-    void createTeamProposition(@Param("proposition_id") int proposition_id, @Param("team_id") int team_id);
+    void createTeamProposition(@Param("propositionId") int propositionId, @Param("teamId") int teamId);
 
     @Transactional
     @Modifying
-    @Query(value = "DELETE FROM team_proposition WHERE proposition_id=:proposition_id",
+    @Query(value = "DELETE FROM team_proposition WHERE proposition_id = :propositionId",
             nativeQuery = true)
-    void deleteTeamPropositionsByProposition(@Param("proposition_id") int proposition_id);
+    void deleteTeamPropositionsByProposition(@Param("propositionId") int propositionId);
 
     @Transactional
     @Modifying
-    @Query(value = "DELETE FROM team_proposition WHERE proposition_id=:proposition_id AND team_id=:team_id",
+    @Query(value = "DELETE FROM team_proposition WHERE proposition_id = :propositionId AND team_id = :teamId",
             nativeQuery = true)
-    void deleteTeamProposition(@Param("proposition_id") int proposition_id, @Param("team_id") int team_id);
+    void deleteTeamProposition(@Param("propositionId") int propositionId, @Param("teamId") int teamId);
 }

@@ -15,9 +15,9 @@ public interface UserRepository extends JpaRepository<User, Integer> {
             nativeQuery = true)
     List<User> getUsersById(@Param("ids") List<Integer> userIdList);
 
-    @Query(value = "SELECT user.* FROM user_proposition,user WHERE proposition_id=:proposition_id AND user_id = user.id",
+    @Query(value = "SELECT user.* FROM user_proposition,user WHERE proposition_id = :propositionId AND user_id = user.id",
             nativeQuery = true)
-    List<User> getUsersByProposition(@Param("proposition_id") int proposition_id);
+    List<User> getUsersByProposition(@Param("propositionId") int propositionId);
 
     @Query(value = "SELECT user.* FROM user INNER JOIN user_team ON user.id = user_team.user_id WHERE user_team.team_id = :teamId",
             nativeQuery = true)

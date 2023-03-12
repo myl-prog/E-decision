@@ -13,9 +13,9 @@ import java.util.Optional;
 public interface PropositionRepository extends JpaRepository<Proposition, Integer> {
     @Transactional
     @Modifying
-    @Query(value = "DELETE FROM proposition WHERE id=:proposition_id",
+    @Query(value = "DELETE FROM proposition WHERE id= :propositionId",
             nativeQuery = true)
-    void deleteProposition(@Param("proposition_id") int proposition_id);
+    void deleteProposition(@Param("propositionId") int propositionId);
 
     @Query(value = "SELECT * FROM proposition " +
                     "WHERE id IN (SELECT proposition_id FROM team_proposition WHERE team_id IN (SELECT team_id FROM user_team WHERE user_id =:userId))" +
