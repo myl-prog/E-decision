@@ -23,6 +23,17 @@ public class CommentService {
     @Autowired
     public PropositionService propositionService;
 
+    // ===============
+    // === Comment ===
+    // ===============
+
+    /**
+     * Permet de récupérer tous les commentaires d'une proposiiton
+     *
+     * @param projectId       id du projet
+     * @param propositionId   id de la proposition
+     * @return la liste des commentaires
+     */
     public List<Comment> getProjectPropositionCommentsById(int projectId, int propositionId)
     {
         // Récupère la proposition et génère une exception si elle n'existe  pas
@@ -32,6 +43,14 @@ public class CommentService {
         return commentRepo.getPropositionComments(projectId, propositionId);
     }
 
+    /**
+     * Permet d'ajouter un commentaire sur une proposition
+     *
+     * @param projectId       id du projet
+     * @param propositionId   id de la proposition
+     * @param body            objet du commentaire
+     * @return le commentaire ajouté
+     */
     public Comment createProjectPropositionComment(int projectId, int propositionId, CommentBody body)
     {
         // Récupère l'utilisateur qui veut ajouter le commentaire
@@ -55,6 +74,15 @@ public class CommentService {
         return commentRepo.save(comment);
     }
 
+    /**
+     * Permet de modifier un commentaire par son créateur
+     *
+     * @param projectId       id du projet
+     * @param propositionId   id de la proposition
+     * @param commentId       id du commentaire
+     * @param body            objet du commentaire
+     * @return le commentaire modifé
+     */
     public Comment updateProjectPropositionComment(int projectId, int propositionId, int commentId, CommentBody body)
     {
         // Récupère l'utilisateur qui veut ajouter le commentaire
@@ -80,6 +108,13 @@ public class CommentService {
         return commentRepo.save(comment);
     }
 
+    /**
+     * Permet de supprimer un commentaire par son créateur
+     *
+     * @param projectId       id du projet
+     * @param propositionId   id de la proposition
+     * @param commentId       id du commentaire
+     */
     public void deleteProjectPropositionCommentById(int projectId, int propositionId, int commentId)
     {
         // Récupère l'utilisateur qui veut ajouter le commentaire

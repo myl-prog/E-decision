@@ -36,6 +36,10 @@ public class AmendementService {
     @Autowired
     public UserService userService;
 
+    // ==================
+    // === Amendement ===
+    // ==================
+
     /**
      * Permet de récupérer un amendement
      *
@@ -197,6 +201,7 @@ public class AmendementService {
      * @param projectId     id du projet
      * @param propositionId id de la proposition
      * @param amendementId  id de l'amendement
+     * @return la liste des votes de l'amendement
      */
     public List<PropositionVote> getProjectPropositionAmendementVotesById(int projectId, int propositionId, int amendementId)
     {
@@ -213,6 +218,7 @@ public class AmendementService {
      * @param propositionId id de la proposition
      * @param amendementId  id de l'amendement
      * @param body          vote de l'utilisateur
+     * @return les votes de l'amendement
      */
     public List<PropositionVote> voteProjectPropositionAmendement(int projectId, int propositionId, int amendementId, PropositionVoteBody body)
     {

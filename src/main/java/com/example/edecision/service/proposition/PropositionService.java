@@ -31,8 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -82,12 +80,14 @@ public class PropositionService {
     @Autowired
     public TeamService teamService;
 
-
+    // ===================
+    // === Proposition ===
+    // ===================
 
     /**
-     * Get all propositions where current user is associated
+     * Permet de récupérer toutes les propositions auxquels l'utilisateur courant est rattaché
      *
-     * @return The proposition list associated to current user
+     * @return liste de proposition
      */
     public List<Proposition> getAllPropositionsByUser() {
         User user = Common.GetCurrentUser();
@@ -145,8 +145,7 @@ public class PropositionService {
         User currentUser = Common.GetCurrentUser();
 
         // Variables qui vont nous servir pour initialiser la date de création et vérifier la date de fin
-        LocalDateTime localDateTime = LocalDateTime.now();
-        Date now = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+        Date now = Common.GetCurrentLocalDate();
         long endDateMilliesDiff = Math.abs(propositionBody.getProposition().getEndTime().getTime() - now.getTime());
         long endDateDayDiff = TimeUnit.DAYS.convert(endDateMilliesDiff, TimeUnit.MILLISECONDS);
 
@@ -469,9 +468,8 @@ public class PropositionService {
         // Objet de retour
         JudgeVoteResult result = new JudgeVoteResult();
 
-        // Variables qui vont nous servir pour savoir si il est temps de juger la proposition
-        LocalDateTime localDateTime = LocalDateTime.now();
-        Date now = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+        // Variable qui va nous servir a savoir si il est temps de juger la proposition
+        Date now = Common.GetCurrentLocalDate();
 
         // Récupération de l'utilisateur qui veut supprimer la proposition
         User currentUser = Common.GetCurrentUser();
@@ -522,9 +520,8 @@ public class PropositionService {
 
     public boolean checkAmendDelay(Proposition proposition, boolean errorIfInsideDelay, boolean errorIfOutsideDelay){
 
-        // Variables qui vont nous servir à vérifier les dates
-        LocalDateTime localDateTime = LocalDateTime.now();
-        Date now = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+        // Variable qui va servir a vérifier les dates
+        Date now = Common.GetCurrentLocalDate();
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(proposition.getBeginTime());

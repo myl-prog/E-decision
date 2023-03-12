@@ -47,8 +47,12 @@ public class ProjectService {
     @Autowired
     public UserRepository userRepository;
 
+    // ===============
+    // === Project ===
+    // ===============
+
     /**
-     * Get all projects
+     * Permet de récupérer tous les projets
      */
     public List<Project> getAllProjects() {
         List<Project> allProjects = projectRepository.findAll();
@@ -59,10 +63,10 @@ public class ProjectService {
     }
 
     /**
-     * Get a project by id
+     * Permet de récupérer un projet avec son identifiant
      *
-     * @param projectId projectId
-     * @return a project
+     * @param projectId id du projet
+     * @return le projet
      */
     public Project getProjectById(int projectId) {
         Optional<Project> optionalProject = projectRepository.findById(projectId);
@@ -75,12 +79,11 @@ public class ProjectService {
         }
     }
 
-
     /**
-     * Permit to create a project and associate teams with project_users to it
+     * Permet de créer le projet et de lui associer les équipes et les utilisateurs
      *
-     * @param projectBody projectBody object
-     * @return the created project
+     * @param projectBody objet du projet avec ses équipes et utilisateurs/rôles
+     * @return le projet créé
      */
     public Project createProject(ProjectBody projectBody) {
         if (projectStatusRepository.findById(projectBody.getProject().getProjectStatus().getId()).isPresent()) {
@@ -99,11 +102,11 @@ public class ProjectService {
     }
 
     /**
-     * Permit to update an existing project and modify teams with project_users associated
+     * Permet de mettre à jour le projet avec ses utilisateurs et ses équipes
      *
-     * @param projectId   projectId
-     * @param projectBody projectBody object
-     * @return the updated project
+     * @param projectId   id du projet
+     * @param projectBody objet du projet
+     * @return le projet mis à jour
      */
     public Project updateProject(int projectId, ProjectBody projectBody) {
         if (projectRepository.findById(projectId).isPresent()) {
@@ -131,9 +134,9 @@ public class ProjectService {
     }
 
     /**
-     * Permit to delete an existing project, delete all teams and project_users associated to it
+     * Permet de supprimer un projet et tous les éléments qui sont rattachés à lui
      *
-     * @param projectId projectId
+     * @param projectId id du projet
      */
     public void deleteProject(int projectId) {
         if (projectRepository.findById(projectId).isPresent()) {
@@ -146,13 +149,17 @@ public class ProjectService {
         }
     }
 
+    // =========================
+    // === Project user role ===
+    // =========================
+
     /**
-     * Permit to update user's role in a project
+     * Permet de modifier le role d'un utilisateur au cours d'un projet
      *
-     * @param projectId    projectId
-     * @param userId       userId
-     * @param userRoleBody userRoleBody
-     * @return the updated projectUser
+     * @param projectId    id du projet
+     * @param userId       id du user
+     * @param userRoleBody id du role
+     * @return le lien entre le projet et l'utilisateur mis à jour
      */
     public ProjectUser changeUserRole(int projectId, int userId, UserRoleBody userRoleBody) {
         if (projectRepository.findById(projectId).isEmpty()) {
@@ -170,10 +177,14 @@ public class ProjectService {
         }
     }
 
+    // ====================
+    // === Project team ===
+    // ====================
+
     /**
-     * Add all associated teams to project
+     * Permet d'ajouter les équipes au projet
      *
-     * @param projectId project id
+     * @param projectId id du projet
      */
     private void addTeamsToProject(int projectId) {
         Project project = projectRepository.getById(projectId);
@@ -181,10 +192,10 @@ public class ProjectService {
     }
 
     /**
-     * Get all teams with associated users where project_id is null
+     * Permet de récupérer les équipes qui sont libres avec leurs utilisateurs
      *
-     * @param teamsId teamsId
-     * @return a teamList
+     * @param teamsId id de l'équipe
+     * @return une liste d'équipes libres
      */
     private List<Team> getFreeTeams(List<Integer> teamsId) {
         List<Team> freeTeams = teamService.getFreeTeams(teamsId);
@@ -195,10 +206,10 @@ public class ProjectService {
     }
 
     /**
-     * Permit to know if users are associated to a teamList
+     * Permet de vérifier que les utilisateurs sont au moins dans une équipe du projet
      *
-     * @param projectUsers projectUsers
-     * @param freeTeams    teams
+     * @param projectUsers les utilisateurs
+     * @param freeTeams    les équipes
      */
     private void verifyIfUsersExistsInTeams(List<ProjectUser> projectUsers, List<Team> freeTeams) {
         projectUsers.forEach(projectUser -> {
@@ -209,24 +220,11 @@ public class ProjectService {
     }
 
     /**
-     * Add project_users to a project
+     * Vérifie si les équipes existent et si elles ne sont pas rattachées à un autre projet
+     * pendant la modification du projet
      *
-     * @param projectId    projectId
-     * @param projectUsers projectUsers
-     */
-    private void addProjectUsersToProject(int projectId, List<ProjectUser> projectUsers) {
-        for (ProjectUser projectUser : projectUsers) {
-            projectUser.setProjectId(projectId);
-            projectUserRepository.save(projectUser);
-        }
-    }
-
-    /**
-     * Verify if teams exist and if there are not associated to another project
-     * during project update
-     *
-     * @param projectId   projectId
-     * @param projectBody projectBody
+     * @param projectId   id du projet
+     * @param projectBody objet du projet avec les équipes
      */
     private void verificationsOnTeamsDuringProjectUpdate(int projectId, ProjectBody projectBody) {
         projectBody.getTeamIdList().forEach(teamId -> {
@@ -242,10 +240,48 @@ public class ProjectService {
     }
 
     /**
-     * Verify if users exist and if there are associated in provided teams
-     * during project update
+     * Met à jour les équipes associées au projet durant la modification de celui-ci
      *
-     * @param projectBody projectBody
+     * @param projectId          id du projet
+     * @param projectBody        objet du projet
+     * @param oldProjectTeamList anciennes équipes rattachées au projet avant modification
+     */
+    private void modifyAssociatedTeams(int projectId, ProjectBody projectBody, List<Team> oldProjectTeamList) {
+        projectBody.getTeamIdList().forEach(teamId -> {
+            if (oldProjectTeamList.stream().noneMatch(team -> teamId == team.getId())) {
+                projectRepository.addProjectToTeam(teamId, projectId);
+            }
+        });
+
+        oldProjectTeamList.forEach(team -> {
+            if (!projectBody.getTeamIdList().contains(team.getId())) {
+                teamRepository.removeProjectIdFromTeam(projectId, team.getId());
+            }
+        });
+    }
+
+    // ====================
+    // === Project user ===
+    // ====================
+
+    /**
+     * Permet d'ajouter un utilisateur à un projet
+     *
+     * @param projectId    id du projet
+     * @param projectUsers les utilisateurs et leur rôle
+     */
+    private void addProjectUsersToProject(int projectId, List<ProjectUser> projectUsers) {
+        for (ProjectUser projectUser : projectUsers) {
+            projectUser.setProjectId(projectId);
+            projectUserRepository.save(projectUser);
+        }
+    }
+
+    /**
+     * Vérifie si les utilisateurs existent et s'ils sont bien rattachés à au moins une équipe
+     * pendant la modification du projet
+     *
+     * @param projectBody objet du projet avec ses utilisateurs
      */
     private void verificationsOnUsersDuringProjectUpdate(ProjectBody projectBody) {
         projectBody.getProjectUsers().forEach(projectUser -> {
@@ -266,31 +302,10 @@ public class ProjectService {
     }
 
     /**
-     * Modify associated teams during project update
+     * Met à jour les utilisateurs du projet durant sa modification
      *
-     * @param projectId          projectId
-     * @param projectBody        projectBody
-     * @param oldProjectTeamList oldProjectTeamList
-     */
-    private void modifyAssociatedTeams(int projectId, ProjectBody projectBody, List<Team> oldProjectTeamList) {
-        projectBody.getTeamIdList().forEach(teamId -> {
-            if (oldProjectTeamList.stream().noneMatch(team -> teamId == team.getId())) {
-                projectRepository.addProjectToTeam(teamId, projectId);
-            }
-        });
-
-        oldProjectTeamList.forEach(team -> {
-            if (!projectBody.getTeamIdList().contains(team.getId())) {
-                teamRepository.removeProjectIdFromTeam(projectId, team.getId());
-            }
-        });
-    }
-
-    /**
-     * Modify associated users during project update
-     *
-     * @param projectBody        projectBody
-     * @param oldProjectUserList oldProjectUserList
+     * @param projectBody        objet du projet
+     * @param oldProjectUserList anciens utilisateurs rattachés au projet avant modification
      */
     private void modifyProjectUsers(ProjectBody projectBody, List<ProjectUser> oldProjectUserList) {
         projectBody.getProjectUsers().forEach(projectUser -> {
@@ -307,9 +322,9 @@ public class ProjectService {
     }
 
     /**
-     * Verify if current user is the project owner
+     * Vérifie si l'utilisateur courant est le gestionnaire du projet
      *
-     * @param projectId projectId
+     * @param projectId id du projet
      */
     private void verifyProjectOwnership(int projectId) {
         User projectOwner = userRepository.getProjectOwner(projectId);

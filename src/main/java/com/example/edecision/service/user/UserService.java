@@ -19,28 +19,34 @@ public class UserService {
 
     BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
+    // ============
+    // === User ===
+    // ============
+
     /**
-     * Get all users
+     * Permet de récupérer l'ensemble des utilisateurs
+     *
+     * @return une liste d'utilisateurs
      */
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
     /**
-     * Get a user by id
+     * Permet de récupérer un utilisateur avec son identifiant
      *
-     * @param id user's id that we want to get
-     * @return A user
+     * @param id id de l'utilisateur
+     * @return l'utilisateur
      **/
     public User getUser(int id) {
         return userRepository.findById(id).orElseThrow(() -> new CustomException("User not found with id : " + id, HttpStatus.NOT_FOUND));
     }
 
     /**
-     * Permit to create a user
+     * Permet de créer un utilisateur
      *
-     * @param user user object that we want to create
-     * @return the created user
+     * @param user objet de l'utilisateur
+     * @return l'utilisateur créé
      */
     public User createUser(User user) {
         if (userRepository.findByLogin(user.getLogin()).isPresent()) {
@@ -52,11 +58,11 @@ public class UserService {
     }
 
     /**
-     * Permit to update an existing user
+     * Permet de modifier un utilisateur
      *
-     * @param user user object
-     * @param id   user's id that we want to update
-     * @return the updated user
+     * @param user objet de l'utilisateur
+     * @param id   id de l'utilisateur
+     * @return l'utilisateur mis à jour
      */
     public User updateUser(User user, int id) {
         if (userRepository.findById(id).isPresent()) {
@@ -78,9 +84,9 @@ public class UserService {
     }
 
     /**
-     * Permit to delete an existing user
+     * Permet de supprimer un utilisateur
      *
-     * @param id user's id that we want to delete
+     * @param id id de l'utilisateur
      */
     public void deleteUser(int id) {
         if (userRepository.findById(id).isPresent()) {
@@ -91,11 +97,11 @@ public class UserService {
     }
 
     /**
-     * Verify if one user exists in a teamList
+     * Vérifier si un u'itlisateur est dans au moins une des équipes
      *
-     * @param userId    userId
-     * @param freeTeams teams
-     * @return a boolean
+     * @param userId    id de l'utilisateur
+     * @param freeTeams liste des équipes
+     * @return un booléen qui indique si oui ou non il est dans une équipe
      */
     public boolean isUserInTeams(int userId, List<Team> freeTeams) {
         return freeTeams.stream().anyMatch(team -> team.getUsers().stream().anyMatch(user -> user.getId() == userId));

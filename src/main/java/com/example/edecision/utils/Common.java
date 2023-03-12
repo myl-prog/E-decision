@@ -11,10 +11,20 @@ import static java.util.Date.from;
 
 public class Common {
 
+    /**
+     * Récupère l'utilisateur qui appelle l'api grâce à son token jwt
+     *
+     * @return l'utilisateur
+     */
     public static User GetCurrentUser(){
         return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
+    /**
+     * Récupère la date courante
+     *
+     * @return la date
+     */
     public static Date GetCurrentLocalDate(){
         LocalDateTime localDateTime = LocalDateTime.now();
         return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());

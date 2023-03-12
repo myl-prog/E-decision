@@ -26,28 +26,33 @@ public class TeamService {
     @Autowired
     public UserRepository userRepository;
 
+    // ============
+    // === Team ===
+    // ============
+
     /**
-     * Get all teams
+     * Récupère toutes les équipes
+     * @return la liste des équipes
      */
     public List<Team> getAllTeams() {
         return teamRepository.findAll();
     }
 
     /**
-     * Get a team by id
+     * Récupère une équipe avec son identifiant
      *
-     * @param id team id that we want to get
-     * @return a team
+     * @param id id de l'équipe
+     * @return l'équipe
      */
     public Team getTeamById(int id) {
         return teamRepository.findById(id).orElseThrow(() -> new CustomException("No team found with this id : " + id, HttpStatus.NOT_FOUND));
     }
 
     /**
-     * Permit to create a team and create all userTeam provided
+     * Permet de créer une équipe en associant tous ses utilisateurs
      *
-     * @param teamBody teamBody object
-     * @return the created team
+     * @param teamBody objet de l'équipe et l'association de ses utilisateurs
+     * @return l'équipe créée
      */
     public Team createTeam(TeamBody teamBody) {
         if (teamRepository.findByName(teamBody.getTeam().getName()).isPresent()) {
@@ -68,11 +73,11 @@ public class TeamService {
     }
 
     /**
-     * Permit to update an existing team and modify userTeam
+     * Permet de mettre à jour une équipe
      *
-     * @param teamId   teamId that we want to update
-     * @param teamBody teamBody object
-     * @return the updated team
+     * @param teamId   id de l'équipe
+     * @param teamBody objet de l'équipe
+     * @return l'équipe mise à jour
      */
     public Team updateTeam(int teamId, TeamBody teamBody) {
         if (teamRepository.findById(teamId).isPresent()) {
@@ -98,9 +103,9 @@ public class TeamService {
     }
 
     /**
-     * Permit to delete an existing team, delete all userTeam associated
+     * Permet de supprimer une équipe et ses associations avec ses utilisateurs
      *
-     * @param id teamId that we want to delete
+     * @param id id de la team
      */
     public void deleteTeam(int id) {
         if (teamRepository.findById(id).isPresent()) {
@@ -114,11 +119,10 @@ public class TeamService {
     }
 
     /**
-     * Get all teams where project_id is null
-     * and add his associated users
+     * Permet de récupérer toutes les équipes qui ne sont pas rattachées à un projet
      *
-     * @param teamsIds teamsId
-     * @return a team list
+     * @param teamsIds id des teams
+     * @return la liste des équipes libres avec leurs utilisateurs
      */
     public List<Team> getFreeTeams(List<Integer> teamsIds) {
         List<Team> teamList = teamRepository.getFreeTeamsForProjectCreation(teamsIds);
@@ -126,26 +130,21 @@ public class TeamService {
     }
 
     /**
-     * Get all teams associated to a project
+     * Permet toutes les équipes d'une proposition
      *
-     * @param projectId projectId
-     * @return a team list
+     * @param propositionId id de la proposition
+     * @return la liste des équipes rattachées à la proposition avec leurs utilisateurs
      */
-    public List<Team> getTeamsByProject(int projectId) {
-        List<Team> teamList = teamRepository.getTeamsByProject(projectId);
-        return getTeamsWithUsers(teamList);
-    }
-
     public List<Team> getTeamsByProposition(int propositionId) {
         List<Team> teamList = teamRepository.getTeamsByProposition(propositionId);
         return getTeamsWithUsers(teamList);
     }
 
     /**
-     * For each team in teamList, add associated users
+     * Permet de retourner les équipes avec les utilisateurs associés
      *
-     * @param teamList teamList
-     * @return a team list
+     * @param teamList liste d'équipes
+     * @return liste d'équipes avec utilisateurs associés
      */
     private List<Team> getTeamsWithUsers(List<Team> teamList) {
         teamList.forEach(team -> team.setUsers(userRepository.findAllUsersByTeamId(team.getId())));
@@ -153,11 +152,11 @@ public class TeamService {
     }
 
     /**
-     * Modify team's associated users during update
+     * Met à jour les utilisateurs associés à l'équipe pendant la modification
      *
-     * @param teamId      teamId
-     * @param teamBody    teamBody
-     * @param oldUserList oldUserList
+     * @param teamId      id de l'équipe
+     * @param teamBody    objet de l'équipe
+     * @param oldUserList ancienne liste d'utilisateurs associés à l'équipe
      */
     private void modifyUsersInTeam(int teamId, TeamBody teamBody, List<User> oldUserList) {
         teamBody.getUserIdList().forEach(userId -> {
@@ -174,9 +173,9 @@ public class TeamService {
     }
 
     /**
-     * Verify if current user is the team owner
+     * Vérifie si l'utilisateur courant est le gestionnaire de l'équipe
      *
-     * @param team team
+     * @param team équipe
      */
     private void verifyUserOwnership(Team team) {
         if (Common.GetCurrentUser().getId() != team.getOwner().getId()) {
