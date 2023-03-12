@@ -14,6 +14,10 @@ public class PropositionController {
     @Autowired
     public PropositionService propositionService;
 
+    // ===================
+    // === Proposition ===
+    // ===================
+
     @GetMapping("/propositions")
     public ResponseEntity<List<Proposition>> getAllPropositionsByUser() {
         return ResponseEntity.status(HttpStatus.OK).body(propositionService.getAllPropositionsByUser());

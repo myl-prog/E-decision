@@ -36,9 +36,9 @@ public class ProjectController {
     @Autowired
     public CommentService commentService;
 
-    // ========================
-    // ======= Projects =======
-    // ========================
+    // ===============
+    // === Project ===
+    // ===============
 
     @GetMapping("/projects")
     public ResponseEntity<List<Project>> getAllProjects() {
@@ -66,18 +66,18 @@ public class ProjectController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    // ========================
-    // ===== Project user =====
-    // ========================
+    // ======================
+    // ==== Project user ====
+    // ======================
 
     @PatchMapping("/projects/{projectId}/users/{userId}")
     public ResponseEntity<ProjectUser> changeUserRole(@PathVariable("projectId") int projectId, @PathVariable("userId") int userId, @RequestBody UserRoleBody userRoleBody) {
         return ResponseEntity.status(HttpStatus.OK).body(projectService.changeUserRole(projectId, userId, userRoleBody));
     }
 
-    // ========================
-    // = Project propositions =
-    // ========================
+    // ===========================
+    // === Project proposition ===
+    // ===========================
 
     @GetMapping("/projects/{projectId}/propositions/{propositionId}")
     public ResponseEntity<Proposition> getProjectPropositionById(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId) {
@@ -104,9 +104,9 @@ public class ProjectController {
         return ResponseEntity.status(HttpStatus.OK).body(propositionService.deleteProjectProposition(projectId, propositionId));
     }
 
-    // =================================
-    // === Project proposition votes ===
-    // =================================
+    // ================================
+    // === Project proposition vote ===
+    // ================================
 
     @GetMapping("/projects/{projectId}/propositions/{propositionId}/votes")
     public ResponseEntity<List<PropositionVote>> getProjectPropositionVotes(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId) {
@@ -123,9 +123,9 @@ public class ProjectController {
         return ResponseEntity.status(HttpStatus.OK).body(propositionService.judgeProjectProposition(projectId, propositionId));
     }
 
-    // ====================================
-    // === Project proposition comments ===
-    // ====================================
+    // ===================================
+    // === Project proposition comment ===
+    // ===================================
 
     @GetMapping("/projects/{projectId}/propositions/{propositionId}/comments")
     public ResponseEntity<List<Comment>> getProjectPropositionComments(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId) {
@@ -148,9 +148,9 @@ public class ProjectController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    // ===================================
-    // = Project proposition amendements =
-    // ===================================
+    // =======================================
+    // === Project proposition amendements ===
+    // =======================================
 
     @GetMapping("/projects/{projectId}/propositions/{propositionId}/amendements")
     public ResponseEntity<List<Amendement>> getProjectPropositionAmendements(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId) {
@@ -178,9 +178,9 @@ public class ProjectController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    // ============================================
-    // === Project proposition amendement votes ===
-    // ============================================
+    // ===========================================
+    // === Project proposition amendement vote ===
+    // ===========================================
 
     @GetMapping("/projects/{projectId}/propositions/{propositionId}/amendements/{amendementId}/votes")
     public ResponseEntity<List<PropositionVote>> getProjectPropositionVotes(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @PathVariable("amendementId") int amendementId) {

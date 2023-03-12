@@ -15,6 +15,10 @@ public class TeamController {
     @Autowired
     public TeamService teamService;
 
+    // ============
+    // === Team ===
+    // ============
+
     @GetMapping("/teams")
     public ResponseEntity<List<Team>> getAllTeams() {
         return ResponseEntity.status(HttpStatus.OK).body(teamService.getAllTeams());

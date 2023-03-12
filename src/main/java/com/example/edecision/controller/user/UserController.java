@@ -14,6 +14,10 @@ public class UserController {
     @Autowired
     public UserService userService;
 
+    // ============
+    // === User ===
+    // ============
+
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.status(HttpStatus.OK).body(userService.getAllUsers());
@@ -22,11 +26,6 @@ public class UserController {
     @GetMapping("/users/{id}")
     public ResponseEntity<User> getUserById(@PathVariable("id") int id) {
         return ResponseEntity.status(HttpStatus.OK).body(userService.getUser(id));
-    }
-
-    @PostMapping("/register")
-    public ResponseEntity<User> register(@RequestBody User user) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(user));
     }
 
     @PutMapping("/users/{id}")
@@ -38,5 +37,14 @@ public class UserController {
     public ResponseEntity<HttpStatus> deleteUserById(@PathVariable("id") int id) {
         userService.deleteUser(id);
         return new ResponseEntity(HttpStatus.OK);
+    }
+
+    // ================
+    // === Register ===
+    // ================
+
+    @PostMapping("/register")
+    public ResponseEntity<User> register(@RequestBody User user) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(user));
     }
 }
