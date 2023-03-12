@@ -1,4 +1,4 @@
-package com.example.edecision.model.vote;
+package com.example.edecision.model.proposition;
 
 import lombok.Data;
 

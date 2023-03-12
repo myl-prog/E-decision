@@ -1,5 +1,6 @@
 package com.example.edecision.model.team;
 
+import com.example.edecision.model.proposition.PropositionStatus;
 import com.example.edecision.model.user.User;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
@@ -22,8 +23,9 @@ public class Team {
     @Column(name = "project_id")
     private int projectId;
 
-    @Column(name = "team_type_id")
-    private int teamTypeId;
+    @ManyToOne()
+    @JoinColumn(name = "team_type_id", referencedColumnName = "id")
+    private TeamType teamType;
 
     @ManyToOne()
     @JoinColumn(name = "user_id", referencedColumnName = "id")

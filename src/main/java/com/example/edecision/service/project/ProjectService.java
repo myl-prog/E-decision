@@ -332,4 +332,17 @@ public class ProjectService {
             throw new CustomException("You are not project owner, you can't perform this action", HttpStatus.UNAUTHORIZED);
         }
     }
+
+    // ======================
+    // === Project status ===
+    // ======================
+
+    /**
+     * Permet de récupérer la liste des statuts de projet
+     *
+     * @return la liste des statuts de projet
+     */
+    public List<ProjectStatus> getProjectStatus(){
+        return projectStatusRepository.findAll();
+    }
 }

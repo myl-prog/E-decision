@@ -2,8 +2,11 @@ package com.example.edecision.service.user;
 
 import com.example.edecision.model.exception.CustomException;
 import com.example.edecision.model.team.Team;
+import com.example.edecision.model.team.TeamType;
 import com.example.edecision.model.user.User;
+import com.example.edecision.model.user.UserRole;
 import com.example.edecision.repository.user.UserRepository;
+import com.example.edecision.repository.user.UserRoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -15,7 +18,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @Service
 public class UserService {
     @Autowired
-    public UserRepository userRepository;
+    public UserRepository userRepo;
+
+    @Autowired
+    public UserRoleRepository userRoleRepo;
 
     BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -29,7 +35,7 @@ public class UserService {
      * @return une liste d'utilisateurs
      */
     public List<User> getAllUsers() {
-        return userRepository.findAll();
+        return userRepo.findAll();
     }
 
     /**
@@ -39,7 +45,7 @@ public class UserService {
      * @return l'utilisateur
      **/
     public User getUser(int id) {
-        return userRepository.findById(id).orElseThrow(() -> new CustomException("User not found with id : " + id, HttpStatus.NOT_FOUND));
+        return userRepo.findById(id).orElseThrow(() -> new CustomException("User not found with id : " + id, HttpStatus.NOT_FOUND));
     }
 
     /**
@@ -49,12 +55,12 @@ public class UserService {
      * @return l'utilisateur créé
      */
     public User createUser(User user) {
-        if (userRepository.findByLogin(user.getLogin()).isPresent()) {
+        if (userRepo.findByLogin(user.getLogin()).isPresent()) {
             throw new CustomException("User with same login already exist", HttpStatus.CONFLICT);
         }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+        return userRepo.save(user);
     }
 
     /**
@@ -65,20 +71,20 @@ public class UserService {
      * @return l'utilisateur mis à jour
      */
     public User updateUser(User user, int id) {
-        if (userRepository.findById(id).isPresent()) {
-            User userUpdated = userRepository.findById(id).get();
+        if (userRepo.findById(id).isPresent()) {
+            User userUpdated = userRepo.findById(id).get();
             userUpdated.setLogin(user.getLogin());
             userUpdated.setFirstName(user.getFirstName());
             userUpdated.setLastName(user.getLastName());
             user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-            if (userRepository.findByLogin(userUpdated.getLogin()).isPresent()) {
-                User foundUser = userRepository.findByLogin(userUpdated.getLogin()).get();
+            if (userRepo.findByLogin(userUpdated.getLogin()).isPresent()) {
+                User foundUser = userRepo.findByLogin(userUpdated.getLogin()).get();
                 if (foundUser.getId() != id) {
                     throw new CustomException("User with same login already exist", HttpStatus.CONFLICT);
                 }
             }
-            return userRepository.save(userUpdated);
+            return userRepo.save(userUpdated);
         }
         throw new CustomException("User not found with id : " + id, HttpStatus.NOT_FOUND);
     }
@@ -89,8 +95,8 @@ public class UserService {
      * @param id id de l'utilisateur
      */
     public void deleteUser(int id) {
-        if (userRepository.findById(id).isPresent()) {
-            userRepository.deleteById(id);
+        if (userRepo.findById(id).isPresent()) {
+            userRepo.deleteById(id);
         } else {
             throw new CustomException("User not found with id : " + id, HttpStatus.NOT_FOUND);
         }
@@ -105,5 +111,18 @@ public class UserService {
      */
     public boolean isUserInTeams(int userId, List<Team> freeTeams) {
         return freeTeams.stream().anyMatch(team -> team.getUsers().stream().anyMatch(user -> user.getId() == userId));
+    }
+
+    // =================
+    // === User role ===
+    // =================
+
+    /**
+     * Permet de récupérer la liste des rôles d'utilisateur
+     *
+     * @return la liste des rôles d'utilisateur
+     */
+    public List<UserRole> getUserRoles(){
+        return userRoleRepo.findAll();
     }
 }

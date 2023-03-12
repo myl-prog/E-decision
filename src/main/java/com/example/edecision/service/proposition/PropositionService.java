@@ -9,7 +9,9 @@ import com.example.edecision.model.userProposition.UserProposition;
 import com.example.edecision.model.comment.Comment;
 import com.example.edecision.model.vote.CommentVote;
 import com.example.edecision.model.vote.JudgeVoteResult;
+import com.example.edecision.model.proposition.PropositionStatus;
 import com.example.edecision.model.vote.PropositionVote;
+import com.example.edecision.model.vote.VoteType;
 import com.example.edecision.repository.amendement.AmendementRepository;
 import com.example.edecision.repository.comment.CommentRepository;
 import com.example.edecision.repository.project.ProjectRepository;
@@ -566,6 +568,32 @@ public class PropositionService {
             return validatedStatus;
         else
             return declinedStatus;
+    }
+
+    // ==========================
+    // === Proposition status ===
+    // ==========================
+
+    /**
+     * Permet de récupérer la liste des statuts de proposition
+     *
+     * @return la liste des statuts de proposition
+     */
+    public List<PropositionStatus> getPropositionStatus(){
+        return propositionStatusRepo.findAll();
+    }
+
+    // =================
+    // === Vote type ===
+    // ==================
+
+    /**
+     * Permet de récupérer la liste des types de vote
+     *
+     * @return la liste des types de vote
+     */
+    public List<VoteType> getVoteTypes(){
+        return voteTypeRepo.findAll();
     }
 
 }

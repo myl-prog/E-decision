@@ -2,7 +2,7 @@ package com.example.edecision.model.amendement;
 
 import com.example.edecision.model.proposition.Proposition;
 import com.example.edecision.model.user.User;
-import com.example.edecision.model.vote.PropositionStatus;
+import com.example.edecision.model.proposition.PropositionStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 

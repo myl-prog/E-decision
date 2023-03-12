@@ -1,12 +1,13 @@
-package com.example.edecision.model.project;
+package com.example.edecision.model.team;
+
 import lombok.Data;
+
 import javax.persistence.*;
 
 @Data
-@Entity(name = "project_status")
-@Table(name = "project_status")
-public class ProjectStatus {
-
+@Entity(name = "team_type")
+@Table(name = "team_type")
+public class TeamType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -14,5 +15,4 @@ public class ProjectStatus {
 
     @Column(name = "name")
     private String name;
-
 }

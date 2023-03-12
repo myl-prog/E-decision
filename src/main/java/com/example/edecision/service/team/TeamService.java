@@ -3,9 +3,11 @@ package com.example.edecision.service.team;
 import com.example.edecision.model.exception.CustomException;
 import com.example.edecision.model.team.Team;
 import com.example.edecision.model.team.TeamBody;
+import com.example.edecision.model.team.TeamType;
 import com.example.edecision.model.team.UserTeam;
 import com.example.edecision.model.user.User;
 import com.example.edecision.repository.team.TeamRepository;
+import com.example.edecision.repository.team.TeamTypeRepository;
 import com.example.edecision.repository.team.UserTeamRepository;
 import com.example.edecision.repository.user.UserRepository;
 import com.example.edecision.utils.Common;
@@ -25,6 +27,9 @@ public class TeamService {
 
     @Autowired
     public UserRepository userRepository;
+
+    @Autowired
+    public TeamTypeRepository teamTypeRepo;
 
     // ============
     // === Team ===
@@ -94,7 +99,7 @@ public class TeamService {
             modifyUsersInTeam(teamId, teamBody, oldUserList);
 
             updatedTeam.setName(teamBody.getTeam().getName());
-            updatedTeam.setTeamTypeId(teamBody.getTeam().getTeamTypeId());
+            updatedTeam.setTeamType(teamBody.getTeam().getTeamType());
             updatedTeam.setOwner(Common.GetCurrentUser());
             return teamRepository.save(updatedTeam);
         } else {
@@ -181,5 +186,18 @@ public class TeamService {
         if (Common.GetCurrentUser().getId() != team.getOwner().getId()) {
             throw new CustomException("You are not the team owner, you can't perform this action", HttpStatus.UNAUTHORIZED);
         }
+    }
+
+    // =================
+    // === Team type ===
+    // =================
+
+    /**
+     * Permet de récupérer la liste des types d'équipe
+     *
+     * @return la liste des types d'équipe
+     */
+    public List<TeamType> getTeamTypes(){
+        return teamTypeRepo.findAll();
     }
 }
