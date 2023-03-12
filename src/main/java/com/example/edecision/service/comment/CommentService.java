@@ -61,7 +61,7 @@ public class CommentService {
         User currentUser = Common.GetCurrentUser();
 
         // Récupère le commentaire
-        Optional<Comment> optionalComment = commentRepo.getPropositionComment(projectId, propositionId, commentId);
+        Optional<Comment> optionalComment = commentRepo.getPropositionCommentById(projectId, propositionId, commentId);
 
         if(!optionalComment.isPresent())
             throw new CustomException("This proposition comment doesn't exists", HttpStatus.BAD_REQUEST);
@@ -86,7 +86,7 @@ public class CommentService {
         User currentUser = Common.GetCurrentUser();
 
         // Récupère le commentaire
-        Optional<Comment> optionalComment = commentRepo.getPropositionComment(projectId, propositionId, commentId);
+        Optional<Comment> optionalComment = commentRepo.getPropositionCommentById(projectId, propositionId, commentId);
 
         if(!optionalComment.isPresent())
             throw new CustomException("This proposition comment doesn't exists", HttpStatus.BAD_REQUEST);
@@ -98,7 +98,7 @@ public class CommentService {
             throw new CustomException("You are not the author of this comment", HttpStatus.BAD_REQUEST);
 
         // Supprime le commentaire
-        commentRepo.deletePropositionComment(commentId);
+        commentRepo.deletePropositionCommentById(commentId);
     }
 
 }

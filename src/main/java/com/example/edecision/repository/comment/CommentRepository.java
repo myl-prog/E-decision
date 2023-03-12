@@ -30,7 +30,7 @@ public interface CommentRepository extends JpaRepository<Comment, Integer> {
                     "AND is_deleted = 0 " +
                     "AND comment.id = :commentId",
             nativeQuery = true)
-    Optional<Comment> getPropositionComment(@Param("projectId") int projectId, @Param("propositionId") int propositionId, @Param("commentId") int commentId);
+    Optional<Comment> getPropositionCommentById(@Param("projectId") int projectId, @Param("propositionId") int propositionId, @Param("commentId") int commentId);
 
     @Query(value = "SELECT * FROM comment " +
                     "INNER JOIN proposition ON proposition.id = comment.proposition_id " +
@@ -59,5 +59,5 @@ public interface CommentRepository extends JpaRepository<Comment, Integer> {
     @Modifying
     @Query(value = "DELETE FROM comment WHERE id = :commentId",
             nativeQuery = true)
-    void deletePropositionComment(@Param("commentId") int commentId);
+    void deletePropositionCommentById(@Param("commentId") int commentId);
 }
