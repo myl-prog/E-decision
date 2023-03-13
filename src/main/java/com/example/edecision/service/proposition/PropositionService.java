@@ -111,8 +111,8 @@ public class PropositionService {
         // Récupération de la proposition
         Optional<Proposition> optionalProposition = propositionRepo.getProjectPropositionById(projectId, propositionId);
 
-        // Vérification que la proposition existe et qu'elle est visible pour ce user
-        if(!optionalProposition.isPresent())
+        // Vérification que la proposition existe et qu'elle est visible pour cet utilisateur
+        if(optionalProposition.isEmpty())
             throw new CustomException("This proposition doesn't exists", HttpStatus.NOT_FOUND);
 
         Proposition proposition = optionalProposition.get();
@@ -129,7 +129,7 @@ public class PropositionService {
         boolean isUserInUsersProposition = users.stream().anyMatch(u -> u.getId() == currentUser.getId());
 
         proposition.setIsEditable(proposition.getEndTime().getTime() > System.currentTimeMillis() && proposition.getPropositionStatus().getId() == 1 && (isUserInTeamsProposition || isUserInUsersProposition) && checkAmendDelay(proposition, false, true));
-        proposition.setIsVoteable(proposition.getEndTime().getTime() > System.currentTimeMillis() && proposition.getPropositionStatus().getId() == 1 && (isUserInTeamsProposition || isUserInUsersProposition) && checkAmendDelay(proposition, true, false));
+        proposition.setIsVotable(proposition.getEndTime().getTime() > System.currentTimeMillis() && proposition.getPropositionStatus().getId() == 1 && (isUserInTeamsProposition || isUserInUsersProposition) && checkAmendDelay(proposition, true, false));
 
         return proposition;
     }
@@ -148,14 +148,14 @@ public class PropositionService {
 
         // Variables qui vont nous servir pour initialiser la date de création et vérifier la date de fin
         Date now = Common.GetCurrentLocalDate();
-        long endDateMilliesDiff = Math.abs(propositionBody.getProposition().getEndTime().getTime() - now.getTime());
-        long endDateDayDiff = TimeUnit.DAYS.convert(endDateMilliesDiff, TimeUnit.MILLISECONDS);
+        long endDateMillisDiff = Math.abs(propositionBody.getProposition().getEndTime().getTime() - now.getTime());
+        long endDateDayDiff = TimeUnit.DAYS.convert(endDateMillisDiff, TimeUnit.MILLISECONDS);
 
         Optional<Project> optionalProject = projectRepo.findById(projectId);
         Optional<Proposition> optionalLastProposition = propositionRepo.getLastPropositionByUserId(currentUser.getId());
 
         // Vérifie que le projet existe
-        if(!optionalProject.isPresent())
+        if(optionalProject.isEmpty())
             throw new CustomException("This project doesn't exists", HttpStatus.BAD_REQUEST);
 
         // Vérifie que la date de fin soit dans 1 semaine au plus tôt et 1 mois au plus tard
@@ -166,15 +166,15 @@ public class PropositionService {
         if(optionalLastProposition.isPresent()){
 
             Proposition lastProposition = optionalLastProposition.get();
-            long lastPropositionMilliesDiff = Math.abs(now.getTime() - lastProposition.getBeginTime().getTime());
-            long lastPropositionDayDiff = TimeUnit.DAYS.convert(lastPropositionMilliesDiff, TimeUnit.MILLISECONDS);
+            long lastPropositionMillisDiff = Math.abs(now.getTime() - lastProposition.getBeginTime().getTime());
+            long lastPropositionDayDiff = TimeUnit.DAYS.convert(lastPropositionMillisDiff, TimeUnit.MILLISECONDS);
 
-            // Vérifie si l'utilisateur fait déjà partie d'une propoposition créée il y a moins de 7 jours
+            // Vérifie si l'utilisateur fait déjà partie d'une proposition créée il y a moins de 7 jours
             if(lastPropositionDayDiff <= Parameters.DAYS_BETWEEN_TWO_PROPOSITIONS)
                 throw new CustomException("You already belong to a proposal created less than a week ago", HttpStatus.FORBIDDEN);
         }
 
-        // Prend le délais d'amendement par défaut s'il y en a pas dans le body
+        // Prend le délai d'amendement par défaut s'il n'y en a pas dans le body
         if (propositionBody.getProposition().getAmendmentDelay() <= 0)
             propositionBody.getProposition().setAmendmentDelay(Parameters.PROPOSITION_AMENDMENT_DELAY);
 
@@ -190,14 +190,14 @@ public class PropositionService {
         // Affectation des utilisateurs qui sont à la base de la création de cette proposition, il s'agit des gestionnaires
         createUsersProposition(propositionBody.getUserIdList(), createdProposition.getId());
 
-        // Affectation de l'équipe qui est en charge de la proposition
+        // Affectation de l'équipe qui gère la proposition
         teamPropositionRepo.createTeamProposition(createdProposition.getId(), propositionBody.getTeam().getId());
 
         return createdProposition;
     }
 
     /**
-     * Permet de modifier une proposition qui appartient à un projet, pendant son délais d'amendement
+     * Permet de modifier une proposition qui appartient à un projet, pendant son délai d'amendement
      *
      * @param projectId       id du projet
      * @param propositionId   id de la proposition
@@ -215,8 +215,8 @@ public class PropositionService {
         List<User> oldUsers = oldProposition.getUsers();
         oldProposition.setUsers(null);
 
-        // Vérification que l'utilisateur qui veut modifier la proposition fasse parti des créateurs
-        if(!oldUsers.stream().anyMatch(u -> u.getId() == currentUser.getId()))
+        // Vérification que l'utilisateur qui veut modifier la proposition soit un des créateurs
+        if(oldUsers.stream().noneMatch(u -> u.getId() == currentUser.getId()))
             throw new CustomException("You do not have the right to modify this proposal", HttpStatus.FORBIDDEN);
 
         // Vérification statut en cours de la proposition et qu'on soit dans le délai d'amendement
@@ -235,18 +235,16 @@ public class PropositionService {
         // Création des nouveaux gestionnaires
         if (propositionBody.getUserIdList() != null) {
             for (int userId : propositionBody.getUserIdList()) {
-                if (oldUsers == null || !oldUsers.stream().anyMatch(x -> x.getId() == userId)) {
+                if (oldUsers.stream().noneMatch(x -> x.getId() == userId)) {
                     userPropositionRepo.save(new UserProposition(userId, propositionId));
                 }
             }
         }
 
         // Suppression des utilisateurs qui ne doivent plus être gestionnaires de celle-ci, hormis celui qui est en train de la modifier
-        if (oldUsers != null) {
-            for (User user : oldUsers) {
-                if ((propositionBody.getUserIdList() == null || !propositionBody.getUserIdList().stream().anyMatch(x -> x == user.getId())) && user.getId() != currentUser.getId()) {
-                    userPropositionRepo.deleteUserProposition(propositionId, user.getId());
-                }
+        for (User user : oldUsers) {
+            if ((propositionBody.getUserIdList() == null || propositionBody.getUserIdList().stream().noneMatch(x -> x == user.getId())) && user.getId() != currentUser.getId()) {
+                userPropositionRepo.deleteUserProposition(propositionId, user.getId());
             }
         }
 
@@ -276,12 +274,12 @@ public class PropositionService {
         if(proposition.getTeams().size() > 1)
             throw new CustomException("The proposal has already been escalated", HttpStatus.FORBIDDEN);
 
-        // On vérifie que l'utilisateur fasse parti des utilisateurs des teams
+        // On vérifie que l'utilisateur soit dans une équipe
         if(!userService.isUserInTeams(currentUser.getId(), proposition.getTeams()))
             throw new CustomException("You do not have the right to escalate this proposal", HttpStatus.FORBIDDEN);
 
         // Récupère le commentaire de suppression s'il existe déjà
-        Comment escalatedComment = null;
+        Comment escalatedComment;
         Optional<Comment> optionalEscalatedComment = commentRepo.getPropositionEscalateComment(projectId, propositionId);
 
         if(optionalEscalatedComment.isPresent()){ // Si un utilisateur a déjà fait la proposition d'escalade
@@ -289,7 +287,7 @@ public class PropositionService {
             // On récupère le commentaire d'escalade
             escalatedComment = optionalEscalatedComment.get();
 
-            // On récupère les votes déjà existant sur ce commentaire d'escalade
+            // On récupère les votes déjà existants sur ce commentaire d'escalade
             List<CommentVote> commentVotes = commentVoteRepo.getCommentVotes(escalatedComment.getId());
 
             // On vérifie si l'utilisateur courant a déjà voté ou non pour l'escalade
@@ -297,7 +295,7 @@ public class PropositionService {
                 throw new CustomException("You have already voted to escalate this proposal", HttpStatus.FORBIDDEN);
         }
         else{
-            // On créé le commentaire d'escalade
+            // On crée le commentaire d'escalade
             escalatedComment = commentRepo.save(new Comment(propositionId, true, false, currentUser));
         }
 
@@ -308,7 +306,7 @@ public class PropositionService {
         List<CommentVote> commentVotes = commentVoteRepo.getCommentVotes(escalatedComment.getId());
 
         // On récupère la liste des utilisateurs qui doivent voter pour ce commentaire afin que la prop soit escaladée
-        List<User> propositionTeamUsers = new ArrayList<User>();
+        List<User> propositionTeamUsers = new ArrayList<>();
         for (Team team : proposition.getTeams()) {
             propositionTeamUsers.addAll(team.getUsers()); // Ne marche pas en lambda...
         }
@@ -318,7 +316,7 @@ public class PropositionService {
         result.setVoteUsers(propositionTeamUsers.stream().filter(u -> commentVotes.stream().anyMatch(v -> v.getUserId() == u.getId())).collect(Collectors.toList()));
 
         // On récupère les utilisateurs qui ne veulent pas encore escalader
-        result.setNotVoteUsers(propositionTeamUsers.stream().filter(u -> !commentVotes.stream().anyMatch(v -> v.getUserId() == u.getId())).collect(Collectors.toList()));
+        result.setNotVoteUsers(propositionTeamUsers.stream().filter(u -> commentVotes.stream().noneMatch(v -> v.getUserId() == u.getId())).collect(Collectors.toList()));
 
         // On regarde si tous les utilisateurs veulent escalader
         result.setEscalated(result.getNotVoteUsers().size() == 0);
@@ -350,12 +348,12 @@ public class PropositionService {
         // Permet de récupérer la proposition et générer une erreur si elle n'existe pas
         Proposition proposition = getProjectPropositionById(projectId, propositionId);
 
-        // On vérifie que l'utilisateur fasse parti des créateurs de la proposition
-        if(!proposition.getUsers().stream().anyMatch(u -> u.getId() == currentUser.getId()))
+        // On vérifie que l'utilisateur soit un des créateurs
+        if(proposition.getUsers().stream().noneMatch(u -> u.getId() == currentUser.getId()))
             throw new CustomException("You do not have the right to delete this proposal", HttpStatus.FORBIDDEN);
 
         // Récupère le commentaire de suppression s'il existe déjà
-        Comment deletedComment = null;
+        Comment deletedComment;
         Optional<Comment> optionalDeletedComment = commentRepo.getPropositionDeletedComment(projectId, propositionId);
 
         if(optionalDeletedComment.isPresent()){ // Si un utilisateur gestionnaire de la prop a déjà fait une proposition de suppression
@@ -363,7 +361,7 @@ public class PropositionService {
             // On récupère le commentaire de suppression
             deletedComment = optionalDeletedComment.get();
 
-            // On récupère les votes déjà existant sur ce commentaire de suppression
+            // On récupère les votes déjà existants sur ce commentaire de suppression
             List<CommentVote> commentVotes = commentVoteRepo.getCommentVotes(deletedComment.getId());
 
             // On vérifie si l'utilisateur courant a déjà voté ou non pour la suppression
@@ -372,7 +370,7 @@ public class PropositionService {
 
         }
         else{
-            // On créé le commentaire de suppression
+            // On crée le commentaire de suppression
             deletedComment = commentRepo.save(new Comment(propositionId, false, true, currentUser));
         }
 
@@ -389,12 +387,12 @@ public class PropositionService {
         result.setVoteUsers(propositionUsers.stream().filter(u -> commentVotes.stream().anyMatch(v -> v.getUserId() == u.getId())).collect(Collectors.toList()));
 
         // On récupère les utilisateurs qui n'ont pas voté
-        result.setNotVoteUsers(propositionUsers.stream().filter(u -> !commentVotes.stream().anyMatch(v -> v.getUserId() == u.getId())).collect(Collectors.toList()));
+        result.setNotVoteUsers(propositionUsers.stream().filter(u -> commentVotes.stream().noneMatch(v -> v.getUserId() == u.getId())).collect(Collectors.toList()));
 
         // On regarde si tous les utilisateurs ont voté
         result.setDeleted(result.getNotVoteUsers().size() == 0);
 
-        if(result.isDeleted()){ // Si tout les utilisateurs ont voté
+        if(result.isDeleted()){ // Si tous les utilisateurs ont voté
             userPropositionRepo.deleteUserPropositionsByProposition(propositionId);
             teamPropositionRepo.deleteTeamPropositionsByProposition(propositionId);
             amendementRepo.deleteAmendementsByProposition(propositionId);
@@ -420,8 +418,8 @@ public class PropositionService {
     public List<PropositionVote> getProjectPropositionVotesById(int projectId, int propositionId)
     {
 
-        // Permet de récupérer la proposition et générer une erreur si elle n'existe pas
-        Proposition proposition = getProjectPropositionById(projectId, propositionId);
+        // Permet de générer une erreur si la proposition n'existe pas
+        getProjectPropositionById(projectId, propositionId);
 
         return propositionVoteRepo.getProjectPropositionVotesById(projectId, propositionId);
     }
@@ -443,13 +441,13 @@ public class PropositionService {
         Proposition proposition = getProjectPropositionById(projectId, propositionId);
 
         // On vérifie que la proposition soit en période de vote et accessible par l'utilisateur
-        if(!proposition.getIsVoteable())
+        if(!proposition.getIsVotable())
             throw new CustomException("You do not have the right to vote this proposal", HttpStatus.FORBIDDEN);
 
-        // On récupère la liste des votes déjà existant
+        // On récupère la liste des votes déjà existants
         List<PropositionVote> propositionVotes = propositionVoteRepo.getProjectPropositionVotesById(projectId, propositionId);
 
-        // On vérifie que l'utilisateur n'ai pas déjà voté pour cette proposition
+        // On vérifie que l'utilisateur n'ait pas déjà voté pour cette proposition
         if(propositionVotes != null && propositionVotes.stream().anyMatch(v -> v.getUser().getId() == currentUser.getId()))
             throw new CustomException("You have already voted for this proposal", HttpStatus.FORBIDDEN);
 
@@ -470,7 +468,7 @@ public class PropositionService {
         // Objet de retour
         JudgeVoteResult result = new JudgeVoteResult();
 
-        // Variable qui va nous servir a savoir si il est temps de juger la proposition
+        // Variable qui va nous servir à savoir s'il est temps de juger la proposition
         Date now = Common.GetCurrentLocalDate();
 
         // Récupération de l'utilisateur qui veut supprimer la proposition
@@ -479,7 +477,7 @@ public class PropositionService {
         // Permet de récupérer la proposition et générer une erreur si elle n'existe pas
         Proposition proposition = getProjectPropositionById(projectId, propositionId);
 
-        // On vérifie que la proposition n'ai pas déjà été jugée
+        // On vérifie que la proposition n'ait pas déjà été jugée
         if(proposition.getPropositionStatus().getId() > 1)
             throw new CustomException("The proposal has already been judged", HttpStatus.FORBIDDEN);
 
@@ -487,8 +485,8 @@ public class PropositionService {
         if(proposition.getEndTime().after(now))
             throw new CustomException("It is not yet time to judge this proposal and its amendments", HttpStatus.FORBIDDEN);
 
-        // On vérifie que l'utilisateur fasse parti des créateurs de la proposition
-        if(!proposition.getUsers().stream().anyMatch(u -> u.getId() == currentUser.getId()))
+        // On vérifie que l'utilisateur soit un des créateurs
+        if(proposition.getUsers().stream().noneMatch(u -> u.getId() == currentUser.getId()))
             throw new CustomException("You do not have the right to judge this proposal", HttpStatus.FORBIDDEN);
 
         // On récupère tous les amendements à juger avec la proposition
@@ -520,7 +518,7 @@ public class PropositionService {
         }
     }
 
-    public boolean checkAmendDelay(Proposition proposition, boolean errorIfInsideDelay, boolean errorIfOutsideDelay){
+    private boolean checkAmendDelay(Proposition proposition, boolean errorIfInsideDelay, boolean errorIfOutsideDelay){
 
         // Variable qui va servir a vérifier les dates
         Date now = Common.GetCurrentLocalDate();
@@ -531,11 +529,7 @@ public class PropositionService {
         Date maxDateForUpdate = calendar.getTime();
 
         // Vérification qu'il est encore temps de modifier la proposition à partir de la date de création et délai d'amendement et statut
-        if(proposition.getPropositionStatus().getId() != 1 || (maxDateForUpdate.before(now) && errorIfOutsideDelay) || (maxDateForUpdate.after(now) && errorIfInsideDelay))
-            return false;
-        else
-            return true;
-
+        return !(proposition.getPropositionStatus().getId() != 1 || (maxDateForUpdate.before(now) && errorIfOutsideDelay) || (maxDateForUpdate.after(now) && errorIfInsideDelay));
     }
 
     /**
@@ -549,7 +543,7 @@ public class PropositionService {
         int validatedStatus = 2;
         int declinedStatus = 3;
 
-        int totalVote = (int)votes.size();
+        int totalVote = votes.size();
         int totalVoteOk = (int)votes.stream().filter(v -> v.getVoteType().getId() == 1).count();
         int minVotes;
 

@@ -4,7 +4,6 @@ import com.example.edecision.model.amendement.Amendement;
 import com.example.edecision.model.amendement.AmendementBody;
 import com.example.edecision.model.exception.CustomException;
 import com.example.edecision.model.proposition.Proposition;
-import com.example.edecision.model.proposition.PropositionStatus;
 import com.example.edecision.model.proposition.PropositionVoteBody;
 import com.example.edecision.model.user.User;
 import com.example.edecision.model.vote.PropositionVote;
@@ -62,7 +61,7 @@ public class AmendementService {
         Optional<Amendement> optionalAmendement = amendementRepo.getProjectPropositionAmendementById(projectId, propositionId, amendementId);
 
         // Vérification que l'amendement existe et qu'elle est visible pour ce user
-        if(!optionalAmendement.isPresent())
+        if(optionalAmendement.isEmpty())
             throw new CustomException("This amendement doesn't exists", HttpStatus.NOT_FOUND);
 
         Amendement amendement = optionalAmendement.get();
@@ -70,7 +69,7 @@ public class AmendementService {
 
         // Permet de savoir, pour un utilisateur, si l'amendement peut être modifiée et/ou votée
         amendement.setIsEditable(proposition.getIsEditable() && amendement.getUser().getId() == currentUser.getId());
-        amendement.setIsVoteable(proposition.getIsVoteable());
+        amendement.setIsVotable(proposition.getIsVotable());
 
         return amendement;
     }
@@ -95,12 +94,12 @@ public class AmendementService {
             // Récupération de la proposition concernée
             Proposition proposition = propositionService.getProjectPropositionById(projectId, propositionId);
             boolean propositionIsEditable = proposition.getIsEditable();
-            boolean propositionIsVoteable = proposition.getIsVoteable();
+            boolean propositionIsVotable = proposition.getIsVotable();
 
             // Permet de savoir si l'amendement peut être voté et modifié pour l'utilisateur connecté
-            propositionAmendements.stream().forEach( a -> {
+            propositionAmendements.forEach( a -> {
                 a.setIsEditable(propositionIsEditable && a.getUser().getId() == currentUser.getId());
-                a.setIsVoteable(propositionIsVoteable);
+                a.setIsVotable(propositionIsVotable);
             });
         }
 
@@ -235,7 +234,7 @@ public class AmendementService {
         Amendement amendement = getProjectPropositionAmendementById(projectId, propositionId, amendementId);
 
         // On vérifie que l'amendement soit en période de vote et accessible par l'utilisateur
-        if(!amendement.getIsVoteable())
+        if(!amendement.getIsVotable())
             throw new CustomException("You do not have the right to vote this amendement", HttpStatus.FORBIDDEN);
 
         // On récupère la liste des votes déjà existant
