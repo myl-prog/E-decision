@@ -1,15 +1,14 @@
-package com.example.edecision.controller.setting;
+package com.example.edecision.controller;
 
 import com.example.edecision.model.project.ProjectStatus;
-import com.example.edecision.model.proposition.Proposition;
 import com.example.edecision.model.proposition.PropositionStatus;
 import com.example.edecision.model.team.TeamType;
 import com.example.edecision.model.user.UserRole;
 import com.example.edecision.model.vote.VoteType;
-import com.example.edecision.service.project.ProjectService;
-import com.example.edecision.service.proposition.PropositionService;
-import com.example.edecision.service.team.TeamService;
-import com.example.edecision.service.user.UserService;
+import com.example.edecision.service.ProjectService;
+import com.example.edecision.service.PropositionService;
+import com.example.edecision.service.TeamService;
+import com.example.edecision.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

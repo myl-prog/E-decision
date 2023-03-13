@@ -1,4 +1,4 @@
-package com.example.edecision.service.team;
+package com.example.edecision.service;
 
 import com.example.edecision.model.exception.CustomException;
 import com.example.edecision.model.team.Team;

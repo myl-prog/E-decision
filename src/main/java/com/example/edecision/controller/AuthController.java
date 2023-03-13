@@ -1,4 +1,4 @@
-package com.example.edecision.controller.authentication;
+package com.example.edecision.controller;
 
 import com.example.edecision.model.authentication.AuthRequest;
 import com.example.edecision.model.authentication.AuthResponse;
@@ -25,7 +25,7 @@ public class AuthController {
 
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Permet à un utilisateur de se connecter avec son identifiant et son mot de passe",
-                  notes = "Retourne l'identifiant de l'utilisateur ainsi que le jwt généré qui va permettre de s'authentifier")
+            notes = "Retourne l'identifiant de l'utilisateur ainsi que le jwt généré qui va permettre de s'authentifier")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "L'identifiant et le mot de passe sont correct", response = AuthResponse.class),
             @ApiResponse(code = 401, message = "Les informations renseignées ne sont pas valides")

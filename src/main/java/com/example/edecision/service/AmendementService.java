@@ -1,4 +1,4 @@
-package com.example.edecision.service.amendement;
+package com.example.edecision.service;
 
 import com.example.edecision.model.amendement.Amendement;
 import com.example.edecision.model.amendement.AmendementBody;
@@ -10,8 +10,8 @@ import com.example.edecision.model.vote.PropositionVote;
 import com.example.edecision.repository.amendement.AmendementRepository;
 import com.example.edecision.repository.proposition.PropositionStatusRepository;
 import com.example.edecision.repository.vote.PropositionVoteRepository;
-import com.example.edecision.service.proposition.PropositionService;
-import com.example.edecision.service.user.UserService;
+import com.example.edecision.service.PropositionService;
+import com.example.edecision.service.UserService;
 import com.example.edecision.utils.Common;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -47,9 +47,9 @@ public class AmendementService {
     /**
      * Permet de récupérer un amendement
      *
-     * @param projectId       id du projet
-     * @param propositionId   id de la proposition
-     * @param amendementId    id de l'amendement
+     * @param projectId     id du projet
+     * @param propositionId id de la proposition
+     * @param amendementId  id de l'amendement
      * @return l'amendement
      */
     public Amendement getProjectPropositionAmendementById(int projectId, int propositionId, int amendementId) {
@@ -61,7 +61,7 @@ public class AmendementService {
         Optional<Amendement> optionalAmendement = amendementRepo.getProjectPropositionAmendementById(projectId, propositionId, amendementId);
 
         // Vérification que l'amendement existe et qu'elle est visible pour ce user
-        if(optionalAmendement.isEmpty())
+        if (optionalAmendement.isEmpty())
             throw new CustomException("This amendement doesn't exists", HttpStatus.NOT_FOUND);
 
         Amendement amendement = optionalAmendement.get();
@@ -77,19 +77,18 @@ public class AmendementService {
     /**
      * Permet de récupérer l'ensemble des amendements d'une proposition
      *
-     * @param projectId       id du projet
-     * @param propositionId   id de la proposition
+     * @param projectId     id du projet
+     * @param propositionId id de la proposition
      * @return les amendements
      */
-    public List<Amendement> getProjectPropositionAmendements(int projectId, int propositionId)
-    {
+    public List<Amendement> getProjectPropositionAmendements(int projectId, int propositionId) {
         // Récupération de l'utilisateur qui veut accéder aux amendements
         User currentUser = Common.GetCurrentUser();
 
         // Récupération des amendements
         List<Amendement> propositionAmendements = amendementRepo.getProjectPropositionAmendements(projectId, propositionId);
 
-        if(propositionAmendements != null && propositionAmendements.stream().findFirst().isPresent()){
+        if (propositionAmendements != null && propositionAmendements.stream().findFirst().isPresent()) {
 
             // Récupération de la proposition concernée
             Proposition proposition = propositionService.getProjectPropositionById(projectId, propositionId);
@@ -97,7 +96,7 @@ public class AmendementService {
             boolean propositionIsVotable = proposition.getIsVotable();
 
             // Permet de savoir si l'amendement peut être voté et modifié pour l'utilisateur connecté
-            propositionAmendements.forEach( a -> {
+            propositionAmendements.forEach(a -> {
                 a.setIsEditable(propositionIsEditable && a.getUser().getId() == currentUser.getId());
                 a.setIsVotable(propositionIsVotable);
             });
@@ -109,13 +108,12 @@ public class AmendementService {
     /**
      * Permet d'amender une proposition
      *
-     * @param projectId       id du projet
-     * @param propositionId   id de la proposition
-     * @param body            objet de l'amendement
+     * @param projectId     id du projet
+     * @param propositionId id de la proposition
+     * @param body          objet de l'amendement
      * @return l'amendement
      */
-    public Amendement createProjectPropositionAmendement(int projectId, int propositionId, AmendementBody body)
-    {
+    public Amendement createProjectPropositionAmendement(int projectId, int propositionId, AmendementBody body) {
         // Récupération de l'utilisateur qui veut amender la proposition
         User currentUser = Common.GetCurrentUser();
 
@@ -127,7 +125,7 @@ public class AmendementService {
         Proposition amendProposition = propositionService.getProjectPropositionById(projectId, propositionId);
 
         // Vérification que le user soit dans les gestionnaires ou une team de la proposition
-        if(!amendProposition.getIsEditable())
+        if (!amendProposition.getIsEditable())
             throw new CustomException("You do not have the right to amend this proposal", HttpStatus.FORBIDDEN);
 
         Amendement amend = new Amendement();
@@ -145,14 +143,13 @@ public class AmendementService {
     /**
      * Permet de modifier un amendement
      *
-     * @param projectId       id du projet
-     * @param propositionId   id de la proposition
-     * @param amendementId      id de l'amendement
-     * @param amendementBody  objet de l'amendement
+     * @param projectId      id du projet
+     * @param propositionId  id de la proposition
+     * @param amendementId   id de l'amendement
+     * @param amendementBody objet de l'amendement
      * @return l'amendement mis à jour
      */
-    public Amendement updateProjectPropositionAmendementById(int projectId, int propositionId, int amendementId, AmendementBody amendementBody)
-    {
+    public Amendement updateProjectPropositionAmendementById(int projectId, int propositionId, int amendementId, AmendementBody amendementBody) {
 
         // Utilisateur qui demande à modifier la proposition
         User currentUser = Common.GetCurrentUser();
@@ -161,7 +158,7 @@ public class AmendementService {
         Amendement oldAmendement = getProjectPropositionAmendementById(projectId, propositionId, amendementId);
 
         // Vérification que l'utilisateur puisse modifier l'amendement
-        if(!oldAmendement.getIsEditable())
+        if (!oldAmendement.getIsEditable())
             throw new CustomException("You do not have the right to modify this proposal amendement", HttpStatus.FORBIDDEN);
 
         // Modification des propriétés dans l'objet
@@ -178,19 +175,18 @@ public class AmendementService {
     /**
      * Permet de supprimer un amendement par son utilisateur seulement
      *
-     * @param projectId       id du projet
-     * @param propositionId   id de la proposition
-     * @param amendementId    id de l'amendement
+     * @param projectId     id du projet
+     * @param propositionId id de la proposition
+     * @param amendementId  id de l'amendement
      */
-    public void deleteProjectPropositionAmendementById(int projectId, int propositionId, int amendementId)
-    {
+    public void deleteProjectPropositionAmendementById(int projectId, int propositionId, int amendementId) {
 
         // Récupération de l'amendement et génération d'exception si il ou le projet/proposition n'existe pas
         Amendement oldAmendement = getProjectPropositionAmendementById(projectId, propositionId, amendementId);
 
 
         // Vérification que l'utilisateur puisse supprimer l'amendement
-        if(!oldAmendement.getIsEditable())
+        if (!oldAmendement.getIsEditable())
             throw new CustomException("You do not have the right to delete this proposal amendement", HttpStatus.FORBIDDEN);
 
         amendementRepo.deleteAmendementById(amendementId);
@@ -208,8 +204,7 @@ public class AmendementService {
      * @param amendementId  id de l'amendement
      * @return la liste des votes de l'amendement
      */
-    public List<PropositionVote> getProjectPropositionAmendementVotesById(int projectId, int propositionId, int amendementId)
-    {
+    public List<PropositionVote> getProjectPropositionAmendementVotesById(int projectId, int propositionId, int amendementId) {
         // Permet de récupérer l'amendement et générer une erreur si existe pas
         Amendement amendement = getProjectPropositionAmendementById(projectId, propositionId, amendementId);
 
@@ -225,8 +220,7 @@ public class AmendementService {
      * @param body          vote de l'utilisateur
      * @return les votes de l'amendement
      */
-    public List<PropositionVote> voteProjectPropositionAmendement(int projectId, int propositionId, int amendementId, PropositionVoteBody body)
-    {
+    public List<PropositionVote> voteProjectPropositionAmendement(int projectId, int propositionId, int amendementId, PropositionVoteBody body) {
         // Récupération de l'utilisateur qui veut voter l'amendement
         User currentUser = Common.GetCurrentUser();
 
@@ -234,14 +228,14 @@ public class AmendementService {
         Amendement amendement = getProjectPropositionAmendementById(projectId, propositionId, amendementId);
 
         // On vérifie que l'amendement soit en période de vote et accessible par l'utilisateur
-        if(!amendement.getIsVotable())
+        if (!amendement.getIsVotable())
             throw new CustomException("You do not have the right to vote this amendement", HttpStatus.FORBIDDEN);
 
         // On récupère la liste des votes déjà existant
         List<PropositionVote> amendementVotes = propositionVoteRepo.getProjectPropositionAmendementVotesById(projectId, propositionId, amendementId);
 
         // On vérifie que l'utilisateur n'ai pas déjà voté pour cet amendement
-        if(amendementVotes != null && amendementVotes.stream().anyMatch(v -> v.getUser().getId() == currentUser.getId()))
+        if (amendementVotes != null && amendementVotes.stream().anyMatch(v -> v.getUser().getId() == currentUser.getId()))
             throw new CustomException("You have already voted for this amendement", HttpStatus.FORBIDDEN);
 
         // Si tout est bon alors on ajoute son vote

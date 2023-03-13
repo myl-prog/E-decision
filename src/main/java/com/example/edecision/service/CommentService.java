@@ -1,4 +1,4 @@
-package com.example.edecision.service.comment;
+package com.example.edecision.service;
 
 import com.example.edecision.model.comment.Comment;
 import com.example.edecision.model.comment.CommentBody;
@@ -6,7 +6,7 @@ import com.example.edecision.model.exception.CustomException;
 import com.example.edecision.model.proposition.Proposition;
 import com.example.edecision.model.user.User;
 import com.example.edecision.repository.comment.CommentRepository;
-import com.example.edecision.service.proposition.PropositionService;
+import com.example.edecision.service.PropositionService;
 import com.example.edecision.utils.Common;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,12 +30,11 @@ public class CommentService {
     /**
      * Permet de récupérer tous les commentaires d'une proposiiton
      *
-     * @param projectId       id du projet
-     * @param propositionId   id de la proposition
+     * @param projectId     id du projet
+     * @param propositionId id de la proposition
      * @return la liste des commentaires
      */
-    public List<Comment> getProjectPropositionCommentsById(int projectId, int propositionId)
-    {
+    public List<Comment> getProjectPropositionCommentsById(int projectId, int propositionId) {
         // Récupère la proposition et génère une exception si elle n'existe  pas
         Proposition proposition = propositionService.getProjectPropositionById(projectId, propositionId);
 
@@ -46,13 +45,12 @@ public class CommentService {
     /**
      * Permet d'ajouter un commentaire sur une proposition
      *
-     * @param projectId       id du projet
-     * @param propositionId   id de la proposition
-     * @param body            objet du commentaire
+     * @param projectId     id du projet
+     * @param propositionId id de la proposition
+     * @param body          objet du commentaire
      * @return le commentaire ajouté
      */
-    public Comment createProjectPropositionComment(int projectId, int propositionId, CommentBody body)
-    {
+    public Comment createProjectPropositionComment(int projectId, int propositionId, CommentBody body) {
         // Récupère l'utilisateur qui veut ajouter le commentaire
         User currentUser = Common.GetCurrentUser();
 
@@ -77,27 +75,26 @@ public class CommentService {
     /**
      * Permet de modifier un commentaire par son créateur
      *
-     * @param projectId       id du projet
-     * @param propositionId   id de la proposition
-     * @param commentId       id du commentaire
-     * @param body            objet du commentaire
+     * @param projectId     id du projet
+     * @param propositionId id de la proposition
+     * @param commentId     id du commentaire
+     * @param body          objet du commentaire
      * @return le commentaire modifé
      */
-    public Comment updateProjectPropositionComment(int projectId, int propositionId, int commentId, CommentBody body)
-    {
+    public Comment updateProjectPropositionComment(int projectId, int propositionId, int commentId, CommentBody body) {
         // Récupère l'utilisateur qui veut ajouter le commentaire
         User currentUser = Common.GetCurrentUser();
 
         // Récupère le commentaire
         Optional<Comment> optionalComment = commentRepo.getPropositionCommentById(projectId, propositionId, commentId);
 
-        if(!optionalComment.isPresent())
+        if (!optionalComment.isPresent())
             throw new CustomException("This proposition comment doesn't exists", HttpStatus.BAD_REQUEST);
 
         Comment comment = optionalComment.get();
 
         // Vérifie que l'utilisateur courant soit l'auteur du commentaire
-        if(comment.getUser().getId() != currentUser.getId())
+        if (comment.getUser().getId() != currentUser.getId())
             throw new CustomException("You are not the author of this comment", HttpStatus.BAD_REQUEST);
 
         // Met à jour le commentaire
@@ -111,25 +108,24 @@ public class CommentService {
     /**
      * Permet de supprimer un commentaire par son créateur
      *
-     * @param projectId       id du projet
-     * @param propositionId   id de la proposition
-     * @param commentId       id du commentaire
+     * @param projectId     id du projet
+     * @param propositionId id de la proposition
+     * @param commentId     id du commentaire
      */
-    public void deleteProjectPropositionCommentById(int projectId, int propositionId, int commentId)
-    {
+    public void deleteProjectPropositionCommentById(int projectId, int propositionId, int commentId) {
         // Récupère l'utilisateur qui veut ajouter le commentaire
         User currentUser = Common.GetCurrentUser();
 
         // Récupère le commentaire
         Optional<Comment> optionalComment = commentRepo.getPropositionCommentById(projectId, propositionId, commentId);
 
-        if(!optionalComment.isPresent())
+        if (!optionalComment.isPresent())
             throw new CustomException("This proposition comment doesn't exists", HttpStatus.BAD_REQUEST);
 
         Comment comment = optionalComment.get();
 
         // Vérifie que l'utilisateur courant soit l'auteur du commentaire
-        if(comment.getUser().getId() != currentUser.getId())
+        if (comment.getUser().getId() != currentUser.getId())
             throw new CustomException("You are not the author of this comment", HttpStatus.BAD_REQUEST);
 
         // Supprime le commentaire

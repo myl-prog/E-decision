@@ -1,4 +1,4 @@
-package com.example.edecision.controller.exception;
+package com.example.edecision.controller;
 
 import com.example.edecision.model.exception.CustomException;
 import com.example.edecision.model.exception.ErrorMessage;

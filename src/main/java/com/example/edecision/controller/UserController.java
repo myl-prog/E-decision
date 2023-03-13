@@ -1,7 +1,7 @@
-package com.example.edecision.controller.user;
+package com.example.edecision.controller;
 
 import com.example.edecision.model.user.User;
-import com.example.edecision.service.user.UserService;
+import com.example.edecision.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

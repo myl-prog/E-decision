@@ -1,4 +1,4 @@
-package com.example.edecision.controller.project;
+package com.example.edecision.controller;
 
 import com.example.edecision.model.amendement.Amendement;
 import com.example.edecision.model.comment.Comment;
@@ -11,10 +11,10 @@ import com.example.edecision.model.proposition.*;
 import com.example.edecision.model.user.UserRoleBody;
 import com.example.edecision.model.vote.JudgeVoteResult;
 import com.example.edecision.model.vote.PropositionVote;
-import com.example.edecision.service.amendement.AmendementService;
-import com.example.edecision.service.comment.CommentService;
-import com.example.edecision.service.project.ProjectService;
-import com.example.edecision.service.proposition.PropositionService;
+import com.example.edecision.service.AmendementService;
+import com.example.edecision.service.CommentService;
+import com.example.edecision.service.ProjectService;
+import com.example.edecision.service.PropositionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -138,7 +138,7 @@ public class ProjectController {
     }
 
     @PutMapping("/projects/{projectId}/propositions/{propositionId}/comments/{commentId}")
-    public ResponseEntity<Comment> updateProjectPropositionComment(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @PathVariable("commentId") int commentId,  @RequestBody CommentBody commentBody) {
+    public ResponseEntity<Comment> updateProjectPropositionComment(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @PathVariable("commentId") int commentId, @RequestBody CommentBody commentBody) {
         return ResponseEntity.status(HttpStatus.OK).body(commentService.updateProjectPropositionComment(projectId, propositionId, commentId, commentBody));
     }
 

@@ -1,4 +1,4 @@
-package com.example.edecision.service.project;
+package com.example.edecision.service;
 
 import com.example.edecision.model.exception.CustomException;
 import com.example.edecision.model.project.Project;
@@ -13,8 +13,8 @@ import com.example.edecision.repository.project.ProjectUserRepository;
 import com.example.edecision.repository.team.TeamRepository;
 import com.example.edecision.model.team.Team;
 import com.example.edecision.repository.user.UserRepository;
-import com.example.edecision.service.team.TeamService;
-import com.example.edecision.service.user.UserService;
+import com.example.edecision.service.TeamService;
+import com.example.edecision.service.UserService;
 import com.example.edecision.utils.Common;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -342,7 +342,7 @@ public class ProjectService {
      *
      * @return la liste des statuts de projet
      */
-    public List<ProjectStatus> getProjectStatus(){
+    public List<ProjectStatus> getProjectStatus() {
         return projectStatusRepo.findAll();
     }
 }
