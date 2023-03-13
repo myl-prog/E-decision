@@ -33,7 +33,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         http.authorizeRequests().requestMatchers(req-> req.getRequestURI().contains("swagger")).permitAll();
-        http.authorizeRequests().antMatchers("/login").permitAll().antMatchers("/register").permitAll().antMatchers("/v3/api-docs/**").permitAll().anyRequest().authenticated();
+        http.authorizeRequests().antMatchers("/login").permitAll().antMatchers("/register").permitAll().antMatchers("/v2/api-docs/**").permitAll().anyRequest().authenticated();
 
         http.exceptionHandling().authenticationEntryPoint((request, response, ex) -> {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage());
