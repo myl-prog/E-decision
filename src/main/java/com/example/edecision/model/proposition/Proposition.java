@@ -58,5 +58,5 @@ public class Proposition {
 
     @Transient
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Boolean isVoteable;
+    private Boolean isVotable;
 }
