@@ -13,8 +13,6 @@ import com.example.edecision.repository.project.ProjectUserRepository;
 import com.example.edecision.repository.team.TeamRepository;
 import com.example.edecision.model.team.Team;
 import com.example.edecision.repository.user.UserRepository;
-import com.example.edecision.service.TeamService;
-import com.example.edecision.service.UserService;
 import com.example.edecision.utils.Common;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -70,13 +68,12 @@ public class ProjectService {
      */
     public Project getProjectById(int projectId) {
         Optional<Project> optionalProject = projectRepo.findById(projectId);
-        if (optionalProject.isPresent()) {
-            Project project = optionalProject.get();
-            addTeamsToProject(projectId);
-            return project;
-        } else {
+        if (optionalProject.isEmpty())
             throw new CustomException("This project doesn't exists", HttpStatus.NOT_FOUND);
-        }
+
+        Project project = optionalProject.get();
+        addTeamsToProject(projectId);
+        return project;
     }
 
     /**
@@ -86,19 +83,21 @@ public class ProjectService {
      * @return le projet créé
      */
     public Project createProject(ProjectBody projectBody) {
-        if (projectStatusRepo.findById(projectBody.getProject().getProjectStatus().getId()).isPresent()) {
-            ProjectStatus projectStatus = projectStatusRepo.findById(projectBody.getProject().getProjectStatus().getId()).get();
-            projectBody.getProject().setProjectStatus(projectStatus);
-            List<Team> freeTeams = getFreeTeams(projectBody.getTeamIdList());
-            verifyIfUsersExistsInTeams(projectBody.getProjectUsers(), freeTeams);
+        Optional<ProjectStatus> optionalProjectStatus = projectStatusRepo.findById(projectBody.getProject().getProjectStatus().getId());
 
-            Project createdProject = projectRepo.save(projectBody.getProject());
-            teamRepo.addProjectToTeams(projectBody.getTeamIdList(), projectBody.getProject().getId());
-            addProjectUsersToProject(createdProject.getId(), projectBody.getProjectUsers());
-            return getProjectById(createdProject.getId());
-        } else {
+        if (optionalProjectStatus.isEmpty())
             throw new CustomException("This project status does not exist", HttpStatus.BAD_REQUEST);
-        }
+
+        ProjectStatus projectStatus = optionalProjectStatus.get();
+        projectBody.getProject().setProjectStatus(projectStatus);
+
+        List<Team> freeTeams = getFreeTeams(projectBody.getTeamIdList());
+        verifyIfUsersExistsInTeams(projectBody.getProjectUsers(), freeTeams);
+
+        Project createdProject = projectRepo.save(projectBody.getProject());
+        teamRepo.addProjectToTeams(projectBody.getTeamIdList(), projectBody.getProject().getId());
+        addProjectUsersToProject(createdProject.getId(), projectBody.getProjectUsers());
+        return getProjectById(createdProject.getId());
     }
 
     /**
@@ -109,28 +108,29 @@ public class ProjectService {
      * @return le projet mis à jour
      */
     public Project updateProject(int projectId, ProjectBody projectBody) {
-        if (projectRepo.findById(projectId).isPresent()) {
-            if (projectStatusRepo.findById(projectBody.getProject().getProjectStatus().getId()).isEmpty()) {
-                throw new CustomException("This project status does not exist", HttpStatus.BAD_REQUEST);
-            } else {
-                Project projectUpdated = projectRepo.findById(projectId).get();
-                projectUpdated.setTitle(projectBody.getProject().getTitle());
-                projectUpdated.setDescription(projectBody.getProject().getDescription());
-                projectUpdated.setProjectStatus(projectBody.getProject().getProjectStatus());
+        Optional<Project> optionalProject = projectRepo.findById(projectId);
+        Optional<ProjectStatus> optionalProjectStatus = projectStatusRepo.findById(projectBody.getProject().getProjectStatus().getId());
 
-                verificationsOnTeamsDuringProjectUpdate(projectId, projectBody);
-                verificationsOnUsersDuringProjectUpdate(projectBody);
+        if (optionalProject.isEmpty())
+            throw new CustomException("Project not found with this id", HttpStatus.NOT_FOUND);
 
-                List<Team> oldProjectTeamList = teamRepo.getTeamsByProject(projectId);
-                List<ProjectUser> oldProjectUserList = projectUserRepo.getAllProjectUserByProject(projectId);
-                modifyAssociatedTeams(projectId, projectBody, oldProjectTeamList);
-                modifyProjectUsers(projectBody, oldProjectUserList);
-                projectRepo.save(projectUpdated);
-                return getProjectById(projectUpdated.getId());
-            }
-        } else {
-            throw new CustomException("Project not found with id : " + projectId, HttpStatus.NOT_FOUND);
-        }
+        if (optionalProjectStatus.isEmpty())
+            throw new CustomException("This project status does not exist", HttpStatus.BAD_REQUEST);
+
+        Project projectUpdated = optionalProject.get();
+        projectUpdated.setTitle(projectBody.getProject().getTitle());
+        projectUpdated.setDescription(projectBody.getProject().getDescription());
+        projectUpdated.setProjectStatus(projectBody.getProject().getProjectStatus());
+
+        verificationsOnTeamsDuringProjectUpdate(projectId, projectBody);
+        verificationsOnUsersDuringProjectUpdate(projectBody);
+
+        List<Team> oldProjectTeamList = teamRepo.getTeamsByProject(projectId);
+        List<ProjectUser> oldProjectUserList = projectUserRepo.getAllProjectUserByProject(projectId);
+        modifyAssociatedTeams(projectId, projectBody, oldProjectTeamList);
+        modifyProjectUsers(projectBody, oldProjectUserList);
+        projectRepo.save(projectUpdated);
+        return getProjectById(projectUpdated.getId());
     }
 
     /**
@@ -139,14 +139,15 @@ public class ProjectService {
      * @param projectId id du projet
      */
     public void deleteProject(int projectId) {
-        if (projectRepo.findById(projectId).isPresent()) {
-            verifyProjectOwnership(projectId);
-            projectUserRepo.deleteAllProjectUserByProjectId(projectId);
-            teamRepo.removeProjectIdFromTeams(projectId);
-            projectRepo.deleteById(projectId);
-        } else {
-            throw new CustomException("Project not found with id : " + projectId, HttpStatus.NOT_FOUND);
-        }
+        Optional<Project> optionalProject = projectRepo.findById(projectId);
+
+        if (optionalProject.isEmpty())
+            throw new CustomException("Project not found with this id", HttpStatus.NOT_FOUND);
+
+        verifyProjectOwnership(projectId);
+        projectUserRepo.deleteAllProjectUserByProjectId(projectId);
+        teamRepo.removeProjectIdFromTeams(projectId);
+        projectRepo.deleteById(projectId);
     }
 
     // =========================
@@ -163,10 +164,10 @@ public class ProjectService {
      */
     public ProjectUser changeUserRole(int projectId, int userId, UserRoleBody userRoleBody) {
         if (projectRepo.findById(projectId).isEmpty()) {
-            throw new CustomException("Project not found with id : " + projectId, HttpStatus.NOT_FOUND);
+            throw new CustomException("Project not found with this id", HttpStatus.NOT_FOUND);
         }
         if (userRepo.findById(userId).isEmpty()) {
-            throw new CustomException("User not found with id : " + userId, HttpStatus.NOT_FOUND);
+            throw new CustomException("User not found with this id", HttpStatus.NOT_FOUND);
         }
         if (projectUserRepo.findProjectUserByProjectIdAndUserId(projectId, userId).isEmpty()) {
             throw new CustomException("This user is not associated to this project", HttpStatus.BAD_REQUEST);
