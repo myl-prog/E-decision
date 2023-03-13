@@ -4,6 +4,7 @@ import com.example.edecision.model.authentication.AuthRequest;
 import com.example.edecision.model.authentication.AuthResponse;
 import com.example.edecision.authentication.JwtTokenUtil;
 import com.example.edecision.model.user.User;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.security.authentication.*;
@@ -17,6 +18,8 @@ public class AuthController {
     @Autowired
     JwtTokenUtil jwtUtil;
 
+
+    @ApiOperation(value = "Permet à un utilisateur de se connecter avec son identifiant et son mot de passe", notes = "Retourne l'identifiant de l'utilisateur ainsi que le jwt généré qui va permettre de s'authentifier")
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
         try {
