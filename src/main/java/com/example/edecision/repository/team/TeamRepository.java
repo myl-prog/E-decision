@@ -19,7 +19,8 @@ public interface TeamRepository extends JpaRepository<Team, Integer> {
             nativeQuery = true)
     List<Team> getTeamsByProject(@Param("projectId") int projectId);
 
-    @Query(value = "SELECT * FROM team " +
+    @Query(
+            value = "SELECT * FROM team " +
                     "INNER JOIN team_proposition ON team.id = team_proposition.team_id " +
                     "WHERE team_proposition.proposition_id = :propositionId",
             nativeQuery = true)
@@ -40,4 +41,16 @@ public interface TeamRepository extends JpaRepository<Team, Integer> {
     @Query(value = "UPDATE team SET project_id = NULL WHERE project_id = :projectId AND id = :teamId",
             nativeQuery = true)
     void removeProjectIdFromTeam(@Param("projectId") int projectId, @Param("teamId") int teamId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE team SET project_id = :projectId WHERE id IN :ids AND project_id IS NULL",
+            nativeQuery = true)
+    void addProjectToTeams(@Param("ids") List<Integer> ids, @Param("projectId") int projectId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE team SET project_id = :projectId WHERE id = :teamId AND project_id IS NULL",
+            nativeQuery = true)
+    void addProjectToTeam(@Param("teamId") int teamId, @Param("projectId") int projectId);
 }

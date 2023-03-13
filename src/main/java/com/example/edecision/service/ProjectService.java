@@ -93,7 +93,7 @@ public class ProjectService {
             verifyIfUsersExistsInTeams(projectBody.getProjectUsers(), freeTeams);
 
             Project createdProject = projectRepo.save(projectBody.getProject());
-            projectRepo.addProjectToTeams(projectBody.getTeamIdList(), projectBody.getProject().getId());
+            teamRepo.addProjectToTeams(projectBody.getTeamIdList(), projectBody.getProject().getId());
             addProjectUsersToProject(createdProject.getId(), projectBody.getProjectUsers());
             return getProjectById(createdProject.getId());
         } else {
@@ -249,7 +249,7 @@ public class ProjectService {
     private void modifyAssociatedTeams(int projectId, ProjectBody projectBody, List<Team> oldProjectTeamList) {
         projectBody.getTeamIdList().forEach(teamId -> {
             if (oldProjectTeamList.stream().noneMatch(team -> teamId == team.getId())) {
-                projectRepo.addProjectToTeam(teamId, projectId);
+                teamRepo.addProjectToTeam(teamId, projectId);
             }
         });
 
