@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -45,7 +46,7 @@ public class UserService {
      * @return l'utilisateur
      **/
     public User getUser(int id) {
-        return userRepo.findById(id).orElseThrow(() -> new CustomException("User not found with id : " + id, HttpStatus.NOT_FOUND));
+        return userRepo.findById(id).orElseThrow(() -> new CustomException("User not found with", HttpStatus.NOT_FOUND));
     }
 
     /**
@@ -55,9 +56,8 @@ public class UserService {
      * @return l'utilisateur créé
      */
     public User createUser(User user) {
-        if (userRepo.findByLogin(user.getLogin()).isPresent()) {
+        if (userRepo.findByLogin(user.getLogin()).isPresent())
             throw new CustomException("User with same login already exist", HttpStatus.CONFLICT);
-        }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepo.save(user);
@@ -71,22 +71,22 @@ public class UserService {
      * @return l'utilisateur mis à jour
      */
     public User updateUser(User user, int id) {
-        if (userRepo.findById(id).isPresent()) {
-            User userUpdated = userRepo.findById(id).get();
-            userUpdated.setLogin(user.getLogin());
-            userUpdated.setFirstName(user.getFirstName());
-            userUpdated.setLastName(user.getLastName());
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        Optional<User> optionalUser = userRepo.findById(id);
+        Optional<User> optionalUserWithSameLogin = userRepo.findByLogin(user.getLogin());
 
-            if (userRepo.findByLogin(userUpdated.getLogin()).isPresent()) {
-                User foundUser = userRepo.findByLogin(userUpdated.getLogin()).get();
-                if (foundUser.getId() != id) {
-                    throw new CustomException("User with same login already exist", HttpStatus.CONFLICT);
-                }
-            }
-            return userRepo.save(userUpdated);
-        }
-        throw new CustomException("User not found with id : " + id, HttpStatus.NOT_FOUND);
+        if (optionalUser.isEmpty())
+            throw new CustomException("User not found with this id", HttpStatus.NOT_FOUND);
+
+        // Ici on vérifie si un utilisateur avec le meme login n'existe pas deja, sauf si c'est l'utilisateur en train d'être modifié.
+        if (optionalUserWithSameLogin.isPresent() && optionalUserWithSameLogin.get().getId() != id)
+            throw new CustomException("User with same login already exist", HttpStatus.CONFLICT);
+
+        User userUpdated = optionalUser.get();
+        userUpdated.setLogin(user.getLogin());
+        userUpdated.setFirstName(user.getFirstName());
+        userUpdated.setLastName(user.getLastName());
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return userRepo.save(userUpdated);
     }
 
     /**
@@ -95,15 +95,15 @@ public class UserService {
      * @param id id de l'utilisateur
      */
     public void deleteUser(int id) {
-        if (userRepo.findById(id).isPresent()) {
-            userRepo.deleteById(id);
-        } else {
-            throw new CustomException("User not found with id : " + id, HttpStatus.NOT_FOUND);
-        }
+        Optional<User> optionalUser = userRepo.findById(id);
+        if (optionalUser.isEmpty())
+            throw new CustomException("User not found with this id", HttpStatus.NOT_FOUND);
+
+        userRepo.deleteById(id);
     }
 
     /**
-     * Vérifier si un u'itlisateur est dans au moins une des équipes
+     * Vérifie si un utilisateur est dans au moins une des équipes
      *
      * @param userId    id de l'utilisateur
      * @param freeTeams liste des équipes
@@ -122,7 +122,7 @@ public class UserService {
      *
      * @return la liste des rôles d'utilisateur
      */
-    public List<UserRole> getUserRoles(){
+    public List<UserRole> getUserRoles() {
         return userRoleRepo.findAll();
     }
 }
