@@ -24,7 +24,7 @@ public class TeamController {
     // === Team ===
     // ============
 
-    @GetMapping(value = "/teams", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/teams", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Récupère l'ensemble des équipes",
             notes = "Utilisable pour le formulaire de création et modification d'un projet ou d'une proposition")
     @ApiResponses(value = {
@@ -35,7 +35,7 @@ public class TeamController {
         return ResponseEntity.status(HttpStatus.OK).body(teamService.getAllTeams());
     }
 
-    @GetMapping(value = "/teams/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/teams/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Récupère une équipe avec son identifiant",
             notes = "Utilisable pour visualiser une équipe")
     @ApiResponses(value = {
@@ -73,7 +73,7 @@ public class TeamController {
         return ResponseEntity.status(HttpStatus.OK).body(teamService.updateTeam(teamId, teamBody));
     }
 
-    @DeleteMapping(value = "/teams/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = "/teams/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Supprime une équipe")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "L'équipe a bien été supprimée"),

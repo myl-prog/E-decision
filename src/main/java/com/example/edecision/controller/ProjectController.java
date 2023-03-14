@@ -8,6 +8,7 @@ import com.example.edecision.model.project.ProjectBody;
 import com.example.edecision.model.project.ProjectUser;
 import com.example.edecision.model.amendement.AmendementBody;
 import com.example.edecision.model.proposition.*;
+import com.example.edecision.model.user.User;
 import com.example.edecision.model.user.UserRoleBody;
 import com.example.edecision.model.vote.JudgeVoteResult;
 import com.example.edecision.model.vote.PropositionVote;
@@ -15,8 +16,12 @@ import com.example.edecision.service.AmendementService;
 import com.example.edecision.service.CommentService;
 import com.example.edecision.service.ProjectService;
 import com.example.edecision.service.PropositionService;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,12 +45,24 @@ public class ProjectController {
     // === Project ===
     // ===============
 
-    @GetMapping("/projects")
+    @GetMapping(value = "/projects", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Récupère l'ensemble des projets" )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Les projets sont bien retournés", response = Project.class, responseContainer = "List"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur"),
+    })
     public ResponseEntity<List<Project>> getAllProjects() {
         return ResponseEntity.status(HttpStatus.OK).body(projectService.getAllProjects());
     }
 
-    @GetMapping("/projects/{id}")
+    @GetMapping(value = "/projects/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Récupère un projet avec son identifiant",
+            notes = "Utilisable pour visualiser un projet")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Le projet est bien retourné", response = Project.class),
+            @ApiResponse(code = 404, message = "Le projet n'existe pas"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur"),
+    })
     public ResponseEntity<Project> getProjectById(@PathVariable("id") int id) {
         return ResponseEntity.status(HttpStatus.OK).body(projectService.getProjectById(id));
     }

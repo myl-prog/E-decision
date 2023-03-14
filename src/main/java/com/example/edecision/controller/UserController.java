@@ -23,7 +23,7 @@ public class UserController {
     // === User ===
     // ============
 
-    @GetMapping(value = "/users", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Récupère l'ensemble des utilisateurs",
             notes = "Utilisable pour le formulaire de création et modification d'une équipe, d'un projet ou d'une proposition")
     @ApiResponses(value = {
@@ -34,9 +34,9 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(userService.getAllUsers());
     }
 
-    @GetMapping(value = "/users/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/users/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Récupère un utilisateur avec son identifiant",
-            notes = "Utilisable visualiser un utilisateur")
+            notes = "Utilisable pour visualiser un utilisateur")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "L'utilisateur est bien retourné", response = User.class),
             @ApiResponse(code = 404, message = "L'utilisateur n'existe pas"),
@@ -59,7 +59,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(userService.updateUser(user, id));
     }
 
-    @DeleteMapping(value = "/users/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = "/users/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Supprime un utilisateur")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "L'utilisateur a bien été supprimé"),

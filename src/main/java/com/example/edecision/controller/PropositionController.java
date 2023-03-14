@@ -24,7 +24,7 @@ public class PropositionController {
     // === Proposition ===
     // ===================
 
-    @GetMapping(value = "/propositions", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/propositions", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Récupère l'ensemble des propositions auxquels l'utilisateur est rattaché")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Les propositions sont bien retournées", response = Proposition.class, responseContainer = "List" ),
