@@ -26,31 +26,60 @@ public class TeamController {
 
     @GetMapping(value = "/teams", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Récupère l'ensemble des équipes",
-            notes = "Retourne la liste des équipes, peut être utilisé pour la création d'un formulaire lié au projet")
+            notes = "Utilisable pour le formulaire de création et modification d'un projet ou d'une proposition")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Les statuts sont bien retournés", response = ProjectStatus.class, responseContainer = "List"),
+            @ApiResponse(code = 200, message = "Les équipes sont bien retournées", response = Team.class, responseContainer = "List"),
             @ApiResponse(code = 500, message = "Erreur interne du serveur"),
     })
     public ResponseEntity<List<Team>> getAllTeams() {
         return ResponseEntity.status(HttpStatus.OK).body(teamService.getAllTeams());
     }
 
-    @GetMapping("/teams/{id}")
+    @GetMapping(value = "/teams/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Récupère une équipe avec son identifiant",
+            notes = "Utilisable pour visualiser une équipe")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "L'équipe est bien retournée", response = Team.class),
+            @ApiResponse(code = 404, message = "L'équipe n'existe pas"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur"),
+    })
     public ResponseEntity<Team> getById(@PathVariable("id") int id) {
         return ResponseEntity.status(HttpStatus.OK).body(teamService.getTeamById(id));
     }
 
-    @PostMapping("/teams")
+    @PostMapping(value = "/teams", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Créé une équipe",
+            notes = "Aucune équipe avec le même nom ne doit déjà exister")
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "L'équipe a bien été créée et est retournée", response = Team.class),
+            @ApiResponse(code = 404, message = "Un ou plusieurs utilisateurs de l'équipe n'existent pas"),
+            @ApiResponse(code = 409, message = "Une équipe existe déjà avec le même nom"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur"),
+    })
     public ResponseEntity<Team> createTeam(@RequestBody TeamBody teamBody) {
         return ResponseEntity.status(HttpStatus.CREATED).body(teamService.createTeam(teamBody));
     }
 
-    @PutMapping("/teams/{id}")
+    @PutMapping(value = "/teams/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Modifie une équipe",
+            notes = "Aucune équipe avec le même nom ne doit déjà exister")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "L'équipe a bien été modifiée et est retournée", response = Team.class),
+            @ApiResponse(code = 404, message = "L'équipe n'existe pas"),
+            @ApiResponse(code = 409, message = "Une équipe existe déjà avec le même nom"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur"),
+    })
     public ResponseEntity<Team> updateTeam(@PathVariable("id") int teamId, @RequestBody TeamBody teamBody) {
         return ResponseEntity.status(HttpStatus.OK).body(teamService.updateTeam(teamId, teamBody));
     }
 
-    @DeleteMapping("teams/{id}")
+    @DeleteMapping(value = "/teams/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Supprime une équipe")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "L'équipe a bien été supprimée"),
+            @ApiResponse(code = 404, message = "L'équipe n'existe pas"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur"),
+    })
     public ResponseEntity<HttpStatus> deleteById(@PathVariable("id") int id) {
         teamService.deleteTeam(id);
         return new ResponseEntity(HttpStatus.OK);
