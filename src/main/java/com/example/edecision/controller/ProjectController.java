@@ -8,6 +8,7 @@ import com.example.edecision.model.project.ProjectBody;
 import com.example.edecision.model.project.ProjectUser;
 import com.example.edecision.model.amendement.AmendementBody;
 import com.example.edecision.model.proposition.*;
+import com.example.edecision.model.team.Team;
 import com.example.edecision.model.user.User;
 import com.example.edecision.model.user.UserRoleBody;
 import com.example.edecision.model.vote.JudgeVoteResult;
@@ -49,7 +50,7 @@ public class ProjectController {
     @ApiOperation(value = "Récupère l'ensemble des projets" )
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Les projets sont bien retournés", response = Project.class, responseContainer = "List"),
-            @ApiResponse(code = 500, message = "Erreur interne du serveur"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur")
     })
     public ResponseEntity<List<Project>> getAllProjects() {
         return ResponseEntity.status(HttpStatus.OK).body(projectService.getAllProjects());
@@ -61,23 +62,43 @@ public class ProjectController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Le projet est bien retourné", response = Project.class),
             @ApiResponse(code = 404, message = "Le projet n'existe pas"),
-            @ApiResponse(code = 500, message = "Erreur interne du serveur"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur")
     })
     public ResponseEntity<Project> getProjectById(@PathVariable("id") int id) {
         return ResponseEntity.status(HttpStatus.OK).body(projectService.getProjectById(id));
     }
 
-    @PostMapping("/projects")
+    @PostMapping(value = "/projects", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Créé un projet")
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "Le projet a bien été créé et est retourné", response = Project.class),
+            @ApiResponse(code = 400, message = "Le statut du projet n'existe pas ou un utilisateur renseigné n'est pas dans une équipe du projet"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur")
+    })
     public ResponseEntity<Project> createProject(@RequestBody ProjectBody projectBody) {
         return ResponseEntity.status(HttpStatus.CREATED).body(projectService.createProject(projectBody));
     }
 
-    @PutMapping("/projects/{id}")
+    @PutMapping(value = "/projects/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Modifie un projet")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Le projet a bien été modifié et est retourné", response = Project.class),
+            @ApiResponse(code = 400, message = "Le statut du projet, un utilisateur ou une équipe n'existe pas"),
+            @ApiResponse(code = 404, message = "Le projet n'existe pas"),
+            @ApiResponse(code = 409, message = "Une ou plusieurs équipes sont déjà rattachées à un projet"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur")
+    })
     public ResponseEntity<Project> updateProject(@PathVariable("id") int id, @RequestBody ProjectBody projectBody) {
         return ResponseEntity.status(HttpStatus.OK).body(projectService.updateProject(id, projectBody));
     }
 
-    @DeleteMapping("/projects/{id}")
+    @DeleteMapping(value = "/projects/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Supprime un projet")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Le projet a bien été supprimé"),
+            @ApiResponse(code = 404, message = "Le projet n'existe pas"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur")
+    })
     public ResponseEntity<HttpStatus> deleteProject(@PathVariable("id") int id) {
         projectService.deleteProject(id);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -87,7 +108,14 @@ public class ProjectController {
     // ==== Project user ====
     // ======================
 
-    @PatchMapping("/projects/{projectId}/users/{userId}")
+    @PatchMapping(value = "/projects/{projectId}/users/{userId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Modifie le rôle d'un utilisateur au sein d'un projet")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Le rôle a bien été modifié et est retourné", response = ProjectUser.class),
+            @ApiResponse(code = 400, message = "Le projet ou l'utilisateur n'existe pas"),
+            @ApiResponse(code = 404, message = "L'utilisateur n'est pas associé à ce projet"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur")
+    })
     public ResponseEntity<ProjectUser> changeUserRole(@PathVariable("projectId") int projectId, @PathVariable("userId") int userId, @RequestBody UserRoleBody userRoleBody) {
         return ResponseEntity.status(HttpStatus.OK).body(projectService.changeUserRole(projectId, userId, userRoleBody));
     }
@@ -96,17 +124,39 @@ public class ProjectController {
     // === Project proposition ===
     // ===========================
 
-    @GetMapping("/projects/{projectId}/propositions/{propositionId}")
+    @GetMapping(value = "/projects/{projectId}/propositions/{propositionId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Récupère une proposition avec son identifiant",
+            notes = "Utilisable pour visualiser une proposition")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "La proposition est bien retournée", response = Proposition.class),
+            @ApiResponse(code = 404, message = "La proposition n'existe pas ou n'est pas rattachée à ce projet"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur")
+    })
     public ResponseEntity<Proposition> getProjectPropositionById(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId) {
         return ResponseEntity.status(HttpStatus.OK).body(propositionService.getProjectPropositionById(projectId, propositionId));
     }
 
-    @PostMapping("/projects/{projectId}/propositions")
+    @PostMapping(value = "/projects/{projectId}/propositions", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Créé une proposition",
+            notes = "La date de fin doit être dans minimum une semaine et maximum 1 mois et l'utilisateur ne doit pas être compris dans une proposition énoncée il y a moins d'une semaine")
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "La proposition a bien été créée et est retournée", response = Proposition.class),
+            @ApiResponse(code = 400, message = "Le projet n'existe pas ou les délais de la date de fin ne sont pas respectés"),
+            @ApiResponse(code = 403, message = "L'utilisateur est déjà dans une proposition trop récente"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur")
+    })
     public ResponseEntity<Proposition> createProjectProposition(@PathVariable("projectId") int projectId, @RequestBody PropositionBody propositionBody) {
         return ResponseEntity.status(HttpStatus.CREATED).body(propositionService.createProjectProposition(projectId, propositionBody));
     }
 
-    @PutMapping("/projects/{projectId}/propositions/{propositionId}")
+    @PutMapping(value = "/projects/{projectId}/propositions/{propositionId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Modifie une proposition",
+            notes = "L'utilisateur doit faire parti des gestionnaires et la proposition doit être dans les délais d'amendement")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "La proposition a bien été modifiée et est retournée", response = Proposition.class),
+            @ApiResponse(code = 403, message = "L'utilisateur n'a pas le droit de modifier cette proposition"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur"),
+    })
     public ResponseEntity<Proposition> updateProjectProposition(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @RequestBody PropositionBody propositionBody) {
         return ResponseEntity.status(HttpStatus.OK).body(propositionService.updateProjectPropositionById(projectId, propositionId, propositionBody));
     }
