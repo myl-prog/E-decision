@@ -37,8 +37,8 @@ public class SettingController {
     public UserService userService;
 
     @GetMapping(value = "/project-status", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Permet de récupérer l'ensemble des statuts possibles pour un projet",
-                  notes = "Retourne la liste des statuts, peut être utilisé pour la création d'un formulaire lié au projet")
+    @ApiOperation(value = "Récupère l'ensemble des statuts possibles pour un projet",
+                  notes = "Utilisable pour le formulaire de création et modification d'un projet")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Les statuts sont bien retournés", response = ProjectStatus.class, responseContainer = "List"),
             @ApiResponse(code = 500, message = "Erreur interne du serveur"),
@@ -48,8 +48,8 @@ public class SettingController {
     }
 
     @GetMapping(value = "/proposition-status", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Permet de récupérer l'ensemble des statuts possibles pour une proposition",
-            notes = "Retourne la liste des statuts, peut être utilisé pour la création d'un formulaire lié à une proposition")
+    @ApiOperation(value = "Récupère l'ensemble des statuts possibles pour une proposition",
+            notes = "Utilisable pour le formulaire de création et modification d'une proposition")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Les statuts sont bien retournés", response = PropositionStatus.class, responseContainer = "List"),
             @ApiResponse(code = 500, message = "Erreur interne du serveur"),
@@ -59,8 +59,8 @@ public class SettingController {
     }
 
     @GetMapping(value = "/team-types", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Permet de récupérer l'ensemble des différents types d'équipes possibles",
-            notes = "Retourne la liste des types, peut être utilisé pour la création d'un formulaire lié à une équipe")
+    @ApiOperation(value = "Récupère l'ensemble des différents types d'équipes possibles",
+            notes = "Utilisable pour le formulaire de création et modification d'une équipe")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Les types sont bien retournés", response = TeamType.class, responseContainer = "List"),
             @ApiResponse(code = 500, message = "Erreur interne du serveur"),
@@ -70,8 +70,8 @@ public class SettingController {
     }
 
     @GetMapping(value = "/user-roles", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Permet de récupérer l'ensemble des différents rôles d'utilisateurs possibles",
-            notes = "Retourne la liste des rôles, peut être utilisé pour la création d'un formulaire lié à un utilisateur")
+    @ApiOperation(value = "Récupère l'ensemble des différents rôles d'utilisateurs possibles",
+            notes = "Utilisable pour le formulaire de création et modification d'un utilisateur")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Les types sont bien retournés", response = UserRole.class, responseContainer = "List"),
             @ApiResponse(code = 500, message = "Erreur interne du serveur"),
@@ -81,8 +81,8 @@ public class SettingController {
     }
 
     @GetMapping(value = "/vote-types", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Permet de récupérer l'ensemble des différents types de votes possibles",
-            notes = "Retourne la liste des types, peut être utilisé pour la création d'un formulaire lié à aux votes")
+    @ApiOperation(value = "Récupère l'ensemble des différents types de votes possibles",
+            notes = "Utilisable pour le formulaire de vote")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Les types sont bien retournés", response = VoteType.class, responseContainer = "List"),
             @ApiResponse(code = 500, message = "Erreur interne du serveur"),
