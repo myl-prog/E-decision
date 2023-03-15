@@ -109,7 +109,10 @@ public class ProjectService {
      * @param projectBody objet du projet
      * @return le projet mis à jour
      */
-    public Project updateProject(int projectId, ProjectBody projectBody) {
+    public Project updateProject(int projectId, ProjectBody projectBody)
+    {
+        User currentUser = Common.GetCurrentUser();
+
         Optional<Project> optionalProject = projectRepo.findById(projectId);
         Optional<ProjectStatus> optionalProjectStatus = projectStatusRepo.findById(projectBody.getProject().getProjectStatus().getId());
 
@@ -120,6 +123,14 @@ public class ProjectService {
             throw new CustomException("This project status does not exist", HttpStatus.BAD_REQUEST);
 
         Project projectUpdated = optionalProject.get();
+        List<Team> oldProjectTeamList = teamRepo.getTeamsByProject(projectId);
+        List<ProjectUser> oldProjectUserList = projectUserRepo.getAllProjectUserByProject(projectId);
+
+        Optional<ProjectUser> owner = oldProjectUserList.stream().filter(u -> u.isOwn()).findFirst();
+
+        if(owner.isEmpty() || ( owner.isPresent() && owner.get().getUserId() != currentUser.getId()))
+            throw new CustomException("You do not have the right to modify this project", HttpStatus.FORBIDDEN);
+
         projectUpdated.setTitle(projectBody.getProject().getTitle());
         projectUpdated.setDescription(projectBody.getProject().getDescription());
         projectUpdated.setProjectStatus(projectBody.getProject().getProjectStatus());
@@ -127,8 +138,6 @@ public class ProjectService {
         verificationsOnTeamsDuringProjectUpdate(projectId, projectBody);
         verificationsOnUsersDuringProjectUpdate(projectBody);
 
-        List<Team> oldProjectTeamList = teamRepo.getTeamsByProject(projectId);
-        List<ProjectUser> oldProjectUserList = projectUserRepo.getAllProjectUserByProject(projectId);
         modifyAssociatedTeams(projectId, projectBody, oldProjectTeamList);
         modifyProjectUsers(projectBody, oldProjectUserList);
         projectRepo.save(projectUpdated);
@@ -141,10 +150,17 @@ public class ProjectService {
      * @param projectId id du projet
      */
     public void deleteProject(int projectId) {
+        User currentUser = Common.GetCurrentUser();
         Optional<Project> optionalProject = projectRepo.findById(projectId);
 
         if (optionalProject.isEmpty())
             throw new CustomException("Project not found with this id", HttpStatus.NOT_FOUND);
+
+        List<ProjectUser> oldProjectUserList = projectUserRepo.getAllProjectUserByProject(projectId);
+        Optional<ProjectUser> owner = oldProjectUserList.stream().filter(u -> u.isOwn()).findFirst();
+
+        if(owner.isEmpty() || ( owner.isPresent() && owner.get().getUserId() != currentUser.getId()))
+            throw new CustomException("You do not have the right to delete this project", HttpStatus.FORBIDDEN);
 
         verifyProjectOwnership(projectId);
         projectUserRepo.deleteAllProjectUserByProjectId(projectId);
