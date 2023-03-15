@@ -60,7 +60,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(userService.updateUser(user, id));
     }
 
-    @DeleteMapping(value = "/users/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = "/users/{id}")
     @ApiOperation(value = "Supprime un utilisateur")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "L'utilisateur a bien été supprimé"),

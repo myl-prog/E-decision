@@ -37,7 +37,7 @@ public class SettingController {
     @Autowired
     public UserService userService;
 
-    @GetMapping(value = "/project-status", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/project-status", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Récupère l'ensemble des statuts possibles pour un projet",
                   notes = "Utilisable pour le formulaire de création et modification d'un projet")
     @ApiResponses(value = {
@@ -48,7 +48,7 @@ public class SettingController {
         return ResponseEntity.status(HttpStatus.OK).body(projectService.getProjectStatus());
     }
 
-    @GetMapping(value = "/proposition-status", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/proposition-status", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Récupère l'ensemble des statuts possibles pour une proposition",
             notes = "Utilisable pour le formulaire de création et modification d'une proposition")
     @ApiResponses(value = {
@@ -59,7 +59,7 @@ public class SettingController {
         return ResponseEntity.status(HttpStatus.OK).body(propositionService.getPropositionStatus());
     }
 
-    @GetMapping(value = "/team-types", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/team-types", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Récupère l'ensemble des différents types d'équipes possibles",
             notes = "Utilisable pour le formulaire de création et modification d'une équipe")
     @ApiResponses(value = {
@@ -70,7 +70,7 @@ public class SettingController {
         return ResponseEntity.status(HttpStatus.OK).body(teamService.getTeamTypes());
     }
 
-    @GetMapping(value = "/user-roles", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/user-roles", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Récupère l'ensemble des différents rôles d'utilisateurs possibles",
             notes = "Utilisable pour le formulaire de création et modification d'un utilisateur")
     @ApiResponses(value = {
@@ -81,7 +81,7 @@ public class SettingController {
         return ResponseEntity.status(HttpStatus.OK).body(userService.getUserRoles());
     }
 
-    @GetMapping(value = "/vote-types", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/vote-types", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Récupère l'ensemble des différents types de votes possibles",
             notes = "Utilisable pour le formulaire de vote", response = ErrorMessage.class)
     @ApiResponses(value = {

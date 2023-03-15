@@ -74,7 +74,7 @@ public class TeamController {
         return ResponseEntity.status(HttpStatus.OK).body(teamService.updateTeam(teamId, teamBody));
     }
 
-    @DeleteMapping(value = "/teams/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = "/teams/{id}")
     @ApiOperation(value = "Supprime une équipe")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "L'équipe a bien été supprimée"),
