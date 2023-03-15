@@ -35,8 +35,8 @@ public class CommentService {
      * @return la liste des commentaires
      */
     public List<Comment> getProjectPropositionCommentsById(int projectId, int propositionId) {
-        // Récupère la proposition et génère une exception si elle n'existe  pas
-        Proposition proposition = propositionService.getProjectPropositionById(projectId, propositionId);
+        // Génère une exception si elle n'existe  pas
+        propositionService.getProjectPropositionById(projectId, propositionId);
 
         // Retourne l'ensemble des commentaires pour la proposition
         return commentRepo.getPropositionComments(projectId, propositionId);
@@ -54,8 +54,8 @@ public class CommentService {
         // Récupère l'utilisateur qui veut ajouter le commentaire
         User currentUser = Common.GetCurrentUser();
 
-        // Récupère la proposition et génère une exception si elle n'existe  pas
-        Proposition proposition = propositionService.getProjectPropositionById(projectId, propositionId);
+        // Génère une exception si elle n'existe  pas
+        propositionService.getProjectPropositionById(projectId, propositionId);
 
         // Remplis toutes les propriétés de l'objet
         Comment comment = new Comment();
@@ -88,14 +88,14 @@ public class CommentService {
         // Récupère le commentaire
         Optional<Comment> optionalComment = commentRepo.getPropositionCommentById(projectId, propositionId, commentId);
 
-        if (!optionalComment.isPresent())
-            throw new CustomException("This proposition comment doesn't exists", HttpStatus.BAD_REQUEST);
+        if (optionalComment.isEmpty())
+            throw new CustomException("This proposition comment doesn't exists", HttpStatus.NOT_FOUND);
 
         Comment comment = optionalComment.get();
 
         // Vérifie que l'utilisateur courant soit l'auteur du commentaire
         if (comment.getUser().getId() != currentUser.getId())
-            throw new CustomException("You are not the author of this comment", HttpStatus.BAD_REQUEST);
+            throw new CustomException("You are not the author of this comment", HttpStatus.FORBIDDEN);
 
         // Met à jour le commentaire
         comment.setTitle(body.getTitle());
@@ -119,14 +119,14 @@ public class CommentService {
         // Récupère le commentaire
         Optional<Comment> optionalComment = commentRepo.getPropositionCommentById(projectId, propositionId, commentId);
 
-        if (!optionalComment.isPresent())
-            throw new CustomException("This proposition comment doesn't exists", HttpStatus.BAD_REQUEST);
+        if (optionalComment.isEmpty())
+            throw new CustomException("This proposition comment doesn't exists", HttpStatus.NOT_FOUND);
 
         Comment comment = optionalComment.get();
 
         // Vérifie que l'utilisateur courant soit l'auteur du commentaire
         if (comment.getUser().getId() != currentUser.getId())
-            throw new CustomException("You are not the author of this comment", HttpStatus.BAD_REQUEST);
+            throw new CustomException("You are not the author of this comment", HttpStatus.FORBIDDEN);
 
         // Supprime le commentaire
         commentRepo.deletePropositionCommentById(commentId);

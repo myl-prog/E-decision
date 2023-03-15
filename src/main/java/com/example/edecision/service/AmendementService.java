@@ -88,7 +88,7 @@ public class AmendementService {
         // Récupération des amendements
         List<Amendement> propositionAmendements = amendementRepo.getProjectPropositionAmendements(projectId, propositionId);
 
-        if (propositionAmendements != null && propositionAmendements.stream().findFirst().isPresent()) {
+        if (propositionAmendements != null && !propositionAmendements.isEmpty()) {
 
             // Récupération de la proposition concernée
             Proposition proposition = propositionService.getProjectPropositionById(projectId, propositionId);
@@ -116,10 +116,6 @@ public class AmendementService {
     public Amendement createProjectPropositionAmendement(int projectId, int propositionId, AmendementBody body) {
         // Récupération de l'utilisateur qui veut amender la proposition
         User currentUser = Common.GetCurrentUser();
-
-        // Variables utilisées pour la date de création de l'amendement
-        LocalDateTime localDateTime = LocalDateTime.now();
-        Date now = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 
         // Récupération de la proposition à amender
         Proposition amendProposition = propositionService.getProjectPropositionById(projectId, propositionId);
@@ -184,7 +180,6 @@ public class AmendementService {
         // Récupération de l'amendement et génération d'exception si il ou le projet/proposition n'existe pas
         Amendement oldAmendement = getProjectPropositionAmendementById(projectId, propositionId, amendementId);
 
-
         // Vérification que l'utilisateur puisse supprimer l'amendement
         if (!oldAmendement.getIsEditable())
             throw new CustomException("You do not have the right to delete this proposal amendement", HttpStatus.FORBIDDEN);
@@ -206,7 +201,7 @@ public class AmendementService {
      */
     public List<PropositionVote> getProjectPropositionAmendementVotesById(int projectId, int propositionId, int amendementId) {
         // Permet de récupérer l'amendement et générer une erreur si existe pas
-        Amendement amendement = getProjectPropositionAmendementById(projectId, propositionId, amendementId);
+        getProjectPropositionAmendementById(projectId, propositionId, amendementId);
 
         return propositionVoteRepo.getProjectPropositionAmendementVotesById(projectId, propositionId, amendementId);
     }

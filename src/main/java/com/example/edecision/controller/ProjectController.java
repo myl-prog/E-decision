@@ -92,7 +92,7 @@ public class ProjectController {
         return ResponseEntity.status(HttpStatus.OK).body(projectService.updateProject(id, projectBody));
     }
 
-    @DeleteMapping(value = "/projects/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = "/projects/{id}")
     @ApiOperation(value = "Supprime un projet")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Le projet a bien été supprimé"),
@@ -161,12 +161,25 @@ public class ProjectController {
         return ResponseEntity.status(HttpStatus.OK).body(propositionService.updateProjectPropositionById(projectId, propositionId, propositionBody));
     }
 
-    @PostMapping("/projects/{projectId}/propositions/{propositionId}/escalate")
+    @PostMapping(value = "/projects/{projectId}/propositions/{propositionId}/escalate", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Vote pour l'escalade d'une proposition",
+            notes = "La proposition est escaladée lorsque tous les utilisateurs gestionnaires ont voté pour l'escalader")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Le vote pour l'escalade est bien pris en compte et le résultat est retourné", response = EscalatePropositionResult.class),
+            @ApiResponse(code = 403, message = "La proposition a déjà été escaladée ou l'utilisateur n'a pas le droit ou a déjà escaladé cette proposition"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur")
+    })
     public ResponseEntity<EscalatePropositionResult> escalateProjectProposition(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId) {
         return ResponseEntity.status(HttpStatus.OK).body(propositionService.escalateProjectProposition(projectId, propositionId));
     }
 
-    @DeleteMapping("/projects/{projectId}/propositions/{propositionId}")
+    @DeleteMapping(value = "/projects/{projectId}/propositions/{propositionId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Vote la suppression d'une proposition")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Le vote pour l'escalade est bien pris en compte et le résultat est retourné", response = DeletePropositionResult.class),
+            @ApiResponse(code = 403, message = "L'utilisateur n'a pas le droit de supprimer cette proposition"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur")
+    })
     public ResponseEntity<DeletePropositionResult> deleteProposition(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId) {
         return ResponseEntity.status(HttpStatus.OK).body(propositionService.deleteProjectProposition(projectId, propositionId));
     }
@@ -175,17 +188,39 @@ public class ProjectController {
     // === Project proposition vote ===
     // ================================
 
-    @GetMapping("/projects/{projectId}/propositions/{propositionId}/votes")
+    @GetMapping(value = "/projects/{projectId}/propositions/{propositionId}/votes", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Récupère l'ensemble des votes d'une proposition" )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Les votes de la proposition sont bien retournés", response = PropositionVote.class, responseContainer = "List"),
+            @ApiResponse(code = 404, message = "La proposition n'existe pas ou n'est pas rattachée à ce projet"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur")
+    })
     public ResponseEntity<List<PropositionVote>> getProjectPropositionVotes(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId) {
         return ResponseEntity.status(HttpStatus.OK).body(propositionService.getProjectPropositionVotesById(projectId, propositionId));
     }
 
-    @PostMapping("/projects/{projectId}/propositions/{propositionId}/votes")
+    @PostMapping(value = "/projects/{projectId}/propositions/{propositionId}/votes", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Vote une proposition",
+            notes = "La proposition doit être dans sa phase de vote")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Le vote sur la proposition est bien pris en compte et l'ensemble des votes de cette proposition sont retournés", response = PropositionVote.class, responseContainer = "List"),
+            @ApiResponse(code = 403, message = "L'utilisateur n'a pas le droit de voter pour cette proposition ou bien il a déjà voté"),
+            @ApiResponse(code = 404, message = "La proposition n'existe pas ou n'est pas rattachée à ce projet"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur")
+    })
     public ResponseEntity<List<PropositionVote>> voteProjectProposition(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @RequestBody PropositionVoteBody voteBody) {
         return ResponseEntity.status(HttpStatus.OK).body(propositionService.voteProjectProposition(projectId, propositionId, voteBody));
     }
 
-    @PostMapping("/projects/{projectId}/propositions/{propositionId}/judge")
+    @PostMapping(value = "/projects/{projectId}/propositions/{propositionId}/judge", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Juge les votes d'une proposition",
+            notes = "La date de fin de la proposition doit être antérieure à la date courante")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Les votes de la proposition et de l'ensemble de ses amendements ont été traités et le résultat est retourné", response = JudgeVoteResult.class),
+            @ApiResponse(code = 403, message = "La proposition a déjà été traité ou il n'est pas encore temps de traiter les votes ou bien l'utilisateur n'a pas le droit de mener cette action"),
+            @ApiResponse(code = 404, message = "La proposition n'existe pas ou n'est pas rattachée à ce projet"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur")
+    })
     public ResponseEntity<JudgeVoteResult> judgeProjectProposition(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId) {
         return ResponseEntity.status(HttpStatus.OK).body(propositionService.judgeProjectProposition(projectId, propositionId));
     }
@@ -194,22 +229,48 @@ public class ProjectController {
     // === Project proposition comment ===
     // ===================================
 
-    @GetMapping("/projects/{projectId}/propositions/{propositionId}/comments")
+    @GetMapping(value = "/projects/{projectId}/propositions/{propositionId}/comments", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Récupère l'ensemble des commentaires d'une proposition" )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Les commentaires sont bien retournés", response = Comment.class, responseContainer = "List"),
+            @ApiResponse(code = 404, message = "La proposition n'existe pas ou n'est pas rattachée à ce projet"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur")
+    })
     public ResponseEntity<List<Comment>> getProjectPropositionComments(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId) {
         return ResponseEntity.status(HttpStatus.OK).body(commentService.getProjectPropositionCommentsById(projectId, propositionId));
     }
 
-    @PostMapping("/projects/{projectId}/propositions/{propositionId}/comments")
+    @PostMapping(value = "/projects/{projectId}/propositions/{propositionId}/comments", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Ajoute un commentaire")
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "Le commentaire a bien été ajouté et est retourné", response = Comment.class),
+            @ApiResponse(code = 404, message = "La proposition n'existe pas ou n'est pas rattachée à ce projet"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur")
+    })
     public ResponseEntity<Comment> createProjectPropositionComment(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @RequestBody CommentBody commentBody) {
         return ResponseEntity.status(HttpStatus.OK).body(commentService.createProjectPropositionComment(projectId, propositionId, commentBody));
     }
 
-    @PutMapping("/projects/{projectId}/propositions/{propositionId}/comments/{commentId}")
+    @PutMapping(value = "/projects/{projectId}/propositions/{propositionId}/comments/{commentId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Modifie un commentaire sur une proposition")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Le commentaire a bien été modifié et est retourné", response = Comment.class),
+            @ApiResponse(code = 403, message = "L'utilisateur n'est pas l'auteur de ce commentaire"),
+            @ApiResponse(code = 404, message = "Le commentaire n'existe pas ou n'est pas rattaché à ce projet"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur")
+    })
     public ResponseEntity<Comment> updateProjectPropositionComment(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @PathVariable("commentId") int commentId, @RequestBody CommentBody commentBody) {
         return ResponseEntity.status(HttpStatus.OK).body(commentService.updateProjectPropositionComment(projectId, propositionId, commentId, commentBody));
     }
 
-    @DeleteMapping("/projects/{projectId}/propositions/{propositionId}/comments/{commentId}")
+    @DeleteMapping(value = "/projects/{projectId}/propositions/{propositionId}/comments/{commentId}")
+    @ApiOperation(value = "Supprime un projet")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Le commentaire a bien été supprimé"),
+            @ApiResponse(code = 403, message = "L'utilisateur n'est pas l'auteur de ce commentaire"),
+            @ApiResponse(code = 404, message = "Le commentaire n'existe pas ou n'est pas rattaché à ce projet"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur")
+    })
     public ResponseEntity<HttpStatus> getProjectPropositionComments(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @PathVariable("commentId") int commentId) {
         commentService.deleteProjectPropositionCommentById(projectId, propositionId, commentId);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -219,28 +280,65 @@ public class ProjectController {
     // === Project proposition amendements ===
     // =======================================
 
-    @GetMapping("/projects/{projectId}/propositions/{propositionId}/amendements")
+    @GetMapping(value = "/projects/{projectId}/propositions/{propositionId}/amendements", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Récupère l'ensemble des amendements d'une proposition" )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Les amendements sont bien retournés", response = Amendement.class, responseContainer = "List"),
+            @ApiResponse(code = 404, message = "La proposition n'existe pas ou n'est pas rattachée à ce projet"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur")
+    })
     public ResponseEntity<List<Amendement>> getProjectPropositionAmendements(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId) {
         return ResponseEntity.status(HttpStatus.OK).body(amendementService.getProjectPropositionAmendements(projectId, propositionId));
     }
 
-    @GetMapping("/projects/{projectId}/propositions/{propositionId}/amendements/{amendementId}")
+    @GetMapping(value = "/projects/{projectId}/propositions/{propositionId}/amendements/{amendementId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Récupère un amendement avec son identifiant",
+            notes = "Utilisable pour visualiser un amendement")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "L'amendement est bien retourné", response = Amendement.class),
+            @ApiResponse(code = 404, message = "L'amendement n'existe pas ou n'est pas rattaché à cette proposition"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur")
+    })
     public ResponseEntity<Amendement> getProjectPropositionAmendement(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @PathVariable("amendementId") int amendementId) {
         return ResponseEntity.status(HttpStatus.OK).body(amendementService.getProjectPropositionAmendementById(projectId, propositionId, amendementId));
     }
 
-    @PostMapping("/projects/{projectId}/propositions/{propositionId}/amendements")
+    @PostMapping(value = "/projects/{projectId}/propositions/{propositionId}/amendements", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Amende une proposition",
+            notes = "La proposition doit être dans les délais d'amendement")
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "L'amendement a bien été créé et est retourné", response = Amendement.class),
+            @ApiResponse(code = 403, message = "L'utilisateur n'a pas le droit d'amender cette proposition"),
+            @ApiResponse(code = 404, message = "La proposition n'existe pas ou n'est pas rattachée à ce projet"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur")
+    })
     public ResponseEntity<Amendement> createProjectPropositionAmendement(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @RequestBody AmendementBody amendBody) {
         return ResponseEntity.status(HttpStatus.OK).body(amendementService.createProjectPropositionAmendement(projectId, propositionId, amendBody));
     }
 
-    @PutMapping("/projects/{projectId}/propositions/{propositionId}/amendements/{amendementId}")
+    @PutMapping(value = "/projects/{projectId}/propositions/{propositionId}/amendements/{amendementId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Modifie un amendement",
+            notes = "La proposition doit être dans les délais d'amendement")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "L'amendement a bien été modifié et est retourné", response = Amendement.class),
+            @ApiResponse(code = 403, message = "L'utilisateur n'a pas le droit de modifier cet amendement"),
+            @ApiResponse(code = 404, message = "L'amendement n'existe pas"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur")
+    })
     public ResponseEntity<Amendement> updateProjectPropositionAmendement(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @PathVariable("amendementId") int amendementId, @RequestBody AmendementBody amendBody) {
         return ResponseEntity.status(HttpStatus.OK).body(amendementService.updateProjectPropositionAmendementById(projectId, propositionId, amendementId, amendBody));
     }
 
-    @DeleteMapping("/projects/{projectId}/propositions/{propositionId}/amendements/{amendementId}")
-    public ResponseEntity<HttpStatus> updateProjectPropositionAmendement(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @PathVariable("amendementId") int amendementId) {
+    @DeleteMapping(value = "/projects/{projectId}/propositions/{propositionId}/amendements/{amendementId}")
+    @ApiOperation(value = "Supprime un amendement",
+            notes = "La proposition doit être dans les délais d'amendement")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "L'amendement a bien été supprimé"),
+            @ApiResponse(code = 403, message = "L'utilisateur n'a pas le droit de supprimer cet amendement"),
+            @ApiResponse(code = 404, message = "L'amendement n'existe pas"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur")
+    })
+    public ResponseEntity<HttpStatus> deleteProjectPropositionAmendement(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @PathVariable("amendementId") int amendementId) {
         amendementService.deleteProjectPropositionAmendementById(projectId, propositionId, amendementId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -249,12 +347,26 @@ public class ProjectController {
     // === Project proposition amendement vote ===
     // ===========================================
 
-    @GetMapping("/projects/{projectId}/propositions/{propositionId}/amendements/{amendementId}/votes")
+    @GetMapping(value = "/projects/{projectId}/propositions/{propositionId}/amendements/{amendementId}/votes", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Récupère l'ensemble des votes d'un amendement" )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Les votes de l'amendement sont bien retournés", response = PropositionVote.class, responseContainer = "List"),
+            @ApiResponse(code = 404, message = "L'amendement n'existe pas ou n'est pas rattaché à cette proposition"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur")
+    })
     public ResponseEntity<List<PropositionVote>> getProjectPropositionVotes(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @PathVariable("amendementId") int amendementId) {
         return ResponseEntity.status(HttpStatus.OK).body(amendementService.getProjectPropositionAmendementVotesById(projectId, propositionId, amendementId));
     }
 
-    @PostMapping("/projects/{projectId}/propositions/{propositionId}/amendements/{amendementId}/votes")
+    @PostMapping(value = "/projects/{projectId}/propositions/{propositionId}/amendements/{amendementId}/votes", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Vote un amendement",
+            notes = "La proposition de l'amendement doit être dans sa phase de vote")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Le vote sur l'amendement est bien pris en compte et l'ensemble des votes de sa proposition sont retournés", response = PropositionVote.class, responseContainer = "List"),
+            @ApiResponse(code = 403, message = "L'utilisateur n'a pas le droit de voter pour cet amendement ou bien il a déjà voté"),
+            @ApiResponse(code = 404, message = "L'amendement n'existe pas ou n'est pas rattachée à cette proposition"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur")
+    })
     public ResponseEntity<List<PropositionVote>> voteProjectProposition(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId, @PathVariable("amendementId") int amendementId, @RequestBody PropositionVoteBody voteBody) {
         return ResponseEntity.status(HttpStatus.OK).body(amendementService.voteProjectPropositionAmendement(projectId, propositionId, amendementId, voteBody));
     }

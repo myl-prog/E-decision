@@ -32,7 +32,7 @@ public class EdecisionApplication {
 								.version("1.0")
 								.build()
 				)
-				.groupName("ipi")
+				.groupName("ipi-m2il")
 				.select()
 				.apis(RequestHandlerSelectors.basePackage("com.example.edecision"))
 				.paths(PathSelectors.any())
