@@ -3,6 +3,7 @@ package com.example.edecision.model.user;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,24 +19,30 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
+    @ApiModelProperty(notes = "Identifiant de l'utilisateur", value = "1", required = true)
     private int id;
 
     @Column(name = "login")
+    @ApiModelProperty(notes = "Login de connexion", value = "Toto", required = true)
     private String login;
 
     @Column(name = "first_name")
+    @ApiModelProperty(notes = "Prénom", value = "Jacques", required = true)
     private String firstName;
 
     @Column(name = "last_name")
+    @ApiModelProperty(notes = "Nom de famille", value = "Dupont", required = true)
     private String lastName;
 
     @Column(name = "password")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @ApiModelProperty(notes = "Mot de passe", value = "Toto31@", required = true)
     private String password;
 
     @ManyToOne
     @Transient
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @ApiModelProperty(notes = "Rôle de l'utilisateur dans un projet", required = true)
     private UserRole userRole;
 
     @JsonIgnore
