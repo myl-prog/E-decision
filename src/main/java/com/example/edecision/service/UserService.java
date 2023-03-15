@@ -60,6 +60,7 @@ public class UserService {
             throw new CustomException("User with same login already exist", HttpStatus.CONFLICT);
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+
         return userRepo.save(user);
     }
 

@@ -67,6 +67,9 @@ public class TeamService {
 
         User owner = Common.GetCurrentUser();
         teamBody.getTeam().setOwner(owner);
+        teamBody.getTeam().setProjectId(null);
+        teamBody.getTeam().setTeamType(teamTypeRepo.getById(teamBody.getTeam().getTeamType().getId()));
+
         List<User> usersToAddInTeam = userRepo.getUsersById(teamBody.getUserIdList());
 
         if (usersToAddInTeam.size() < teamBody.getUserIdList().size())

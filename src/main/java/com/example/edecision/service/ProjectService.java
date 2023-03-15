@@ -83,6 +83,8 @@ public class ProjectService {
      * @return le projet créé
      */
     public Project createProject(ProjectBody projectBody) {
+        System.out.println(projectBody);
+
         Optional<ProjectStatus> optionalProjectStatus = projectStatusRepo.findById(projectBody.getProject().getProjectStatus().getId());
 
         if (optionalProjectStatus.isEmpty())

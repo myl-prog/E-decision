@@ -1,10 +1,11 @@
 package com.example.edecision.model.team;
 
-import com.example.edecision.model.proposition.PropositionStatus;
 import com.example.edecision.model.user.User;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
 import java.util.List;
@@ -23,12 +24,14 @@ public class Team {
     @ApiModelProperty(notes = "Nom de l'équipe", value = "Les meilleurs devs", required = true)
     private String name;
 
+    @Nullable
     @Column(name = "project_id")
     @ApiModelProperty(notes = "Identifiant du projet en cours de l'équipe", value = "9", required = true)
-    private int projectId;
+    private Integer projectId;
 
     @ManyToOne()
     @JoinColumn(name = "team_type_id", referencedColumnName = "id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @ApiModelProperty(notes = "Type de l'équipe", required = true)
     private TeamType teamType;
 
@@ -38,8 +41,8 @@ public class Team {
     private User owner;
 
     @Transient
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     @OneToMany
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     @ApiModelProperty(notes = "Liste des utilisateurs de l'équipe", required = true)
     private List<User> users;
 }
