@@ -3,6 +3,7 @@ package com.example.edecision.controller;
 import com.example.edecision.model.authentication.AuthRequest;
 import com.example.edecision.model.authentication.AuthResponse;
 import com.example.edecision.authentication.JwtTokenUtil;
+import com.example.edecision.model.exception.ErrorMessage;
 import com.example.edecision.model.user.User;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -28,7 +29,7 @@ public class AuthController {
             notes = "Retourne l'identifiant de l'utilisateur ainsi que le jwt généré qui va permettre de s'authentifier")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "L'identifiant et le mot de passe sont correct", response = AuthResponse.class),
-            @ApiResponse(code = 401, message = "Les informations renseignées ne sont pas valides")
+            @ApiResponse(code = 401, message = "Les informations renseignées ne sont pas valides", response = ErrorMessage.class)
     })
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
         try {

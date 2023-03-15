@@ -1,6 +1,7 @@
 package com.example.edecision.controller;
 
 import com.example.edecision.model.authentication.AuthResponse;
+import com.example.edecision.model.exception.ErrorMessage;
 import com.example.edecision.model.project.ProjectStatus;
 import com.example.edecision.model.proposition.PropositionStatus;
 import com.example.edecision.model.team.TeamType;
@@ -41,7 +42,7 @@ public class SettingController {
                   notes = "Utilisable pour le formulaire de création et modification d'un projet")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Les statuts sont bien retournés", response = ProjectStatus.class, responseContainer = "List"),
-            @ApiResponse(code = 500, message = "Erreur interne du serveur"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur", response = ErrorMessage.class),
     })
     public ResponseEntity<List<ProjectStatus>> getAllProjectStatus() {
         return ResponseEntity.status(HttpStatus.OK).body(projectService.getProjectStatus());
@@ -52,7 +53,7 @@ public class SettingController {
             notes = "Utilisable pour le formulaire de création et modification d'une proposition")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Les statuts sont bien retournés", response = PropositionStatus.class, responseContainer = "List"),
-            @ApiResponse(code = 500, message = "Erreur interne du serveur"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur", response = ErrorMessage.class),
     })
     public ResponseEntity<List<PropositionStatus>> getAllPropositionStatus() {
         return ResponseEntity.status(HttpStatus.OK).body(propositionService.getPropositionStatus());
@@ -63,7 +64,7 @@ public class SettingController {
             notes = "Utilisable pour le formulaire de création et modification d'une équipe")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Les types sont bien retournés", response = TeamType.class, responseContainer = "List"),
-            @ApiResponse(code = 500, message = "Erreur interne du serveur"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur", response = ErrorMessage.class),
     })
     public ResponseEntity<List<TeamType>> getAllTeamTypes() {
         return ResponseEntity.status(HttpStatus.OK).body(teamService.getTeamTypes());
@@ -74,7 +75,7 @@ public class SettingController {
             notes = "Utilisable pour le formulaire de création et modification d'un utilisateur")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Les types sont bien retournés", response = UserRole.class, responseContainer = "List"),
-            @ApiResponse(code = 500, message = "Erreur interne du serveur"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur", response = ErrorMessage.class),
     })
     public ResponseEntity<List<UserRole>> getAllUserRoles() {
         return ResponseEntity.status(HttpStatus.OK).body(userService.getUserRoles());
@@ -82,10 +83,10 @@ public class SettingController {
 
     @GetMapping(value = "/vote-types", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Récupère l'ensemble des différents types de votes possibles",
-            notes = "Utilisable pour le formulaire de vote")
+            notes = "Utilisable pour le formulaire de vote", response = ErrorMessage.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Les types sont bien retournés", response = VoteType.class, responseContainer = "List"),
-            @ApiResponse(code = 500, message = "Erreur interne du serveur"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur", response = ErrorMessage.class),
     })
     public ResponseEntity<List<VoteType>> getAllVoteTypes() {
         return ResponseEntity.status(HttpStatus.OK).body(propositionService.getVoteTypes());

@@ -1,5 +1,6 @@
 package com.example.edecision.controller;
 
+import com.example.edecision.model.exception.ErrorMessage;
 import com.example.edecision.model.proposition.Proposition;
 import com.example.edecision.model.team.Team;
 import com.example.edecision.model.user.User;
@@ -28,7 +29,7 @@ public class PropositionController {
     @ApiOperation(value = "Récupère l'ensemble des propositions auxquels l'utilisateur est rattaché")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Les propositions sont bien retournées", response = Proposition.class, responseContainer = "List" ),
-            @ApiResponse(code = 500, message = "Erreur interne du serveur"),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur", response = ErrorMessage.class),
     })
     public ResponseEntity<List<Proposition>> getAllPropositionsByUser() {
         return ResponseEntity.status(HttpStatus.OK).body(propositionService.getAllPropositionsByUser());
