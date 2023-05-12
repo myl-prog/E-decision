@@ -142,6 +142,7 @@ public class PropositionService {
      * @return la proposition créée
      */
     public Proposition createProjectProposition(int projectId, PropositionBody propositionBody) {
+
         // Utilisateur qui demande à créer la proposition
         User currentUser = Common.GetCurrentUser();
 
@@ -181,7 +182,7 @@ public class PropositionService {
         propositionBody.getProposition().setProject(optionalProject.get());
 
         // Une proposition qui vient d'être créée est forcément au statut "en cours"
-        propositionBody.getProposition().setPropositionStatus(propositionStatusRepo.getById(1));
+        propositionBody.getProposition().setPropositionStatus(propositionStatusRepo.findById(1).get());
 
         // Création de la proposition
         Proposition createdProposition = propositionRepo.save(propositionBody.getProposition());
@@ -192,7 +193,7 @@ public class PropositionService {
         // Affectation de l'équipe qui gère la proposition
         teamPropositionRepo.createTeamProposition(createdProposition.getId(), propositionBody.getTeam().getId());
 
-        return createdProposition;
+        return getProjectPropositionById(projectId, createdProposition.getId());
     }
 
     /**

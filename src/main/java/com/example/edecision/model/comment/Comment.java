@@ -65,5 +65,7 @@ public class Comment {
         this.isDeleted = isDeleted;
         this.isEscalated = isEscalated;
         this.user = user;
+        this.creationDate = new Date();
+        this.lastChangeDate = new Date();
     }
 }

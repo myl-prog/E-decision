@@ -3,6 +3,7 @@ package com.example.edecision.model.proposition;
 import com.example.edecision.model.project.Project;
 import com.example.edecision.model.team.Team;
 import com.example.edecision.model.user.User;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
