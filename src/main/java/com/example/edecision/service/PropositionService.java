@@ -394,7 +394,7 @@ public class PropositionService {
             amendementRepo.deleteAmendementsByProposition(propositionId);
             commentVoteRepo.deleteCommentVotesByProposition(propositionId);
             commentRepo.deleteCommentsByProposition(propositionId);
-            // TODO add delete proposition vote and amendement vote
+            propositionVoteRepo.deleteProjectPropositionVotesById(propositionId);
             propositionRepo.deleteProposition(propositionId);
         }
 

@@ -13,8 +13,10 @@ import java.util.List;
 
 public interface PropositionVoteRepository extends JpaRepository<PropositionVote, Integer> {
 
-    @Query( value = "SELECT * FROM proposition_vote " +
-                    "INNER JOIN proposition ON proposition_id = id " +
+    @Query( value = "SELECT proposition_vote.* FROM proposition_vote " +
+                    "INNER JOIN proposition ON proposition_id = proposition.id " +
+                    "INNER JOIN user ON user_id = user.id " +
+                    "INNER JOIN vote_type ON vote_type_id = vote_type.id " +
                     "WHERE proposition_id = :propositionId " +
                     "AND project_id = :projectId",
             nativeQuery = true)
@@ -43,7 +45,7 @@ public interface PropositionVoteRepository extends JpaRepository<PropositionVote
 
     @Transactional
     @Modifying
-    @Query( value = "DELETE FROM propositon_vote " +
+    @Query( value = "DELETE FROM proposition_vote " +
                     "WHERE proposition_id = :propositionId",
             nativeQuery = true)
     void deleteProjectPropositionVotesById(@Param("propositionId") int propositionId);
