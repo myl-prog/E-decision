@@ -401,6 +401,34 @@ public class PropositionService {
         return result;
     }
 
+    /**
+     * Demo - Permet de forcer le statut d'une proposition afin qu'on puisse la voter
+     *
+     * @param projectId       id du projet
+     * @param propositionId   id de la proposition
+     * @param propositionBody objet de la proposition
+     * @return la proposition mise à jour
+     */
+    public Proposition updateDemoProjectPropositionStatusById(int projectId, int propositionId) {
+
+        // Récupération de la proposition et génération d'exception si elle ou le projet n'existe pas
+        Proposition oldProposition = getProjectPropositionById(projectId, propositionId);
+
+        // Conversion de la date en objet Calendar
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(oldProposition.getBeginTime());
+
+        // Reculer la date de début
+        calendar.add(Calendar.DAY_OF_YEAR, -(oldProposition.getAmendmentDelay() + 1));
+        oldProposition.setBeginTime(calendar.getTime());
+
+        // Modification des champs en base de données
+        propositionRepo.save(oldProposition);
+
+        // Retourne la proposition modifiée
+        return getProjectPropositionById(projectId, oldProposition.getId());
+    }
+
     // ================================
     // === Project proposition vote ===
     // ================================

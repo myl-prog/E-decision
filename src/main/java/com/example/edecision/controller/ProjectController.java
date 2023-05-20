@@ -162,6 +162,18 @@ public class ProjectController {
         return ResponseEntity.status(HttpStatus.OK).body(propositionService.updateProjectPropositionById(projectId, propositionId, propositionBody));
     }
 
+    @PatchMapping(value = "/projects/{projectId}/propositions/{propositionId}/votable-status", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Met à jour le status afin qu'on puisse la voter",
+            notes = "Pour la démo")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "La proposition a bien été modifiée et est retournée", response = Proposition.class),
+            @ApiResponse(code = 403, message = "L'utilisateur n'a pas le droit de modifier cette proposition", response = ErrorMessage.class),
+            @ApiResponse(code = 500, message = "Erreur interne du serveur", response = ErrorMessage.class),
+    })
+    public ResponseEntity<Proposition> updateDemoProjectPropositionStatus(@PathVariable("projectId") int projectId, @PathVariable("propositionId") int propositionId) {
+        return ResponseEntity.status(HttpStatus.OK).body(propositionService.updateDemoProjectPropositionStatusById(projectId, propositionId));
+    }
+
     @PostMapping(value = "/projects/{projectId}/propositions/{propositionId}/escalate", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Vote pour l'escalade d'une proposition",
             notes = "La proposition est escaladée lorsque tous les utilisateurs gestionnaires ont voté pour l'escalader")

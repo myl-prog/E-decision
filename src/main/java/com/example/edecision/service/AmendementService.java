@@ -99,6 +99,7 @@ public class AmendementService {
             propositionAmendements.forEach(a -> {
                 a.setIsEditable(propositionIsEditable && a.getUser().getId() == currentUser.getId());
                 a.setIsVotable(propositionIsVotable);
+                a.setAmendProposition(null);
             });
         }
 

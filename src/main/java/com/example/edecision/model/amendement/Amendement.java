@@ -33,6 +33,7 @@ public class Amendement {
     private PropositionStatus amendementStatus;
 
     @OneToOne(cascade = CascadeType.ALL)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     @JoinColumn(name = "proposition_id", referencedColumnName = "id")
     @ApiModelProperty(notes = "Proposition amendée", required = true)
     private Proposition amendProposition;
