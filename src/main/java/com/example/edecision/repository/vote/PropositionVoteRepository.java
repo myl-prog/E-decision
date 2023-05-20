@@ -18,16 +18,16 @@ public interface PropositionVoteRepository extends JpaRepository<PropositionVote
                     "INNER JOIN user ON user_id = user.id " +
                     "INNER JOIN vote_type ON vote_type_id = vote_type.id " +
                     "WHERE proposition_id = :propositionId " +
+                    "AND proposition_vote.amendement_id = -1 " +
                     "AND project_id = :projectId",
             nativeQuery = true)
     List<PropositionVote> getProjectPropositionVotesById(@Param("projectId") int projectId, @Param("propositionId") int propositionId);
 
     @Query( value = "SELECT * FROM proposition_vote " +
-                    "INNER JOIN proposition ON proposition_id = proposition.id " +
-                    "INNER JOIN amendement ON proposition.id = amendement.amend_proposition_id " +
-                    "WHERE proposition_id = :propositionId " +
-                    "AND project_id = :projectId " +
-                    "AND amendement_id = :amendementId",
+                    "INNER JOIN proposition_amendement ON proposition_vote.amendement_id = :amendementId " +
+                    "INNER JOIN proposition ON proposition.id = proposition_amendement.proposition_id " +
+                    "WHERE project_id = :projectId " +
+                    "AND proposition_amendement.proposition_id = :propositionId",
             nativeQuery = true)
     List<PropositionVote> getProjectPropositionAmendementVotesById(@Param("projectId") int projectId, @Param("propositionId") int propositionId, @Param("amendementId") int amendementId);
 
