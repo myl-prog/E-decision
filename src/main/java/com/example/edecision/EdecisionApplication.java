@@ -21,22 +21,23 @@ public class EdecisionApplication {
 
 	@Bean
 	public Docket apis(){
-		// return new Docket(DocumentationType.SWAGGER_2).select().apis(RequestHandlerSelectors.basePackage("com.example.edecision")).build();
-
 		return new Docket(DocumentationType.SWAGGER_2)
 				.apiInfo(
 						new ApiInfoBuilder()
 								.title("E-decision")
-								.description("Documentation technique de l'API pour l'application E-decision")
-								.license("Hugo Lorent - Olivier Leperlier")
+								.description("Documentation technique de " +
+										     "l'API pour l'application E-decision")
+								.license("Hugo Lorent - Olivier Leperlier - " +
+										 "Rémy Mestre - Yassine Lguirati - " +
+										 "Maxime De Oliveira")
 								.version("1.0")
 								.build()
 				)
 				.groupName("ipi-m2il")
 				.select()
-				.apis(RequestHandlerSelectors.basePackage("com.example.edecision"))
+				.apis(RequestHandlerSelectors
+						.basePackage("com.example.edecision"))
 				.paths(PathSelectors.any())
 				.build();
 	}
-
 }

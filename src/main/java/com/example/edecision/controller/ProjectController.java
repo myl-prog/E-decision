@@ -189,7 +189,7 @@ public class ProjectController {
     @DeleteMapping(value = "/projects/{projectId}/propositions/{propositionId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Vote la suppression d'une proposition")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Le vote pour l'escalade est bien pris en compte et le résultat est retourné", response = DeletePropositionResult.class),
+            @ApiResponse(code = 200, message = "Le vote pour la suppression est bien pris en compte et le résultat est retourné", response = DeletePropositionResult.class),
             @ApiResponse(code = 403, message = "L'utilisateur n'a pas le droit de supprimer cette proposition", response = ErrorMessage.class),
             @ApiResponse(code = 500, message = "Erreur interne du serveur", response = ErrorMessage.class)
     })

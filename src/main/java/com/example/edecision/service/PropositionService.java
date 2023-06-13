@@ -533,6 +533,7 @@ public class PropositionService {
 
     private void createUsersProposition(List<Integer> users, int proposition) {
         int currentUserId = Common.GetCurrentUser().getId();
+        if(users == null) users = new ArrayList<Integer>();
         if (!users.contains(currentUserId)) users.add(currentUserId);
         for (int user : users) {
             userPropositionRepo.createUserProposition(proposition, user);
